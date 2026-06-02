@@ -1,0 +1,42 @@
+{
+  "name": "@realinsight/agent-toolkit",
+  "version": "0.1.0",
+  "description": "Realinsight CLI and stdio MCP server for authenticated agent access to Realinsight APIs.",
+  "private": false,
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cwfs-insight/realinsight-agent-toolkit.git",
+    "directory": "packages/agent-toolkit"
+  },
+  "author": {
+    "name": "Realinsight"
+  },
+  "keywords": [
+    "realinsight",
+    "mcp",
+    "cli",
+    "commercial-real-estate",
+    "agent-tools"
+  ],
+  "engines": {
+    "node": ">=18.17"
+  },
+  "bin": {
+    "ri-agent": "./src/ri-agent.mjs"
+  },
+  "files": [
+    "src/",
+    "README.md",
+    "package.json"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "pack:dry-run": "npm --cache ../../.npm-cache pack --dry-run",
+    "ri-agent": "node ./src/ri-agent.mjs",
+    "test:contract": "node ./test/contract-smoke.mjs"
+  }
+}

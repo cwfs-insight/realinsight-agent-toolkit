@@ -1,0 +1,17 @@
+{
+  "name": "@realinsight/claude-desktop-connector",
+  "version": "0.1.0",
+  "description": "Claude Desktop MCPB source for the Realinsight Connector.",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "author": {
+    "name": "Realinsight"
+  },
+  "engines": {
+    "node": ">=18.17"
+  },
+  "scripts": {
+    "ri-agent": "node ./src/ri-agent.mjs"
+  }
+}

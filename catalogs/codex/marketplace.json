@@ -1,0 +1,21 @@
+{
+  "name": "realinsight",
+  "plugins": [
+    {
+      "name": "realinsight-connector",
+      "source": {
+        "source": "local",
+        "path": "./../../plugins/codex/realinsight-connector"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools",
+      "interface": {
+        "displayName": "Realinsight Connector",
+        "shortDescription": "Connect Codex to Realinsight tools and skills"
+      }
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "package_name": "@realinsight/agent-toolkit",
+  "connector_name": "Realinsight Connector",
+  "version": "0.1.0",
+  "environment": "prod",
+  "base_url": "https://www.realinsight.cloud",
+  "generated_at_utc": "2026-06-02T21:41:01.285Z",
+  "sources": {
+    "package": "agent-toolkit-runtime",
+    "plugin": "realinsight-connector",
+    "skills": "realinsight-agent-skills"
+  },
+  "managed_roots": [
+    {
+      "path": "packages/agent-toolkit/src",
+      "owner": "realinsight-release-pipeline",
+      "overwrite": true
+    },
+    {
+      "path": "skills",
+      "owner": "realinsight-release-pipeline",
+      "overwrite": true
+    },
+    {
+      "path": "plugins/codex/realinsight-connector/skills",
+      "owner": "realinsight-release-pipeline",
+      "overwrite": true
+    },
+    {
+      "path": "extensions/claude-desktop/realinsight-connector/src",
+      "owner": "realinsight-release-pipeline",
+      "overwrite": true
+    },
+    {
+      "path": "extensions/claude-desktop/realinsight-connector/skills",
+      "owner": "realinsight-release-pipeline",
+      "overwrite": true
+    }
+  ],
+  "repo_owned_roots": [
+    "README.md",
+    "docs",
+    "catalogs",
+    "examples",
+    "plugins/codex/realinsight-connector/.codex-plugin/plugin.json",
+    "plugins/codex/realinsight-connector/.mcp.json",
+    "extensions/claude-desktop/realinsight-connector/manifest.json",
+    "SECURITY.md",
+    "CONTRIBUTING.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "future_managed_roots": [
+    {
+      "path": "docs-packages",
+      "purpose": "Agent-readable Realinsight documentation corpora packaged from source documentation repositories."
+    }
+  ],
+  "source_commit": "8c3f7d5c5e90ed7163201978a5fd3073b8b6d653",
+  "managed_root_checksums": {
+    "packages/agent-toolkit/src": "ae9c15a2c884096363817c4f64edc4ef6e97505d148b5668697ccde4964a0b2c",
+    "skills": "51646d0df62cd3b9770eca6d04f3404f3f4448b73420b29de769cd6a9aa1c146",
+    "plugins/codex/realinsight-connector/skills": "51646d0df62cd3b9770eca6d04f3404f3f4448b73420b29de769cd6a9aa1c146",
+    "extensions/claude-desktop/realinsight-connector/src": "ae9c15a2c884096363817c4f64edc4ef6e97505d148b5668697ccde4964a0b2c",
+    "extensions/claude-desktop/realinsight-connector/skills": "51646d0df62cd3b9770eca6d04f3404f3f4448b73420b29de769cd6a9aa1c146"
+  },
+  "source_ids": {
+    "packages/agent-toolkit/src": "agent-toolkit-runtime",
+    "skills": "realinsight-agent-skills",
+    "plugins/codex/realinsight-connector/skills": "realinsight-agent-skills",
+    "extensions/claude-desktop/realinsight-connector/src": "agent-toolkit-runtime",
+    "extensions/claude-desktop/realinsight-connector/skills": "realinsight-agent-skills"
+  }
+}

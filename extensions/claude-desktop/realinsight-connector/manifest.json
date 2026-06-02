@@ -1,0 +1,162 @@
+{
+  "manifest_version": "0.3",
+  "name": "realinsight-connector",
+  "display_name": "Realinsight Connector",
+  "version": "0.1.0",
+  "description": "Use Realinsight commercial real estate data and analytics from Claude Desktop.",
+  "long_description": "Connect Claude Desktop to Realinsight through a local MCP server. The extension opens a browser-based Realinsight login, supports SSO/MFA through the normal Realinsight flow, and exposes read-only schema, entity, record, dashboard, analytic, and workbench tools by default.",
+  "author": {
+    "name": "Realinsight",
+    "url": "https://www.realinsight.cloud"
+  },
+  "homepage": "https://www.realinsight.cloud",
+  "documentation": "https://www.realinsight.cloud",
+  "license": "MIT",
+  "keywords": [
+    "realinsight",
+    "mcp",
+    "commercial-real-estate",
+    "analytics"
+  ],
+  "privacy_policies": [
+    "https://www.realinsight.cloud/privacy"
+  ],
+  "compatibility": {
+    "platforms": [
+      "darwin",
+      "win32",
+      "linux"
+    ],
+    "runtimes": {
+      "node": ">=18.17"
+    }
+  },
+  "server": {
+    "type": "node",
+    "entry_point": "src/ri-agent.mjs",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/src/ri-agent.mjs",
+        "mcp"
+      ],
+      "env": {
+        "RI_AGENT_BASE_URL": "${user_config.base_url}",
+        "RI_AGENT_MAX_TOOL_RESULT_BYTES": "${user_config.max_tool_result_bytes}",
+        "REALINSIGHT_AGENT_CONFIG": "${user_config.config_path}"
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "auth_status",
+      "description": "Check the local Realinsight auth profile and complete any pending browser/device authorization after the user approves it."
+    },
+    {
+      "name": "connect_realinsight",
+      "description": "Start a browser-based Realinsight login for the local MCP server without requiring the user to use a terminal. By default this waits up to five minutes for browser approval and stores the profile when approval completes."
+    },
+    {
+      "name": "disconnect_realinsight",
+      "description": "Revoke and remove the local Realinsight auth profile used by the local MCP server."
+    },
+    {
+      "name": "request_realinsight_scopes",
+      "description": "Start a browser-based Realinsight consent flow for a new or expanded local OAuth scope set. By default this waits up to five minutes for browser approval and stores the profile when approval completes."
+    },
+    {
+      "name": "search_features",
+      "description": "Find Realinsight feature/entity types that may satisfy a user request."
+    },
+    {
+      "name": "search_fields",
+      "description": "Find runtime fields across all features or within one feature."
+    },
+    {
+      "name": "get_fields",
+      "description": "List runtime fields for a feature with pagination."
+    },
+    {
+      "name": "search_entities",
+      "description": "Find Realinsight entities using generic top-toolbar style search, or by searching one or more explicit CustomerDataSearch fields."
+    },
+    {
+      "name": "get_children",
+      "description": "Fetch child entities for one or more parent entity ids, with optional filters, sorts, global limit, or per-parent limit."
+    },
+    {
+      "name": "get_latest_children",
+      "description": "Fetch one latest child entity per parent id using an explicit child date/order field. Use this for latest loan servicing, inspection, operating statement, payment, or rent-roll child records before hydrating the returned child ids."
+    },
+    {
+      "name": "get_records",
+      "description": "Hydrate one or more Realinsight entity ids with key fields or explicitly requested record fields. Values may include display_value plus expansion hints for dictionary/reference/user/document fields."
+    },
+    {
+      "name": "get_entity_structure",
+      "description": "Traverse parent, master, child, reference, referenced-by, or periodic relationships for one or more entities and return a compact graph."
+    },
+    {
+      "name": "list_dashboard_pages",
+      "description": "List dashboard pages available to the authenticated Realinsight user."
+    },
+    {
+      "name": "get_dashboard_page",
+      "description": "Describe a dashboard page, its analytics, global filters, cache status, and backing reports."
+    },
+    {
+      "name": "get_analytic_data",
+      "description": "Read cached analytic data, analytic JSON, and base report column metadata for the current user. Use get_analytic_csv for large local-table analysis and extract_analytic_entities for compact entity handoff."
+    },
+    {
+      "name": "get_analytic_csv",
+      "description": "Read one page of cached analytic rows as CSV. For large analytics, write each csv page to a temp file and continue with next_cursor instead of loading all rows into model context."
+    },
+    {
+      "name": "extract_analytic_entities",
+      "description": "Extract compact entity refs from cached analytic rows so the agent can hydrate or traverse the underlying population with get_records, get_children, or get_latest_children."
+    },
+    {
+      "name": "list_workbenches",
+      "description": "List saved workbench lists available to the authenticated user, optionally filtered by workbench code."
+    },
+    {
+      "name": "get_workbench_data",
+      "description": "Read cached workbench table data and backing report column metadata for the current user. Use get_workbench_csv for large local-table analysis and extract_workbench_entities for compact entity handoff."
+    },
+    {
+      "name": "get_workbench_csv",
+      "description": "Read one page of cached workbench/list-report rows as CSV. For large workbenches, write each csv page to a temp file and continue with next_cursor instead of loading all rows into model context."
+    },
+    {
+      "name": "extract_workbench_entities",
+      "description": "Extract compact entity refs from cached workbench/list-report rows so the agent can hydrate or traverse the underlying population with get_records, get_children, or get_latest_children."
+    }
+  ],
+  "tools_generated": true,
+  "user_config": {
+    "base_url": {
+      "type": "string",
+      "title": "Realinsight Base URL",
+      "description": "Use https://www.realinsight.cloud for production, or a Realinsight-provided environment URL for pilots.",
+      "default": "https://www.realinsight.cloud",
+      "required": true
+    },
+    "max_tool_result_bytes": {
+      "type": "number",
+      "title": "Maximum Tool Result Bytes",
+      "description": "Maximum bytes returned by one local MCP tool result.",
+      "default": 240000,
+      "min": 20000,
+      "max": 2000000,
+      "required": false
+    },
+    "config_path": {
+      "type": "string",
+      "title": "Local Credential File",
+      "description": "Local file used to store this extension's Realinsight OAuth profile.",
+      "default": "${HOME}/.realinsight/connector-claude-desktop.json",
+      "required": true
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "managed_skills": [
+    "realinsight-agent-toolkit"
+  ],
+  "source": "skills",
+  "source_filter": [
+    "realinsight-agent-toolkit"
+  ]
+}
