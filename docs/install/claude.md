@@ -19,3 +19,5 @@ mcpb pack ./extensions/claude-desktop/realinsight-connector
 ```
 
 Install the generated `.mcpb` in Claude Desktop. The extension includes the local MCP runtime and uses the `connect_realinsight` browser login helper.
+
+The default MCPB manifest points to production and uses the `realinsight-prod` auth profile. For QA or development, pack a variant manifest with a distinct extension name, `base_url` default, and `profile_name` default. See [../environments.md](../environments.md).

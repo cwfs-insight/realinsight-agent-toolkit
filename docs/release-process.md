@@ -30,6 +30,22 @@ The exporter should be allowlist-driven:
 6. Run a dry-run diff before writing.
 7. Run contract smoke tests and package dry-run checks after writing.
 
+## Environment Manifests
+
+The public default remains production:
+
+- `.agents/plugins/marketplace.json` must expose only `realinsight-connector`.
+- The production Codex plugin uses `RI_AGENT_PROFILE=realinsight-prod`.
+- The production Claude Desktop manifest defaults to `realinsight-prod`.
+
+Dev and QA manifests are opt-in/internal surfaces. The exporter may render them when a release explicitly requests an environment bundle, but it must not replace the public marketplace default or commit private environment URLs into public default manifests.
+
+When rendering an environment-specific local MCP bundle, set:
+
+- `RI_AGENT_BASE_URL` to the target API base URL.
+- `RI_AGENT_PROFILE` to `realinsight-dev`, `realinsight-qa`, or another clear environment profile.
+- `REALINSIGHT_AGENT_CONFIG` to an environment-specific credential file when the host supports it.
+
 ## Future Documentation Packages
 
 When Realinsight publishes documentation corpora for agents, add a new managed root instead of mixing them into skills or the CLI runtime.

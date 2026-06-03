@@ -22,6 +22,7 @@ import {
 
 const DEFAULT_AUTH_POLL_TIMEOUT_SECONDS = 300;
 const DEFAULT_AUTH_POLL_INTERVAL_SECONDS = 5;
+const DEFAULT_PROFILE_NAME = process.env.RI_AGENT_PROFILE || "default";
 
 export async function agent_auth_status(input = {}) {
   const profile_name = optional_string(input, "profile");
@@ -121,7 +122,7 @@ export async function agent_disconnect_realinsight(input = {}) {
 
 async function start_pending_authorization(input, default_scope, tool_name) {
   const config = await read_config();
-  const profile_name = optional_string(input, "profile") || config.active_profile || "default";
+  const profile_name = optional_string(input, "profile") || process.env.RI_AGENT_PROFILE || config.active_profile || "default";
   const existing_profile = config.profiles?.[profile_name];
   const base_url = normalize_base_url(optional_string(input, "base_url")
     || process.env.RI_AGENT_BASE_URL
@@ -332,7 +333,7 @@ async function try_complete_pending_authorization(config, profile_name) {
 }
 
 function resolve_profile_name(config, requested_profile_name) {
-  return requested_profile_name || config.active_profile || Object.keys(config.profiles || {})[0] || "default";
+  return requested_profile_name || process.env.RI_AGENT_PROFILE || config.active_profile || Object.keys(config.profiles || {})[0] || DEFAULT_PROFILE_NAME;
 }
 
 function scope_from_input(input) {

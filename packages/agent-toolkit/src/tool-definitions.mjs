@@ -71,7 +71,7 @@ export const MCP_INSTRUCTIONS = [
   ...(PIPELINE_TOOLS_ENABLED
     ? ["Queueing a pipeline is a side effect: call queue_pipeline only after explicit user approval, with approved=true, a DocumentTracking id, and required property/page context."]
     : []),
-  "Every tool call can include a profile name; otherwise the active local ri-agent auth profile is used.",
+  "Every tool call can include a profile name; otherwise RI_AGENT_PROFILE, the active local ri-agent auth profile, or the first stored profile is used.",
 ].join("\n");
 
 const ALL_AGENT_TOOLS = [

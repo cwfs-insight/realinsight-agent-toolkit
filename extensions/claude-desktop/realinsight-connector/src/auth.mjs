@@ -14,10 +14,12 @@ import {
   REFRESH_SKEW_MS,
 } from "./tool-definitions.mjs";
 
+const DEFAULT_PROFILE_NAME = process.env.RI_AGENT_PROFILE || "default";
+
 export async function login(options) {
   const base_url = normalize_base_url(option_value(options, "base-url", process.env.RI_AGENT_BASE_URL || DEFAULT_BASE_URL));
   const client_id = option_value(options, "client-id", process.env.RI_AGENT_CLIENT_ID || DEFAULT_CLIENT_ID);
-  const profile_name = option_value(options, "profile", "default");
+  const profile_name = option_value(options, "profile", DEFAULT_PROFILE_NAME);
   const scope = option_value(options, "scope", DEFAULT_SCOPE);
   const device_label = option_value(options, "device-label", `${os.hostname()} (${process.platform})`);
   const should_open_browser = !option_bool(options, "no-browser", false);
@@ -278,7 +280,7 @@ export function build_profile(base_url, client_id, token) {
 async function load_profile(requested_profile_name) {
   const config = await read_config();
   const profiles = config.profiles || {};
-  const name = requested_profile_name || config.active_profile || Object.keys(profiles)[0];
+  const name = requested_profile_name || process.env.RI_AGENT_PROFILE || config.active_profile || Object.keys(profiles)[0];
 
   if (!name || !profiles[name]) {
     throw new Error("No Realinsight auth profile found. Run ri-agent auth login first.");

@@ -42,6 +42,7 @@
       ],
       "env": {
         "RI_AGENT_BASE_URL": "${user_config.base_url}",
+        "RI_AGENT_PROFILE": "${user_config.profile_name}",
         "RI_AGENT_MAX_TOOL_RESULT_BYTES": "${user_config.max_tool_result_bytes}",
         "REALINSIGHT_AGENT_CONFIG": "${HOME}/.realinsight/connector-claude-desktop.json"
       }
@@ -141,6 +142,13 @@
       "description": "Use https://www.realinsight.cloud/api/v1 for production, or a Realinsight-provided API base URL for pilots.",
       "default": "https://www.realinsight.cloud/api/v1",
       "required": true
+    },
+    "profile_name": {
+      "type": "string",
+      "title": "Realinsight Auth Profile",
+      "description": "Local auth profile name used by this extension. Use a different profile for each Realinsight environment.",
+      "default": "realinsight-prod",
+      "required": false
     },
     "max_tool_result_bytes": {
       "type": "number",

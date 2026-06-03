@@ -11,6 +11,7 @@ npx -y @realinsight/agent-toolkit@0.1.0 doctor --json
 ```
 
 `auth login` should open a browser when possible, display the user code as a fallback, and use the normal Realinsight login/SSO/MFA flow. The CLI stores profiles locally in `~/.realinsight/agent-toolkit.json` unless `REALINSIGHT_AGENT_CONFIG` is set.
+Use `RI_AGENT_PROFILE` to choose the default profile for a local MCP process, such as `realinsight-prod`, `realinsight-qa`, or `realinsight-dev`.
 
 ## Agent-Friendly Auth Tools
 

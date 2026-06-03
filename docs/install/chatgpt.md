@@ -16,3 +16,4 @@ The `@realinsight/agent-toolkit` package is still useful for local pilots, but C
 ## Future Apps SDK Path
 
 If Realinsight later needs custom UI inside ChatGPT, add a ChatGPT app surface that reuses the hosted MCP tools and adds component resources for workflows that benefit from visual review.
+See [../openai-apps.md](../openai-apps.md) for the Apps SDK requirements and OpenAI submission path.

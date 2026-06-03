@@ -16,6 +16,8 @@ It packages the `ri-agent` CLI, local and hosted MCP connection examples, Codex 
 | Developer or pilot | `npx @realinsight/agent-toolkit` | Direct CLI, `doctor`, auth, and local MCP testing. |
 
 Start with [docs/install/chooser.md](docs/install/chooser.md) for the full decision tree.
+See [docs/environments.md](docs/environments.md) for dev, QA, production, and pilot environment packaging guidance.
+See [docs/openai-apps.md](docs/openai-apps.md) for the ChatGPT Apps SDK and OpenAI submission path.
 
 ## Repository Layout
 
@@ -26,6 +28,7 @@ plugins/codex/realinsight-connector/ # Codex plugin bundle
 extensions/claude-desktop/           # Claude Desktop MCPB source
 examples/mcp/                        # MCP config examples by environment
 docs/install/                        # host-specific install guides
+docs/environments.md                 # dev/qa/prod environment packaging guidance
 catalogs/codex/                      # Codex marketplace/catalog metadata
 ```
 

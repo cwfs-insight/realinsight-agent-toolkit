@@ -47,6 +47,7 @@ async function main() {
 
     run_build_url_smoke(build_url);
     await run_doctor_smoke(config_path);
+    await run_env_profile_smoke(config_path);
     await run_tool_call_smoke(call_agent_tool);
     await run_mcp_smoke(config_path);
     run_result_limit_smoke(enforce_tool_result_limit);
@@ -89,6 +90,17 @@ async function run_doctor_smoke(config_path) {
   assert(payload.ok === true, "doctor did not report ok=true");
   assert(payload.summary.fail === 0, "doctor reported failures");
   assert(payload.checks.some((check) => check.name === "tool_inventory" && check.status === "pass"), "doctor did not pass tool inventory check");
+}
+
+async function run_env_profile_smoke(config_path) {
+  const result = await run_node_cli(["auth", "status", "--json"], config_path, {
+    RI_AGENT_PROFILE: "envtest",
+  });
+
+  assert(result.status === 0, `auth status with RI_AGENT_PROFILE failed: ${result.stderr || result.stdout}`);
+
+  const payload = JSON.parse(result.stdout);
+  assert(payload.profile === "envtest", `RI_AGENT_PROFILE did not select envtest: ${payload.profile}`);
 }
 
 async function run_tool_call_smoke(call_agent_tool) {
@@ -563,13 +575,14 @@ function agent_result(tool, required_scope, items) {
   };
 }
 
-async function run_node_cli(args, config_path) {
+async function run_node_cli(args, config_path, env = {}) {
   return await new Promise((resolve, reject) => {
     const child = spawn(NODE_BIN, ["./src/ri-agent.mjs", ...args], {
       cwd: TOOLKIT_ROOT,
       env: {
         ...process.env,
         REALINSIGHT_AGENT_CONFIG: config_path,
+        ...env,
       },
       stdio: ["ignore", "pipe", "pipe"],
     });
@@ -602,6 +615,18 @@ async function write_config(config_path) {
     active_profile: "default",
     profiles: {
       default: {
+        base_url,
+        client_id: "realinsight-agent-toolkit",
+        access_token: ACCESS_TOKEN,
+        refresh_token: REFRESH_TOKEN,
+        token_type: "Bearer",
+        expires_at_utc: new Date(Date.now() + 3600000).toISOString(),
+        scope: SCOPES,
+        customer_number: CUSTOMER_NUMBER,
+        user_id: USER_ID,
+        updated_at_utc: new Date().toISOString(),
+      },
+      envtest: {
         base_url,
         client_id: "realinsight-agent-toolkit",
         access_token: ACCESS_TOKEN,

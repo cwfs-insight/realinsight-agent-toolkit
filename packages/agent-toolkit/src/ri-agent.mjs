@@ -384,6 +384,7 @@ ${pipeline_help.trimEnd()}
 Environment:
   RI_AGENT_BASE_URL        Default Core API base URL. Defaults to ${DEFAULT_BASE_URL}
   RI_AGENT_CLIENT_ID       OAuth client id. Defaults to ${DEFAULT_CLIENT_ID}
+  RI_AGENT_PROFILE         Default local auth profile name. Defaults to active profile or default.
   REALINSIGHT_AGENT_CONFIG Credential file path. Defaults to ${CONFIG_PATH}
   RI_AGENT_ENABLE_WRITE_TOOLS Include write commands/tools in the local inventory when set to 1.
 `);
