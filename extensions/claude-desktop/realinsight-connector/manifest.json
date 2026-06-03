@@ -138,8 +138,8 @@
     "base_url": {
       "type": "string",
       "title": "Realinsight Base URL",
-      "description": "Use https://www.realinsight.cloud for production, or a Realinsight-provided environment URL for pilots.",
-      "default": "https://www.realinsight.cloud",
+      "description": "Use https://www.realinsight.cloud/api/v1 for production, or a Realinsight-provided API base URL for pilots.",
+      "default": "https://www.realinsight.cloud/api/v1",
       "required": true
     },
     "max_tool_result_bytes": {

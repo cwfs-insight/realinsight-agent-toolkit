@@ -13,7 +13,7 @@ npx -y @realinsight/agent-toolkit@0.1.0 mcp
 with:
 
 ```text
-RI_AGENT_BASE_URL=https://www.realinsight.cloud
+RI_AGENT_BASE_URL=https://www.realinsight.cloud/api/v1
 ```
 
 Use the files under `examples/mcp/` as the source for command, args, and environment settings.

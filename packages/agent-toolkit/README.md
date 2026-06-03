@@ -5,7 +5,7 @@
 ## Quick Start
 
 ```bash
-npx -y @realinsight/agent-toolkit@0.1.0 auth login --base-url https://www.realinsight.cloud
+npx -y @realinsight/agent-toolkit@0.1.0 auth login --base-url https://www.realinsight.cloud/api/v1
 npx -y @realinsight/agent-toolkit@0.1.0 doctor --json
 npx -y @realinsight/agent-toolkit@0.1.0 mcp
 ```

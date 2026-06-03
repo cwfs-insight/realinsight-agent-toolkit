@@ -47,5 +47,5 @@ npx -y @realinsight/agent-toolkit@0.1.0 mcp
 Use the `connect_realinsight` helper tool or run:
 
 ```bash
-npx -y @realinsight/agent-toolkit@0.1.0 auth login --base-url https://www.realinsight.cloud
+npx -y @realinsight/agent-toolkit@0.1.0 auth login --base-url https://www.realinsight.cloud/api/v1
 ```

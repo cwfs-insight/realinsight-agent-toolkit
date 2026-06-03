@@ -1,7 +1,7 @@
 import os from "node:os";
 import path from "node:path";
 
-export const DEFAULT_BASE_URL = "https://www.realinsight.cloud";
+export const DEFAULT_BASE_URL = "https://www.realinsight.cloud/api/v1";
 export const DEFAULT_CLIENT_ID = "realinsight-agent-toolkit";
 export const DEVICE_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:device_code";
 export const DEFAULT_SCOPE = [
@@ -114,7 +114,7 @@ const ALL_AGENT_TOOLS = [
         },
         base_url: {
           type: "string",
-          description: "Optional Realinsight API base URL. Defaults to RI_AGENT_BASE_URL or https://www.realinsight.cloud.",
+          description: "Optional Realinsight API base URL. Defaults to RI_AGENT_BASE_URL or https://www.realinsight.cloud/api/v1.",
         },
         client_id: {
           type: "string",
@@ -198,7 +198,7 @@ const ALL_AGENT_TOOLS = [
         },
         base_url: {
           type: "string",
-          description: "Optional Realinsight API base URL. Defaults to the existing profile, RI_AGENT_BASE_URL, or https://www.realinsight.cloud.",
+          description: "Optional Realinsight API base URL. Defaults to the existing profile, RI_AGENT_BASE_URL, or https://www.realinsight.cloud/api/v1.",
         },
         client_id: {
           type: "string",

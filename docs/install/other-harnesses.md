@@ -15,7 +15,7 @@ npx -y @realinsight/agent-toolkit@0.1.0 mcp
 Production environment:
 
 ```text
-RI_AGENT_BASE_URL=https://www.realinsight.cloud
+RI_AGENT_BASE_URL=https://www.realinsight.cloud/api/v1
 ```
 
 ## If The Harness Supports Instructions But Not Skills

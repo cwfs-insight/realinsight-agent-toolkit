@@ -40,10 +40,12 @@ async function main() {
 
     const { AGENT_TOOLS } = await import("../src/tool-definitions.mjs");
     const { call_agent_tool } = await import("../src/agent-tools.mjs");
+    const { build_url } = await import("../src/http.mjs");
     const { enforce_tool_result_limit } = await import("../src/tool-result-limits.mjs");
 
     agent_tools = AGENT_TOOLS;
 
+    run_build_url_smoke(build_url);
     await run_doctor_smoke(config_path);
     await run_tool_call_smoke(call_agent_tool);
     await run_mcp_smoke(config_path);
@@ -62,6 +64,18 @@ async function main() {
     server.close();
     await fs.rm(temp_dir, { recursive: true, force: true });
   }
+}
+
+function run_build_url_smoke(build_url) {
+  const url = build_url("https://www.realinsight.cloud/api/v1/", "/agent/metadata", {
+    scope: ["ri:schema.read", "ri:entity.read"],
+    empty: "",
+  });
+
+  assert(
+    url === "https://www.realinsight.cloud/api/v1/agent/metadata?scope=ri%3Aschema.read&scope=ri%3Aentity.read",
+    `build_url did not preserve path-bearing base URL: ${url}`,
+  );
 }
 
 async function run_doctor_smoke(config_path) {

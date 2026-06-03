@@ -23,7 +23,7 @@ For local stdio MCP:
 For CLI use:
 
 ```bash
-ri-agent auth login --base-url https://www.realinsight.cloud
+ri-agent auth login --base-url https://www.realinsight.cloud/api/v1
 ri-agent doctor --json
 ri-agent tools
 ```

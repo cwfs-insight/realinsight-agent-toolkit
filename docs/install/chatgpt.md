@@ -4,7 +4,7 @@ The preferred ChatGPT path is a hosted Realinsight Connector backed by the Reali
 
 ## Target Shape
 
-- MCP endpoint: `https://www.realinsight.cloud/mcp` or a dedicated agent gateway URL.
+- MCP endpoint: `https://www.realinsight.cloud/api/v1/mcp` or a dedicated agent gateway URL.
 - Auth: OAuth authorization-code with S256 PKCE.
 - Data access: approved Realinsight APIs remain the trust boundary.
 - Tool behavior: stateless requests with explicit entity ids, cursors, page ids, or report ids.

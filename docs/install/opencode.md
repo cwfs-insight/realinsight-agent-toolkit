@@ -15,7 +15,7 @@ with `RI_AGENT_BASE_URL` set to the target environment.
 ## Production Environment
 
 ```text
-RI_AGENT_BASE_URL=https://www.realinsight.cloud
+RI_AGENT_BASE_URL=https://www.realinsight.cloud/api/v1
 ```
 
 Use the MCP examples under `examples/mcp/` as the source for command, args, and environment settings. For custom environments, start with `examples/mcp/mcp.custom.json`.

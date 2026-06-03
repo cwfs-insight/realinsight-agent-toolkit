@@ -95,7 +95,9 @@ async function request_json_once(url, options) {
 }
 
 export function build_url(base_url, route, query) {
-  const url = new URL(route, `${base_url.replace(/\/+$/, "")}/`);
+  const base = String(base_url || "").replace(/\/+$/, "");
+  const normalized_route = String(route || "").replace(/^\/+/, "");
+  const url = new URL(`${base}/${normalized_route}`);
 
   for (const [key, value] of Object.entries(query || {})) {
     if (value === undefined || value === null || value === "") continue;

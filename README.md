@@ -34,7 +34,7 @@ The Realinsight release pipeline exports managed runtime, skill, plugin, and ext
 ## Developer Quick Start
 
 ```bash
-npm run ri-agent -- auth login --base-url https://www.realinsight.cloud
+npm run ri-agent -- auth login --base-url https://www.realinsight.cloud/api/v1
 npm run ri-agent -- doctor --json
 npm run ri-agent -- mcp
 ```
@@ -49,7 +49,7 @@ npm run pack:dry-run
 ## Package Quick Start
 
 ```bash
-npx -y @realinsight/agent-toolkit@0.1.0 auth login --base-url https://www.realinsight.cloud
+npx -y @realinsight/agent-toolkit@0.1.0 auth login --base-url https://www.realinsight.cloud/api/v1
 npx -y @realinsight/agent-toolkit@0.1.0 doctor --json
 npx -y @realinsight/agent-toolkit@0.1.0 mcp
 ```
