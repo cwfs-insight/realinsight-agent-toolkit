@@ -69,6 +69,43 @@ The production Codex marketplace is the only default marketplace in this reposit
 
 For Claude Desktop, pack from a manifest whose `name`, `display_name`, `base_url` default, and `profile_name` default match the target environment.
 
+## Temporary Dev Bundles
+
+A shell environment variable is enough for direct CLI or MCP examples, but it is not the best way to create an installable plugin or extension. Put environment defaults in the manifest or MCP config that the host installs.
+
+For direct local MCP testing:
+
+```bash
+RI_AGENT_BASE_URL=https://your-dev-realinsight-environment.example/api/v1 \
+RI_AGENT_PROFILE=realinsight-dev \
+REALINSIGHT_AGENT_CONFIG="$HOME/.realinsight/agent-toolkit-dev.json" \
+node ./packages/agent-toolkit/src/ri-agent.mjs mcp
+```
+
+For a temporary Codex dev plugin:
+
+1. Copy `plugins/codex/realinsight-connector/` to a temporary plugin folder such as `plugins/codex/realinsight-connector-dev/`.
+2. In the copied `.codex-plugin/plugin.json`, change `name` to `realinsight-connector-dev` and update the display name to make the dev target obvious.
+3. In the copied `.mcp.json`, set `RI_AGENT_BASE_URL`, `RI_AGENT_PROFILE=realinsight-dev`, and optionally `REALINSIGHT_AGENT_CONFIG`.
+4. Add a temporary marketplace entry that points to the copied plugin folder.
+5. Add that temporary marketplace root in Codex, then install `realinsight-connector-dev`.
+
+Do not put the dev entry in this repository's default `.agents/plugins/marketplace.json`.
+
+For a temporary Claude Desktop dev MCPB:
+
+1. Copy `extensions/claude-desktop/realinsight-connector/` to a temporary folder.
+2. In the copied `manifest.json`, change `name`, `display_name`, `user_config.base_url.default`, and `user_config.profile_name.default`.
+3. Pack the temporary folder:
+
+```bash
+mcpb pack /path/to/temp/realinsight-connector-dev
+```
+
+4. Install the generated `.mcpb` in Claude Desktop.
+
+Because the production Claude manifest exposes `base_url` and `profile_name` as user configuration, a short-lived internal test can also use the production MCPB and override those values in Claude Desktop's extension settings during install. Use a distinct dev-labeled manifest when you want dev and prod installed side by side.
+
 ## Examples
 
 General MCP harness examples:

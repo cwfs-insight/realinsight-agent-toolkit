@@ -18,7 +18,7 @@ This public marketplace exposes production only.
 If you are testing a local checkout instead of GitHub, add the repository root:
 
 ```bash
-codex plugin marketplace add /Users/cshelton/Projects/ri-agent-toolkit
+codex plugin marketplace add /path/to/ri-agent-toolkit
 ```
 
 Do not point Codex directly at `plugins/codex/realinsight-connector` or `catalogs/codex`. Codex expects a marketplace root, and this repository exposes that at `.agents/plugins/marketplace.json`.
