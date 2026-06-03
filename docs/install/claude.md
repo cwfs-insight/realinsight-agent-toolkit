@@ -6,7 +6,7 @@ Use one of two paths.
 
 Use this for business users when the hosted Realinsight MCP endpoint is available.
 
-- MCP endpoint: Realinsight hosted `/mcp`.
+- MCP endpoint: `https://www.realinsight.cloud/api/v1/mcp`, or the equivalent MCP URL for a Realinsight-provided environment.
 - Auth: OAuth authorization-code with S256 PKCE.
 - Skills/instructions: provide the Realinsight skill as connector guidance where Claude supports it.
 

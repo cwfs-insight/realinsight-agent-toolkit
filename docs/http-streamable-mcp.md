@@ -1,10 +1,10 @@
 # Hosted Streamable HTTP MCP
 
-The hosted MCP version is an HTTPS MCP protocol endpoint, not a hosted copy of the local CLI. Local testing can use a local `/mcp` endpoint; production should use a Realinsight-hosted `/mcp` endpoint.
+The hosted MCP version is an HTTPS MCP protocol endpoint, not a hosted copy of the local CLI. Production should use the Realinsight-hosted MCP endpoint under the API base URL, currently `https://www.realinsight.cloud/api/v1/mcp`.
 
 ## Recommended Shape
 
-- Host the Streamable HTTP MCP endpoint at `/mcp`.
+- Host the Streamable HTTP MCP endpoint at `/api/v1/mcp` for the current Realinsight API deployment, or at the equivalent path for a Realinsight-provided environment.
 - Reuse the same public tool contracts used by the CLI package.
 - Validate OAuth bearer tokens on every HTTP request and hydrate the normal Realinsight user/customer context.
 - Keep the endpoint stateless. Do not depend on server memory for customer, cursor, selected entities, or prior tool calls.

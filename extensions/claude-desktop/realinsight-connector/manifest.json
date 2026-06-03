@@ -43,7 +43,7 @@
       "env": {
         "RI_AGENT_BASE_URL": "${user_config.base_url}",
         "RI_AGENT_MAX_TOOL_RESULT_BYTES": "${user_config.max_tool_result_bytes}",
-        "REALINSIGHT_AGENT_CONFIG": "${user_config.config_path}"
+        "REALINSIGHT_AGENT_CONFIG": "${HOME}/.realinsight/connector-claude-desktop.json"
       }
     }
   },
@@ -150,13 +150,6 @@
       "min": 20000,
       "max": 2000000,
       "required": false
-    },
-    "config_path": {
-      "type": "string",
-      "title": "Local Credential File",
-      "description": "Local file used to store this extension's Realinsight OAuth profile.",
-      "default": "${HOME}/.realinsight/connector-claude-desktop.json",
-      "required": true
     }
   }
 }

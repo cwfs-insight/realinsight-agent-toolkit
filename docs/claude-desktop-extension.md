@@ -10,4 +10,4 @@ mcpb pack ./extensions/claude-desktop/realinsight-connector
 
 Install the generated `.mcpb` in Claude Desktop. The extension runs a local stdio MCP server and uses the local `connect_realinsight` browser/device login helper.
 
-It is separate from hosted Claude custom connectors, which should point to the hosted Realinsight `/mcp` endpoint and use OAuth authorization-code + PKCE.
+It is separate from hosted Claude custom connectors, which should point to `https://www.realinsight.cloud/api/v1/mcp` or the equivalent Realinsight-provided MCP URL and use OAuth authorization-code + PKCE.
