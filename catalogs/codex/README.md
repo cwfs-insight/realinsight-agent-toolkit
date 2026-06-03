@@ -1,9 +1,17 @@
 # Codex Catalog
 
-This folder contains Codex marketplace metadata for the Realinsight Connector.
+This folder contains a reference copy of the Codex marketplace metadata for the Realinsight Connector.
 
-Use `marketplace.json` as the source entry for Codex environments that support repository marketplace catalogs. When a Codex install expects a specific catalog location, publish or copy this file to that location and keep the plugin path pointed at:
+The canonical repo marketplace file is:
 
 ```text
-plugins/codex/realinsight-connector
+.agents/plugins/marketplace.json
+```
+
+Use the repository root as the marketplace source. Do not add this `catalogs/codex` folder as the marketplace root, because Codex resolves plugin paths relative to the marketplace root.
+
+Keep the plugin path pointed at:
+
+```text
+./plugins/codex/realinsight-connector
 ```
