@@ -8,11 +8,11 @@ Use this page to choose the right Realinsight agent install path.
 | --- | --- | --- |
 | ChatGPT | Hosted Realinsight Connector | Use once the hosted Streamable HTTP MCP endpoint is deployed and approved for the workspace. |
 | Claude or Claude Desktop | Hosted Claude custom connector | Best nontechnical path when Claude can connect to the hosted Realinsight MCP endpoint. |
+| Claude Code | Claude plugin | Installs the bundled Realinsight skill and local MCP server config from this repo's Claude marketplace. |
 | Claude Desktop local-only | MCPB extension | Use `extensions/claude-desktop/realinsight-connector`. |
 | Codex | Codex plugin | Use `plugins/codex/realinsight-connector` and the Codex marketplace/catalog guidance. |
 | Cursor | MCP config | Use `examples/mcp/` or `docs/install/cursor.md`. |
 | GitHub Copilot in VS Code | MCP config | Use `docs/install/copilot-vscode.md`. |
-| Claude Code | MCP config | Use `docs/install/claude-code.md`. |
 | OpenCode | MCP config | Use `docs/install/opencode.md`. |
 | Pi, OpenClaw, and other harnesses | MCP if supported | Use `docs/install/other-harnesses.md`. |
 | Direct CLI | npm package | Use `npx -y @realinsight/agent-toolkit@0.1.0`. |

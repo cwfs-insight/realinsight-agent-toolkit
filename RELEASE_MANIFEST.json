@@ -27,6 +27,11 @@
       "overwrite": true
     },
     {
+      "path": "plugins/claude/realinsight-connector/skills",
+      "owner": "realinsight-release-pipeline",
+      "overwrite": true
+    },
+    {
       "path": "extensions/claude-desktop/realinsight-connector/src",
       "owner": "realinsight-release-pipeline",
       "overwrite": true
@@ -44,6 +49,10 @@
     "examples",
     "plugins/codex/realinsight-connector/.codex-plugin/plugin.json",
     "plugins/codex/realinsight-connector/.mcp.json",
+    ".claude-plugin",
+    "plugins/claude/realinsight-connector/.claude-plugin/plugin.json",
+    "plugins/claude/realinsight-connector/.mcp.json",
+    "plugins/claude/realinsight-connector/README.md",
     "extensions/claude-desktop/realinsight-connector/manifest.json",
     "SECURITY.md",
     "CONTRIBUTING.md",
@@ -61,6 +70,7 @@
     "packages/agent-toolkit/src": "5fe907d3dca3b1cdf59342be8ee8dce79a3556a8299658c5b5186ba035330f37",
     "skills": "01e7196b9d00fd0110d075833fca80f0024b085465d9b7f292d2a82cd4f71191",
     "plugins/codex/realinsight-connector/skills": "01e7196b9d00fd0110d075833fca80f0024b085465d9b7f292d2a82cd4f71191",
+    "plugins/claude/realinsight-connector/skills": "01e7196b9d00fd0110d075833fca80f0024b085465d9b7f292d2a82cd4f71191",
     "extensions/claude-desktop/realinsight-connector/src": "5fe907d3dca3b1cdf59342be8ee8dce79a3556a8299658c5b5186ba035330f37",
     "extensions/claude-desktop/realinsight-connector/skills": "01e7196b9d00fd0110d075833fca80f0024b085465d9b7f292d2a82cd4f71191"
   },
@@ -68,6 +78,7 @@
     "packages/agent-toolkit/src": "agent-toolkit-runtime",
     "skills": "realinsight-agent-skills",
     "plugins/codex/realinsight-connector/skills": "realinsight-agent-skills",
+    "plugins/claude/realinsight-connector/skills": "realinsight-agent-skills",
     "extensions/claude-desktop/realinsight-connector/src": "agent-toolkit-runtime",
     "extensions/claude-desktop/realinsight-connector/skills": "realinsight-agent-skills"
   }

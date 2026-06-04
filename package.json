@@ -10,6 +10,11 @@
   "scripts": {
     "ri-agent": "node ./packages/agent-toolkit/src/ri-agent.mjs",
     "test:contract": "node ./packages/agent-toolkit/test/contract-smoke.mjs",
+    "package:plugins": "node ./tools/package-env-bundles.mjs",
+    "package:plugins:dev": "node ./tools/package-env-bundles.mjs --env dev",
+    "package:plugins:dev:npx": "node ./tools/package-env-bundles.mjs --env dev --runtime npx",
+    "package:plugins:qa": "node ./tools/package-env-bundles.mjs --env qa",
+    "package:plugins:qa:npx": "node ./tools/package-env-bundles.mjs --env qa --runtime npx",
     "pack:dry-run": "npm --cache ./.npm-cache pack ./packages/agent-toolkit --dry-run"
   }
 }

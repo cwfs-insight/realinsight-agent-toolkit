@@ -1,0 +1,26 @@
+{
+  "name": "realinsight",
+  "owner": {
+    "name": "Realinsight"
+  },
+  "plugins": [
+    {
+      "name": "realinsight-connector",
+      "source": "./plugins/claude/realinsight-connector",
+      "description": "Connect Claude to Realinsight tools and skills.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Realinsight"
+      },
+      "homepage": "https://www.realinsight.cloud",
+      "repository": "https://github.com/cwfs-insight/realinsight-agent-toolkit",
+      "license": "MIT",
+      "keywords": [
+        "realinsight",
+        "mcp",
+        "commercial-real-estate",
+        "analytics"
+      ]
+    }
+  ]
+}

@@ -5,8 +5,8 @@ Public user-facing examples default to production:
 | Environment | Default audience | Base URL |
 | --- | --- | --- |
 | production | Public and general users | `https://www.realinsight.cloud/api/v1` |
-| qa | Internal testers and selected external pilots | Realinsight-provided QA API URL |
-| development | Realinsight developers | Realinsight-provided development API URL |
+| qa | Internal testers and selected external pilots | `https://www.ri2-qa.com/api/v1` |
+| development | Realinsight developers | `https://www.ri2-dev.com/api/v1` |
 | custom pilot | Named pilot users | Realinsight-provided environment URL |
 
 Local MCP installs can override the base URL with `RI_AGENT_BASE_URL` or `--base-url` on auth commands when Realinsight provides a non-production or pilot API base URL.
@@ -37,7 +37,7 @@ Example local login for QA:
 RI_AGENT_PROFILE=realinsight-qa \
 REALINSIGHT_AGENT_CONFIG="$HOME/.realinsight/agent-toolkit-qa.json" \
 npx -y @realinsight/agent-toolkit@0.1.0 auth login \
-  --base-url https://your-qa-realinsight-environment.example/api/v1
+  --base-url https://www.ri2-qa.com/api/v1
 ```
 
 ## Deployment Models
@@ -48,6 +48,7 @@ npx -y @realinsight/agent-toolkit@0.1.0 auth login \
 | Local stdio MCP with npm | `npx -y @realinsight/agent-toolkit@<version> mcp`. | Prefer a published QA/prerelease package once QA promotion occurs. | Avoid unless testing a published prerelease. |
 | Local stdio MCP from source | Useful for package verification. | Useful when validating a QA source snapshot. | Preferred developer path. |
 | Codex plugin | Public marketplace exposes prod only. | Internal marketplace or local checkout entry only. | Local checkout entry only. |
+| Claude plugin | Public marketplace exposes prod only. | Internal marketplace or local checkout entry only. | Local checkout entry only. |
 | Claude Desktop MCPB | Pack prod for public users. | Pack an internal QA MCPB with QA defaults. | Pack a local dev MCPB from source with dev defaults. |
 
 ## Manifest Strategy
@@ -65,7 +66,7 @@ Each variant should set:
 - `RI_AGENT_PROFILE` for the target local auth profile.
 - `REALINSIGHT_AGENT_CONFIG` when local credentials should be stored separately.
 
-The production Codex marketplace is the only default marketplace in this repository. Internal Codex marketplaces can be generated or copied from templates later, but they should not replace `.agents/plugins/marketplace.json`.
+The production Codex and Claude marketplaces are the only default marketplaces in this repository. Internal Codex or Claude marketplaces can be generated or copied from templates later, but they should not replace `.agents/plugins/marketplace.json` or `.claude-plugin/marketplace.json`.
 
 For Claude Desktop, pack from a manifest whose `name`, `display_name`, `base_url` default, and `profile_name` default match the target environment.
 
@@ -73,10 +74,33 @@ For Claude Desktop, pack from a manifest whose `name`, `display_name`, `base_url
 
 A shell environment variable is enough for direct CLI or MCP examples, but it is not the best way to create an installable plugin or extension. Put environment defaults in the manifest or MCP config that the host installs.
 
+Use the local packaging scripts to render repeatable environment bundles into an ignored destination folder:
+
+```bash
+npm run package:plugins:dev
+npm run package:plugins:qa
+```
+
+These default to the bundled `node` runtime and package the Codex and Claude plugin bundles. Use `npx` only after `@realinsight/agent-toolkit` has been published:
+
+```bash
+npm run package:plugins:dev -- --npx
+npm run package:plugins:qa -- --npx
+```
+
+To include Claude Desktop MCPB source bundles too, pass `--type all`:
+
+```bash
+npm run package:plugins:dev -- --type all
+npm run package:plugins:qa -- --type all
+```
+
+The `node` runtime bundles the current local `ri-agent` source into each plugin and sets `cwd` so the MCP server starts from the installed plugin folder. The `npx` runtime writes MCP configs that use `npx -y @realinsight/agent-toolkit@<version> mcp`; packaging does not execute `npx`.
+
 For direct local MCP testing:
 
 ```bash
-RI_AGENT_BASE_URL=https://your-dev-realinsight-environment.example/api/v1 \
+RI_AGENT_BASE_URL=https://www.ri2-dev.com/api/v1 \
 RI_AGENT_PROFILE=realinsight-dev \
 REALINSIGHT_AGENT_CONFIG="$HOME/.realinsight/agent-toolkit-dev.json" \
 node ./packages/agent-toolkit/src/ri-agent.mjs mcp
@@ -91,6 +115,16 @@ For a temporary Codex dev plugin:
 5. Add that temporary marketplace root in Codex, then install `realinsight-connector-dev`.
 
 Do not put the dev entry in this repository's default `.agents/plugins/marketplace.json`.
+
+For a temporary Claude plugin:
+
+1. Copy `plugins/claude/realinsight-connector/` to a temporary plugin folder such as `plugins/claude/realinsight-connector-dev/`.
+2. In the copied `.claude-plugin/plugin.json`, change `name` to `realinsight-connector-dev`, update `displayName`, and keep `skills` plus `mcpServers` pointed at the copied plugin contents.
+3. In the copied `.mcp.json`, set `RI_AGENT_BASE_URL`, `RI_AGENT_PROFILE=realinsight-dev`, and optionally `REALINSIGHT_AGENT_CONFIG`.
+4. Add a temporary Claude marketplace entry that points to the copied plugin folder.
+5. Add that temporary marketplace in Claude, then install `realinsight-connector-dev`.
+
+Do not put the dev entry in this repository's default `.claude-plugin/marketplace.json`.
 
 For a temporary Claude Desktop dev MCPB:
 

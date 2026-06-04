@@ -1,6 +1,6 @@
 # Claude Install
 
-Use one of two paths.
+Use one of three paths.
 
 ## Hosted Claude Connector
 
@@ -9,6 +9,31 @@ Use this for business users when the hosted Realinsight MCP endpoint is availabl
 - MCP endpoint: `https://www.realinsight.cloud/api/v1/mcp`, or the equivalent MCP URL for a Realinsight-provided environment.
 - Auth: OAuth authorization-code with S256 PKCE.
 - Skills/instructions: provide the Realinsight skill as connector guidance where Claude supports it.
+
+## Claude Plugin
+
+Use this for Claude Code or Claude surfaces that support plugin marketplaces. It installs the Realinsight skill and the local stdio MCP configuration together.
+
+Add the marketplace from this public repository:
+
+```text
+/plugin marketplace add cwfs-insight/realinsight-agent-toolkit
+```
+
+Then install the production connector:
+
+```text
+/plugin install realinsight-connector@realinsight
+```
+
+For local testing from a checkout of this repository:
+
+```text
+/plugin marketplace add .
+/plugin install realinsight-connector@realinsight
+```
+
+The bundled plugin lives at `plugins/claude/realinsight-connector/`. Its MCP config points to production and uses the `realinsight-prod` auth profile by default.
 
 ## Claude Desktop Local Extension
 
