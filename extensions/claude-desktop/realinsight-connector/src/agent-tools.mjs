@@ -11,15 +11,23 @@ import { JsonRpcError } from "./json-rpc.mjs";
 import { agent_get_pipeline, agent_queue_pipeline } from "./pipeline-tools.mjs";
 import { agent_get_records, agent_set_record } from "./record-tools.mjs";
 import {
+  agent_create_report_configuration,
+  agent_delete_report_configuration,
   agent_extract_analytic_entities,
   agent_extract_workbench_entities,
   agent_get_analytic_data,
   agent_get_analytic_csv,
   agent_get_dashboard_page,
+  agent_get_report_configuration,
   agent_get_workbench_data,
   agent_get_workbench_csv,
   agent_list_dashboard_pages,
   agent_list_workbenches,
+  agent_search_report_configurations,
+  agent_update_report_configuration,
+  agent_validate_create_report_configuration,
+  agent_validate_delete_report_configuration,
+  agent_validate_update_report_configuration,
 } from "./report-tools.mjs";
 import { agent_get_fields, agent_search_features, agent_search_fields } from "./schema-tools.mjs";
 import { agent_get_entity_structure } from "./structure-tools.mjs";
@@ -95,6 +103,30 @@ export async function call_agent_tool(name, args) {
       break;
     case "extract_workbench_entities":
       payload = await agent_extract_workbench_entities(args);
+      break;
+    case "search_report_configurations":
+      payload = await agent_search_report_configurations(args);
+      break;
+    case "get_report_configuration":
+      payload = await agent_get_report_configuration(args);
+      break;
+    case "validate_create_report_configuration":
+      payload = await agent_validate_create_report_configuration(args);
+      break;
+    case "validate_update_report_configuration":
+      payload = await agent_validate_update_report_configuration(args);
+      break;
+    case "validate_delete_report_configuration":
+      payload = await agent_validate_delete_report_configuration(args);
+      break;
+    case "create_report_configuration":
+      payload = await agent_create_report_configuration(args);
+      break;
+    case "update_report_configuration":
+      payload = await agent_update_report_configuration(args);
+      break;
+    case "delete_report_configuration":
+      payload = await agent_delete_report_configuration(args);
       break;
     case "get_pipeline":
       payload = await agent_get_pipeline(args);

@@ -46,6 +46,7 @@ async function main() {
     agent_tools = AGENT_TOOLS;
 
     run_build_url_smoke(build_url);
+    run_tool_inventory_smoke();
     await run_doctor_smoke(config_path);
     await run_env_profile_smoke(config_path);
     await run_tool_call_smoke(call_agent_tool);
@@ -77,6 +78,17 @@ function run_build_url_smoke(build_url) {
     url === "https://www.realinsight.cloud/api/v1/agent/metadata?scope=ri%3Aschema.read&scope=ri%3Aentity.read",
     `build_url did not preserve path-bearing base URL: ${url}`,
   );
+}
+
+function run_tool_inventory_smoke() {
+  const tool_names = new Set(agent_tools.map((tool) => tool.name));
+
+  assert(tool_names.has("search_report_configurations"), "search_report_configurations missing from default tools");
+  assert(tool_names.has("get_report_configuration"), "get_report_configuration missing from default tools");
+  assert(!tool_names.has("validate_create_report_configuration"), "write report validation tool should be disabled by default");
+  assert(!tool_names.has("create_report_configuration"), "write report create tool should be disabled by default");
+  assert(!tool_names.has("update_report_configuration"), "write report update tool should be disabled by default");
+  assert(!tool_names.has("delete_report_configuration"), "write report delete tool should be disabled by default");
 }
 
 async function run_doctor_smoke(config_path) {
@@ -154,6 +166,14 @@ async function run_tool_call_smoke(call_agent_tool) {
   const workbench_data_result = await call_agent_tool("get_workbench_data", { workbench_id: "workbench-list-1", limit: 1 });
   assert(workbench_data_result.items[0].rows[0]["col-balance"] === 1250000, "get_workbench_data did not return balance");
 
+  const report_search_result = await call_agent_tool("search_report_configurations", {
+    report_type: "LIST",
+    search_text: "Loan",
+  });
+  assert(report_search_result.items[0].report_id === "report-2", "search_report_configurations did not return report-2");
+
+  const report_config_result = await call_agent_tool("get_report_configuration", { report_id: "report-2" });
+  assert(report_config_result.items[0].conflict_token === "conflict-2", "get_report_configuration did not return conflict token");
 }
 
 async function run_mcp_smoke(config_path) {
@@ -548,6 +568,46 @@ async function handle_request(request, response) {
             "col-balance": 1250000,
           },
         ],
+      },
+    ]));
+    return;
+  }
+
+  if (request.method === "GET" && url.pathname === "/agent/reports/configurations/search") {
+    assert(url.searchParams.get("report_type") === "LIST", "search_report_configurations did not pass report_type");
+    assert(url.searchParams.get("search_text") === "Loan", "search_report_configurations did not pass search_text");
+    write_json(response, 200, agent_result("search_report_configurations", "ri:analytics.read", [
+      {
+        report_id: "report-2",
+        report_type: "LIST",
+        active: true,
+        report_name: "Loan List",
+        master_feature_code: "Loan",
+        column_count: 1,
+        conflict_token: "conflict-2",
+      },
+    ]));
+    return;
+  }
+
+  if (request.method === "GET" && url.pathname === "/agent/reports/configurations/report-2") {
+    write_json(response, 200, agent_result("get_report_configuration", "ri:analytics.read", [
+      {
+        report_id: "report-2",
+        report_type: "LIST",
+        active: true,
+        report_name: "Loan List",
+        conflict_token: "conflict-2",
+        list: {
+          master_feature_code: "Loan",
+          columns: [
+            {
+              column_id: "col-balance",
+              schema_code: "Loan.Balance",
+              label: "Balance",
+            },
+          ],
+        },
       },
     ]));
     return;

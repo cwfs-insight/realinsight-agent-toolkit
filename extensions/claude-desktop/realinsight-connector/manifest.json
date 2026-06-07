@@ -132,6 +132,14 @@
     {
       "name": "extract_workbench_entities",
       "description": "Extract compact entity refs from cached workbench/list-report rows so the agent can hydrate or traverse the underlying population with get_records, get_children, or get_latest_children."
+    },
+    {
+      "name": "search_report_configurations",
+      "description": "Search compact report configuration summaries visible to the authenticated user. Use this before editing, copying, or deleting a report so the agent can choose the correct report_id and then call get_report_configuration for the latest conflict token."
+    },
+    {
+      "name": "get_report_configuration",
+      "description": "Read one compact report configuration, including editable LIST configuration and the latest conflict_token. Always call this immediately before validate_update_report_configuration, update_report_configuration, validate_delete_report_configuration, or delete_report_configuration."
     }
   ],
   "tools_generated": true,

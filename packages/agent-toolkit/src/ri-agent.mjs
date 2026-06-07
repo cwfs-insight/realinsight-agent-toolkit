@@ -11,15 +11,23 @@ import { start_mcp_server } from "./mcp-server.mjs";
 import { get_pipeline, queue_pipeline } from "./pipeline-tools.mjs";
 import { get_records, set_record } from "./record-tools.mjs";
 import {
+  create_report_configuration,
+  delete_report_configuration,
   extract_analytic_entities,
   extract_workbench_entities,
   get_analytic_data,
   get_analytic_csv,
   get_dashboard_page,
+  get_report_configuration,
   get_workbench_data,
   get_workbench_csv,
   list_dashboard_pages,
   list_workbenches,
+  search_report_configurations,
+  update_report_configuration,
+  validate_create_report_configuration,
+  validate_delete_report_configuration,
+  validate_update_report_configuration,
 } from "./report-tools.mjs";
 import { get_fields, search_features, search_fields } from "./schema-tools.mjs";
 import { get_entity_structure } from "./structure-tools.mjs";
@@ -165,6 +173,52 @@ async function main() {
 
   if (command === "extract-workbench-entities" || command === "extract_workbench_entities") {
     await extract_workbench_entities(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "search-report-configurations" || command === "search_report_configurations") {
+    await search_report_configurations(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "get-report-configuration" || command === "get_report_configuration") {
+    await get_report_configuration(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "validate-create-report-configuration" || command === "validate_create_report_configuration") {
+    assert_write_tools_enabled();
+    await validate_create_report_configuration(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "validate-update-report-configuration" || command === "validate_update_report_configuration") {
+    assert_write_tools_enabled();
+    await validate_update_report_configuration(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "validate-delete-report-configuration" || command === "validate_delete_report_configuration") {
+    assert_write_tools_enabled();
+    await validate_delete_report_configuration(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "create-report-configuration" || command === "create_report_configuration") {
+    assert_write_tools_enabled();
+    await create_report_configuration(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "update-report-configuration" || command === "update_report_configuration") {
+    assert_write_tools_enabled();
+    await update_report_configuration(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "delete-report-configuration" || command === "delete_report_configuration") {
+    assert_write_tools_enabled();
+    await delete_report_configuration(parsed.positionals.slice(1), parsed.options);
     return;
   }
 
@@ -334,6 +388,52 @@ async function run_report_command(positionals, options) {
     return;
   }
 
+  if (command === "search-report-configurations" || command === "search_report_configurations" || command === "search-configurations" || command === "search") {
+    await search_report_configurations(positionals.slice(1), options);
+    return;
+  }
+
+  if (command === "get-report-configuration" || command === "get_report_configuration" || command === "configuration" || command === "get") {
+    await get_report_configuration(positionals.slice(1), options);
+    return;
+  }
+
+  if (command === "validate-create-report-configuration" || command === "validate_create_report_configuration" || command === "validate-create") {
+    assert_write_tools_enabled();
+    await validate_create_report_configuration(positionals.slice(1), options);
+    return;
+  }
+
+  if (command === "validate-update-report-configuration" || command === "validate_update_report_configuration" || command === "validate-update") {
+    assert_write_tools_enabled();
+    await validate_update_report_configuration(positionals.slice(1), options);
+    return;
+  }
+
+  if (command === "validate-delete-report-configuration" || command === "validate_delete_report_configuration" || command === "validate-delete") {
+    assert_write_tools_enabled();
+    await validate_delete_report_configuration(positionals.slice(1), options);
+    return;
+  }
+
+  if (command === "create-report-configuration" || command === "create_report_configuration" || command === "create") {
+    assert_write_tools_enabled();
+    await create_report_configuration(positionals.slice(1), options);
+    return;
+  }
+
+  if (command === "update-report-configuration" || command === "update_report_configuration" || command === "update") {
+    assert_write_tools_enabled();
+    await update_report_configuration(positionals.slice(1), options);
+    return;
+  }
+
+  if (command === "delete-report-configuration" || command === "delete_report_configuration" || command === "delete") {
+    assert_write_tools_enabled();
+    await delete_report_configuration(positionals.slice(1), options);
+    return;
+  }
+
   throw new Error(`Unknown reports command: ${command}`);
 }
 
@@ -345,7 +445,14 @@ function print_help() {
 `
     : "";
   const write_help = WRITE_TOOLS_ENABLED
-    ? "  ri-agent set-record ENTITY_ID --record-json JSON --approved [--update-fields A,B] [--table]\n"
+    ? `  ri-agent set-record ENTITY_ID --record-json JSON --approved [--update-fields A,B] [--table]
+  ri-agent validate-create-report-configuration --request-json JSON [--table]
+  ri-agent validate-update-report-configuration REPORT_ID --request-json JSON [--expected-conflict-token TOKEN] [--table]
+  ri-agent validate-delete-report-configuration REPORT_ID --expected-conflict-token TOKEN [--table]
+  ri-agent create-report-configuration --request-json JSON --approved [--table]
+  ri-agent update-report-configuration REPORT_ID --request-json JSON --expected-conflict-token TOKEN --approved [--table]
+  ri-agent delete-report-configuration REPORT_ID --expected-conflict-token TOKEN --approved [--table]
+`
     : "";
 
   console.log(`Realinsight Agent Toolkit
@@ -375,7 +482,9 @@ ${write_help.trimEnd()}
   ri-agent get-workbench-data WORKBENCH_ID [--limit N|--all] [--cursor CURSOR] [--table]
   ri-agent get-workbench-csv WORKBENCH_ID [--limit N|--all] [--cursor CURSOR] [--raw]
   ri-agent extract-workbench-entities WORKBENCH_ID [--limit N|--all] [--cursor CURSOR] [--table]
-  ri-agent reports <list-dashboard-pages|get-dashboard-page|get-analytic-data|get-analytic-csv|extract-analytic-entities|list-workbenches|get-workbench-data|get-workbench-csv|extract-workbench-entities> ...
+  ri-agent search-report-configurations [--report-type LIST] [--search-text TEXT] [--table]
+  ri-agent get-report-configuration REPORT_ID [--table]
+  ri-agent reports <list-dashboard-pages|get-dashboard-page|get-analytic-data|get-analytic-csv|extract-analytic-entities|list-workbenches|get-workbench-data|get-workbench-csv|extract-workbench-entities|search-report-configurations|get-report-configuration|validate-create|validate-update|validate-delete|create|update|delete> ...
   ri-agent schema <search-features|search-fields|get-fields> ...
 ${pipeline_help.trimEnd()}
   ri-agent tools
@@ -384,7 +493,6 @@ ${pipeline_help.trimEnd()}
 Environment:
   RI_AGENT_BASE_URL        Default Core API base URL. Defaults to ${DEFAULT_BASE_URL}
   RI_AGENT_CLIENT_ID       OAuth client id. Defaults to ${DEFAULT_CLIENT_ID}
-  RI_AGENT_PROFILE         Default local auth profile name. Defaults to active profile or default.
   REALINSIGHT_AGENT_CONFIG Credential file path. Defaults to ${CONFIG_PATH}
   RI_AGENT_ENABLE_WRITE_TOOLS Include write commands/tools in the local inventory when set to 1.
 `);
@@ -437,6 +545,16 @@ Use --end-page 0 to continue through the end of the document.
 }
 
 function print_report_help() {
+  const report_write_help = WRITE_TOOLS_ENABLED
+    ? `  ri-agent reports validate-create --request-json JSON [--table]
+  ri-agent reports validate-update REPORT_ID --request-json JSON [--expected-conflict-token TOKEN] [--table]
+  ri-agent reports validate-delete REPORT_ID --expected-conflict-token TOKEN [--table]
+  ri-agent reports create --request-json JSON --approved [--table]
+  ri-agent reports update REPORT_ID --request-json JSON --expected-conflict-token TOKEN --approved [--table]
+  ri-agent reports delete REPORT_ID --expected-conflict-token TOKEN --approved [--table]
+`
+    : "";
+
   console.log(`Realinsight Agent Toolkit report, analytic, and workbench commands
 
 Usage:
@@ -449,8 +567,12 @@ Usage:
   ri-agent reports get-workbench-data WORKBENCH_ID [--limit N|--all] [--cursor CURSOR] [--table]
   ri-agent reports get-workbench-csv WORKBENCH_ID [--limit N|--all] [--cursor CURSOR] [--raw]
   ri-agent reports extract-workbench-entities WORKBENCH_ID [--limit N|--all] [--cursor CURSOR] [--table]
+  ri-agent reports search-report-configurations [--report-type LIST] [--search-text TEXT] [--table]
+  ri-agent reports get-report-configuration REPORT_ID [--table]
+${report_write_help.trimEnd()}
 
 Cached analytic and workbench tables can be large. Prefer paging results into a temporary CSV/JSONL/SQLite file for multi-page analysis.
+Report configuration writes are side effects. Call get-report-configuration first for the latest conflict token, validate before saving, and use --approved only after explicit user approval.
 `);
 }
 

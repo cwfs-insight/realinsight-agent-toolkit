@@ -1,10 +1,10 @@
 # Report Query Composition
 
-Use this for ad hoc analytical questions before a dedicated `run_entity_query`, `search_reports`, or `run_report` tool exists.
+Use this for ad hoc analytical questions before a dedicated `run_entity_query` or `run_report` tool exists.
 
 ## Current State
 
-The toolkit does not yet expose report search/run or a general query tool. Compose small read-only answers from:
+The toolkit exposes report definition search/read tools, but it does not yet run arbitrary report jobs or expose a general query tool. Compose small read-only answers from:
 
 - `search_features`
 - `search_fields`
@@ -12,8 +12,10 @@ The toolkit does not yet expose report search/run or a general query tool. Compo
 - `get_children`
 - `get_entity_structure`
 - `get_records`
+- `search_report_configurations`
+- `get_report_configuration`
 
-If the user asks to run an existing RI report, say that report tools are planned but not currently exposed through the toolkit.
+If the user asks to run an existing RI report, say that report execution is not currently exposed through the toolkit. You can inspect the definition with `search_report_configurations` and `get_report_configuration`, then answer from cached analytics/workbenches or compose a bounded lower-level read when appropriate.
 
 ## Deterministic Composition Pattern
 
@@ -39,5 +41,6 @@ For "Show me the top 5 leases for each property in the New York area for office 
 ## Rules
 
 - Do not pretend to run RI report definitions when using composed lower-level tools.
+- Do not confuse inspecting a report definition with running that report.
 - Do not create unbounded fan-out. Ask for a narrower scope when root entities or child rows exceed safe limits.
 - If a metric is ambiguous, present the candidate fields and ask the user to choose.

@@ -41,6 +41,7 @@ Read only the reference files needed for the user's request:
 - `references/structure-traversal.md`: parent, master, children, references, referenced-by, and periodic traversal.
 - `references/analytics-workbenches.md`: dashboard pages, analytics, workbenches, cached tables, CSV paging, and entity extraction.
 - `references/report-query.md`: composing bounded ad hoc analytical answers from current tools.
+- `references/report-configuration.md`: inspecting, validating, creating, updating, and deleting report definitions.
 - `references/record-writes.md`: approval-gated record update workflow when write tools are enabled.
 - `references/pipelines.md`: approval-gated document pipeline queue/status workflow when pipeline tools are enabled.
 
@@ -52,8 +53,9 @@ Read only the reference files needed for the user's request:
 4. Use relationship tools only when the next step needs parent, master, child, reference, or periodic context.
 5. Hydrate records with key fields or explicit fields.
 6. For dashboard, analytic, workbench, or saved-list questions, prefer cached table tools over manual entity fan-out.
-7. Keep calls bounded, follow cursors, and report truncation or access warnings.
-8. Answer with provenance: include the feature, field, dashboard page, analytic, workbench, entity ids, or cache status that materially shaped the result.
+7. For report definition changes, read `references/report-configuration.md`, get the latest conflict token, validate before writing, and require explicit approval.
+8. Keep calls bounded, follow cursors, and report truncation or access warnings.
+9. Answer with provenance: include the feature, field, dashboard page, analytic, workbench, report id, entity ids, or cache status that materially shaped the result.
 
 ## Tool Families
 
@@ -62,6 +64,7 @@ Read only the reference files needed for the user's request:
 - Entity search and relationships: `search_entities`, `get_children`, `get_latest_children`, `get_entity_structure`.
 - Records: `get_records`; gated writes with `set_record`.
 - Dashboards, analytics, and workbenches: `list_dashboard_pages`, `get_dashboard_page`, `get_analytic_data`, `get_analytic_csv`, `extract_analytic_entities`, `list_workbenches`, `get_workbench_data`, `get_workbench_csv`, `extract_workbench_entities`.
+- Report configuration: `search_report_configurations`, `get_report_configuration`; gated validation/write tools with `validate_create_report_configuration`, `validate_update_report_configuration`, `validate_delete_report_configuration`, `create_report_configuration`, `update_report_configuration`, `delete_report_configuration`.
 - Pipelines: gated `get_pipeline` and `queue_pipeline` when enabled.
 
 ## Safety Rules

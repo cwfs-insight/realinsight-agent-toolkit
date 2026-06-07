@@ -141,6 +141,14 @@ export function post_agent_read_json(profile, route, body) {
   });
 }
 
+export function delete_agent_json(profile, route, body) {
+  return request_json(build_url(profile.base_url, route), {
+    method: "DELETE",
+    bearer_token: profile.access_token,
+    body,
+  });
+}
+
 export function format_error_message(error) {
   if (error instanceof HttpJsonError) {
     return `${error.error}: ${error.description}`;

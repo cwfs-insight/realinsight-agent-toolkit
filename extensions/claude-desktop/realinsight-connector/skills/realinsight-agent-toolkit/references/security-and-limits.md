@@ -33,6 +33,7 @@ Use this before adding or using tools that can return large datasets, sensitive 
 ## Side Effects
 
 - `set_record` requires `ri:record.write`, enabled write tooling, and explicit approval of the entity id, fields, and values.
+- Report configuration create/update/delete requires `ri:reports.write`, enabled write tooling, Reports module access, validation, and explicit approval of the exact report side effect.
 - `queue_pipeline` requires its pipeline scopes, enabled pipeline tooling, and explicit approval of the pipeline type, document, property context, and page range.
 - A scope only allows the client to attempt an operation; normal Realinsight security, locks, hooks, and module rules still decide whether it succeeds.
 

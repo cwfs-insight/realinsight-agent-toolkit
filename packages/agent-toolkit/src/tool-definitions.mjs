@@ -29,12 +29,21 @@ export const RECORD_READ_SCOPE = "ri:record.read";
 export const RECORD_WRITE_SCOPE = "ri:record.write";
 export const STRUCTURE_READ_SCOPE = "ri:structure.read";
 export const ANALYTICS_READ_SCOPE = "ri:analytics.read";
+export const REPORT_WRITE_SCOPE = "ri:reports.write";
 export const PIPELINE_READ_SCOPE = "ri:pipeline.read";
 export const PIPELINE_QUEUE_SCOPE = "ri:pipeline.queue";
 export const PIPELINE_TOOLS_ENABLED = parse_env_bool(process.env.RI_AGENT_ENABLE_PIPELINE_TOOLS);
 export const WRITE_TOOLS_ENABLED = parse_env_bool(process.env.RI_AGENT_ENABLE_WRITE_TOOLS);
 const PIPELINE_TOOL_NAMES = new Set(["get_pipeline", "queue_pipeline"]);
-const WRITE_TOOL_NAMES = new Set(["set_record"]);
+const WRITE_TOOL_NAMES = new Set([
+  "set_record",
+  "validate_create_report_configuration",
+  "validate_update_report_configuration",
+  "validate_delete_report_configuration",
+  "create_report_configuration",
+  "update_report_configuration",
+  "delete_report_configuration",
+]);
 export const MCP_PROTOCOL_VERSION = "2025-11-25";
 export const MCP_SUPPORTED_PROTOCOL_VERSIONS = [
   "2025-11-25",
@@ -61,17 +70,19 @@ export const MCP_INSTRUCTIONS = [
   "Use get_entity_structure for parent, master, child, reference, or periodic relationship traversal when the user asks how entities are connected.",
   "Use list_dashboard_pages/get_dashboard_page to discover dashboard analytics already curated for the user.",
   "Use list_workbenches/get_workbench_data when the user asks about existing workbench lists, saved list reports, or cached operational tables.",
+  "Use search_report_configurations/get_report_configuration when the user asks to inspect, edit, copy, or delete report definitions.",
+  "Before building report configurations, use search_features/get_entity_structure/get_fields to choose one top-level master_feature_code and fields from datasets under that same top-level feature.",
   "Use extract_analytic_entities or extract_workbench_entities to turn cached table rows into compact entity refs for later get_records/get_children calls.",
   "Cached analytic and workbench rows can be large; for multi-page analysis, use CSV tools or paged data tools, write pages to a temporary CSV/JSONL/SQLite table in your environment, then query that local copy.",
   "Server caps are reported in tool result limits. Default cached data pages are small; max page size is 1000 rows, and all=true is capped server-side.",
   "Unset Realinsight dates may appear as null with is_unset_value=true; older raw paths may show 0001-01-01 or 1900-01-01.",
   ...(WRITE_TOOLS_ENABLED
-    ? ["set_record is a write operation: call it only after the user approves the exact entity id, field names, and new values, with approved=true."]
+    ? ["set_record and report configuration create/update/delete are write operations: call them only after the user approves the exact side effect, with approved=true."]
     : []),
   ...(PIPELINE_TOOLS_ENABLED
     ? ["Queueing a pipeline is a side effect: call queue_pipeline only after explicit user approval, with approved=true, a DocumentTracking id, and required property/page context."]
     : []),
-  "Every tool call can include a profile name; otherwise RI_AGENT_PROFILE, the active local ri-agent auth profile, or the first stored profile is used.",
+  "Every tool call can include a profile name; otherwise the active local ri-agent auth profile is used.",
 ].join("\n");
 
 const ALL_AGENT_TOOLS = [
@@ -1152,6 +1163,426 @@ const ALL_AGENT_TOOLS = [
         },
       },
       required: ["workbench_id"],
+    },
+  },
+  {
+    name: "search_report_configurations",
+    title: "Search Realinsight Report Configurations",
+    cli: "ri-agent search-report-configurations [--report-type LIST] [--search-text TEXT]",
+    route: "GET /agent/reports/configurations/search",
+    scope: ANALYTICS_READ_SCOPE,
+    description: "Search compact report configuration summaries visible to the authenticated user. Use this before editing, copying, or deleting a report so the agent can choose the correct report_id and then call get_report_configuration for the latest conflict token.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        profile: {
+          type: "string",
+          description: "Optional local ri-agent auth profile name. Uses the active profile when omitted.",
+        },
+        report_type: {
+          type: "string",
+          description: "Optional report type filter such as LIST, ANALYTIC, or COMPOSITE. The first write pass supports LIST only.",
+        },
+        parent_folder_id: {
+          type: "string",
+          description: "Optional report folder id. Use REPORT for the root folder.",
+        },
+        search_text: {
+          type: "string",
+          description: "Optional text to match against report names.",
+        },
+        include_inactive: {
+          type: "boolean",
+          description: "Include inactive reports when the current user is allowed to read them.",
+        },
+        limit: {
+          type: "integer",
+          minimum: 1,
+          maximum: 200,
+          description: "Maximum report summaries to return.",
+        },
+        cursor: {
+          type: "string",
+          description: "Cursor returned by a previous search_report_configurations response.",
+        },
+      },
+    },
+  },
+  {
+    name: "get_report_configuration",
+    title: "Get Realinsight Report Configuration",
+    cli: "ri-agent get-report-configuration REPORT_ID",
+    route: "GET /agent/reports/configurations/{report_id}",
+    scope: ANALYTICS_READ_SCOPE,
+    description: "Read one compact report configuration, including editable LIST configuration and the latest conflict_token. Always call this immediately before validate_update_report_configuration, update_report_configuration, validate_delete_report_configuration, or delete_report_configuration.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        profile: {
+          type: "string",
+          description: "Optional local ri-agent auth profile name. Uses the active profile when omitted.",
+        },
+        report_id: {
+          type: "string",
+          description: "Report ObjectId returned by search_report_configurations, dashboard/workbench tools, or another report configuration response.",
+        },
+      },
+      required: ["report_id"],
+    },
+  },
+  {
+    name: "validate_create_report_configuration",
+    title: "Validate Realinsight Report Create",
+    cli: "ri-agent validate-create-report-configuration --request-json JSON",
+    route: "POST /agent/reports/configurations/validate-create",
+    scope: REPORT_WRITE_SCOPE,
+    description: "Validate and normalize a LIST report create request without writing. Before calling, use search_features/get_entity_structure to choose one master_feature_code, and get_fields for every dataset feature_code so columns use valid field names. Core rejects datasets outside the same top-level feature family.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        profile: {
+          type: "string",
+          description: "Optional local ri-agent auth profile name. Uses the active profile when omitted.",
+        },
+        report_type: {
+          type: "string",
+          description: "Report type. Use LIST; analytic/composite writes are deferred.",
+        },
+        parent_folder_id: {
+          type: "string",
+          description: "Target report folder id. Use REPORT for the root folder.",
+        },
+        report_name: {
+          type: "string",
+          description: "User-facing report name.",
+        },
+        report_description: {
+          type: "string",
+          description: "Optional report description.",
+        },
+        publish_to_users: {
+          type: "boolean",
+          description: "Whether other users can see the report.",
+        },
+        list: {
+          type: "object",
+          additionalProperties: true,
+          description: "LIST report configuration. Include master_feature_code, data_sets, columns, sorts, criteria, prompts, team_role_criteria, and aggregate_group_by as needed. Every data_set.feature_code must belong to the same top-level feature family as master_feature_code.",
+        },
+        change_reason: {
+          type: "string",
+          description: "Optional reason that will be copied to the ConfigAuditLog if the same request is later written.",
+        },
+        correlation_id: {
+          type: "string",
+          description: "Optional caller correlation id.",
+        },
+        source_reference: {
+          type: "string",
+          description: "Optional caller source reference.",
+        },
+      },
+      required: ["report_name", "list"],
+    },
+  },
+  {
+    name: "validate_update_report_configuration",
+    title: "Validate Realinsight Report Update",
+    cli: "ri-agent validate-update-report-configuration REPORT_ID --request-json JSON",
+    route: "POST /agent/reports/configurations/{report_id}/validate-update",
+    scope: REPORT_WRITE_SCOPE,
+    description: "Validate and normalize a LIST report update request without writing. Call get_report_configuration first and pass its latest conflict_token as expected_conflict_token. Use get_fields for dataset feature codes before adding or changing columns.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        profile: {
+          type: "string",
+          description: "Optional local ri-agent auth profile name. Uses the active profile when omitted.",
+        },
+        report_id: {
+          type: "string",
+          description: "Report ObjectId from get_report_configuration.",
+        },
+        report_type: {
+          type: "string",
+          description: "Report type. Use LIST; analytic/composite writes are deferred.",
+        },
+        parent_folder_id: {
+          type: "string",
+          description: "Target report folder id. Use REPORT for the root folder.",
+        },
+        report_name: {
+          type: "string",
+          description: "User-facing report name.",
+        },
+        report_description: {
+          type: "string",
+          description: "Optional report description.",
+        },
+        publish_to_users: {
+          type: "boolean",
+          description: "Whether other users can see the report.",
+        },
+        list: {
+          type: "object",
+          additionalProperties: true,
+          description: "Full normalized LIST report configuration to save. Every data_set.feature_code must belong to the same top-level feature family as list.master_feature_code.",
+        },
+        expected_conflict_token: {
+          type: "string",
+          description: "Latest conflict_token from get_report_configuration. Required for updates.",
+        },
+        change_reason: {
+          type: "string",
+          description: "Optional reason that will be copied to the ConfigAuditLog if the same request is later written.",
+        },
+        correlation_id: {
+          type: "string",
+          description: "Optional caller correlation id.",
+        },
+        source_reference: {
+          type: "string",
+          description: "Optional caller source reference.",
+        },
+      },
+      required: ["report_id", "report_name", "list", "expected_conflict_token"],
+    },
+  },
+  {
+    name: "validate_delete_report_configuration",
+    title: "Validate Realinsight Report Delete",
+    cli: "ri-agent validate-delete-report-configuration REPORT_ID --expected-conflict-token TOKEN",
+    route: "POST /agent/reports/configurations/{report_id}/validate-delete",
+    scope: REPORT_WRITE_SCOPE,
+    description: "Validate report delete prerequisites without writing and return affected resources such as schedules, related analytics, dashboard references, and workbench lists. Call get_report_configuration first and pass its latest conflict_token.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        profile: {
+          type: "string",
+          description: "Optional local ri-agent auth profile name. Uses the active profile when omitted.",
+        },
+        report_id: {
+          type: "string",
+          description: "Report ObjectId from get_report_configuration.",
+        },
+        expected_conflict_token: {
+          type: "string",
+          description: "Latest conflict_token from get_report_configuration.",
+        },
+      },
+      required: ["report_id", "expected_conflict_token"],
+    },
+  },
+  {
+    name: "create_report_configuration",
+    title: "Create Realinsight Report Configuration",
+    cli: "ri-agent create-report-configuration --request-json JSON --approved",
+    route: "POST /agent/reports/configurations",
+    scope: REPORT_WRITE_SCOPE,
+    readOnlyHint: false,
+    idempotentHint: false,
+    description: "Create a LIST report after explicit user approval. Run validate_create_report_configuration first, review normalized_preview/errors with the user, then call this with approved=true. Core validates again, persists the report, and derives ConfigAuditLog changes server-side.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        profile: {
+          type: "string",
+          description: "Optional local ri-agent auth profile name. Uses the active profile when omitted.",
+        },
+        report_type: {
+          type: "string",
+          description: "Report type. Use LIST; analytic/composite writes are deferred.",
+        },
+        parent_folder_id: {
+          type: "string",
+          description: "Target report folder id. Use REPORT for the root folder.",
+        },
+        report_name: {
+          type: "string",
+          description: "User-facing report name.",
+        },
+        report_description: {
+          type: "string",
+          description: "Optional report description.",
+        },
+        publish_to_users: {
+          type: "boolean",
+          description: "Whether other users can see the report.",
+        },
+        list: {
+          type: "object",
+          additionalProperties: true,
+          description: "Full LIST report configuration. Use one master_feature_code and only datasets under the same top-level feature family.",
+        },
+        change_reason: {
+          type: "string",
+          description: "Reason to store with the ConfigAuditLog entry.",
+        },
+        reverses_operation_id: {
+          type: "string",
+          description: "Optional ConfigAuditLog operation id that this save is intentionally backing out.",
+        },
+        correlation_id: {
+          type: "string",
+          description: "Optional caller correlation id.",
+        },
+        source_reference: {
+          type: "string",
+          description: "Optional caller source reference.",
+        },
+        approved: {
+          type: "boolean",
+          description: "Must be true only after the user explicitly approves creating this report.",
+        },
+        confirm_save: {
+          type: "boolean",
+          description: "Alias for approved=true after explicit user approval.",
+        },
+      },
+      required: ["report_name", "list", "approved"],
+    },
+  },
+  {
+    name: "update_report_configuration",
+    title: "Update Realinsight Report Configuration",
+    cli: "ri-agent update-report-configuration REPORT_ID --request-json JSON --approved",
+    route: "POST /agent/reports/configurations/{report_id}",
+    scope: REPORT_WRITE_SCOPE,
+    readOnlyHint: false,
+    idempotentHint: false,
+    description: "Update a LIST report after explicit user approval. Call get_report_configuration first, pass the latest expected_conflict_token, run validate_update_report_configuration, then call this with approved=true. Core derives ConfigAuditLog changes server-side.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        profile: {
+          type: "string",
+          description: "Optional local ri-agent auth profile name. Uses the active profile when omitted.",
+        },
+        report_id: {
+          type: "string",
+          description: "Report ObjectId from get_report_configuration.",
+        },
+        report_type: {
+          type: "string",
+          description: "Report type. Use LIST; analytic/composite writes are deferred.",
+        },
+        parent_folder_id: {
+          type: "string",
+          description: "Target report folder id. Use REPORT for the root folder.",
+        },
+        report_name: {
+          type: "string",
+          description: "User-facing report name.",
+        },
+        report_description: {
+          type: "string",
+          description: "Optional report description.",
+        },
+        publish_to_users: {
+          type: "boolean",
+          description: "Whether other users can see the report.",
+        },
+        list: {
+          type: "object",
+          additionalProperties: true,
+          description: "Full normalized LIST report configuration to save. Every data_set.feature_code must belong to the same top-level feature family as list.master_feature_code.",
+        },
+        expected_conflict_token: {
+          type: "string",
+          description: "Latest conflict_token from get_report_configuration. Required for updates.",
+        },
+        change_reason: {
+          type: "string",
+          description: "Reason to store with the ConfigAuditLog entry.",
+        },
+        reverses_operation_id: {
+          type: "string",
+          description: "Optional ConfigAuditLog operation id that this save is intentionally backing out.",
+        },
+        correlation_id: {
+          type: "string",
+          description: "Optional caller correlation id.",
+        },
+        source_reference: {
+          type: "string",
+          description: "Optional caller source reference.",
+        },
+        approved: {
+          type: "boolean",
+          description: "Must be true only after the user explicitly approves updating this report.",
+        },
+        confirm_update: {
+          type: "boolean",
+          description: "Alias for approved=true after explicit user approval.",
+        },
+        confirm_save: {
+          type: "boolean",
+          description: "Alias for approved=true after explicit user approval.",
+        },
+      },
+      required: ["report_id", "report_name", "list", "expected_conflict_token", "approved"],
+    },
+  },
+  {
+    name: "delete_report_configuration",
+    title: "Delete Realinsight Report Configuration",
+    cli: "ri-agent delete-report-configuration REPORT_ID --expected-conflict-token TOKEN --approved",
+    route: "DELETE /agent/reports/configurations/{report_id}",
+    scope: REPORT_WRITE_SCOPE,
+    readOnlyHint: false,
+    destructiveHint: true,
+    idempotentHint: false,
+    description: "Soft-delete a report after explicit user approval. Call get_report_configuration and validate_delete_report_configuration first. Core validates the latest conflict token, deactivates affected resources as needed, and derives ConfigAuditLog changes server-side.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        profile: {
+          type: "string",
+          description: "Optional local ri-agent auth profile name. Uses the active profile when omitted.",
+        },
+        report_id: {
+          type: "string",
+          description: "Report ObjectId from get_report_configuration.",
+        },
+        expected_conflict_token: {
+          type: "string",
+          description: "Latest conflict_token from get_report_configuration.",
+        },
+        change_reason: {
+          type: "string",
+          description: "Reason to store with the ConfigAuditLog entry.",
+        },
+        reverses_operation_id: {
+          type: "string",
+          description: "Optional ConfigAuditLog operation id that this delete is intentionally backing out.",
+        },
+        correlation_id: {
+          type: "string",
+          description: "Optional caller correlation id.",
+        },
+        source_reference: {
+          type: "string",
+          description: "Optional caller source reference.",
+        },
+        approved: {
+          type: "boolean",
+          description: "Must be true only after the user explicitly approves deleting this report.",
+        },
+        confirm_delete: {
+          type: "boolean",
+          description: "Alias for approved=true after explicit user approval.",
+        },
+      },
+      required: ["report_id", "expected_conflict_token", "approved"],
     },
   },
   {

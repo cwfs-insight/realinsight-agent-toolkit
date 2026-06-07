@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "environment": "prod",
   "base_url": "https://www.realinsight.cloud/api/v1",
-  "generated_at_utc": "2026-06-03T00:55:33.154Z",
+  "generated_at_utc": "2026-06-06T20:43:09.941Z",
   "sources": {
     "package": "agent-toolkit-runtime",
     "plugin": "realinsight-connector",
@@ -65,14 +65,14 @@
       "purpose": "Agent-readable Realinsight documentation corpora packaged from source documentation repositories."
     }
   ],
-  "source_commit": "ca8c2312b18738a2d94d859517c49f79a8063958",
+  "source_commit": "8e57a4d255af83f7a3d3bcf1c0839df4931eae15",
   "managed_root_checksums": {
-    "packages/agent-toolkit/src": "5fe907d3dca3b1cdf59342be8ee8dce79a3556a8299658c5b5186ba035330f37",
-    "skills": "01e7196b9d00fd0110d075833fca80f0024b085465d9b7f292d2a82cd4f71191",
-    "plugins/codex/realinsight-connector/skills": "01e7196b9d00fd0110d075833fca80f0024b085465d9b7f292d2a82cd4f71191",
-    "plugins/claude/realinsight-connector/skills": "01e7196b9d00fd0110d075833fca80f0024b085465d9b7f292d2a82cd4f71191",
-    "extensions/claude-desktop/realinsight-connector/src": "5fe907d3dca3b1cdf59342be8ee8dce79a3556a8299658c5b5186ba035330f37",
-    "extensions/claude-desktop/realinsight-connector/skills": "01e7196b9d00fd0110d075833fca80f0024b085465d9b7f292d2a82cd4f71191"
+    "packages/agent-toolkit/src": "ea420fc9741df370b120278bcc77ea2a384f2372492300f57be50668e037c5b2",
+    "skills": "1ea39e510dd3f0222b9c8bab503dfe7d264a6890e070756690f5629e2d2b7c2a",
+    "plugins/codex/realinsight-connector/skills": "1ea39e510dd3f0222b9c8bab503dfe7d264a6890e070756690f5629e2d2b7c2a",
+    "plugins/claude/realinsight-connector/skills": "1ea39e510dd3f0222b9c8bab503dfe7d264a6890e070756690f5629e2d2b7c2a",
+    "extensions/claude-desktop/realinsight-connector/src": "ea420fc9741df370b120278bcc77ea2a384f2372492300f57be50668e037c5b2",
+    "extensions/claude-desktop/realinsight-connector/skills": "1ea39e510dd3f0222b9c8bab503dfe7d264a6890e070756690f5629e2d2b7c2a"
   },
   "source_ids": {
     "packages/agent-toolkit/src": "agent-toolkit-runtime",
