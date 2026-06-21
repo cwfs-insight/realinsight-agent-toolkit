@@ -3,31 +3,44 @@ import {
   agent_auth_status,
   agent_connect_realinsight,
   agent_disconnect_realinsight,
+  agent_list_profiles,
   agent_request_realinsight_scopes,
+  agent_switch_profile,
 } from "./auth-tools.mjs";
 import { agent_get_children, agent_get_latest_children } from "./child-tools.mjs";
 import { agent_search_entities } from "./entity-tools.mjs";
 import { JsonRpcError } from "./json-rpc.mjs";
+import {
+  agent_create_model_form,
+  agent_download_model_form_template,
+  agent_get_model_form,
+  agent_search_model_forms,
+  agent_stage_model_form_template_file,
+  agent_upload_model_form_template,
+  agent_update_model_form,
+  agent_validate_create_model_form,
+  agent_validate_update_model_form,
+} from "./model-form-tools.mjs";
 import { agent_get_pipeline, agent_queue_pipeline } from "./pipeline-tools.mjs";
 import { agent_get_records, agent_set_record } from "./record-tools.mjs";
 import {
-  agent_create_report_configuration,
-  agent_delete_report_configuration,
+  agent_create_report,
+  agent_delete_report,
   agent_extract_analytic_entities,
   agent_extract_workbench_entities,
   agent_get_analytic_data,
   agent_get_analytic_csv,
   agent_get_dashboard_page,
-  agent_get_report_configuration,
+  agent_get_report,
   agent_get_workbench_data,
   agent_get_workbench_csv,
   agent_list_dashboard_pages,
   agent_list_workbenches,
-  agent_search_report_configurations,
-  agent_update_report_configuration,
-  agent_validate_create_report_configuration,
-  agent_validate_delete_report_configuration,
-  agent_validate_update_report_configuration,
+  agent_search_reports,
+  agent_update_report,
+  agent_validate_create_report,
+  agent_validate_delete_report,
+  agent_validate_update_report,
 } from "./report-tools.mjs";
 import { agent_get_fields, agent_search_features, agent_search_fields } from "./schema-tools.mjs";
 import { agent_get_entity_structure } from "./structure-tools.mjs";
@@ -41,8 +54,14 @@ export async function call_agent_tool(name, args) {
     case "auth_status":
       payload = await agent_auth_status(args);
       break;
+    case "list_profiles":
+      payload = await agent_list_profiles(args);
+      break;
     case "connect_realinsight":
       payload = await agent_connect_realinsight(args);
+      break;
+    case "switch_profile":
+      payload = await agent_switch_profile(args);
       break;
     case "disconnect_realinsight":
       payload = await agent_disconnect_realinsight(args);
@@ -104,29 +123,56 @@ export async function call_agent_tool(name, args) {
     case "extract_workbench_entities":
       payload = await agent_extract_workbench_entities(args);
       break;
-    case "search_report_configurations":
-      payload = await agent_search_report_configurations(args);
+    case "search_reports":
+      payload = await agent_search_reports(args);
       break;
-    case "get_report_configuration":
-      payload = await agent_get_report_configuration(args);
+    case "get_report":
+      payload = await agent_get_report(args);
       break;
-    case "validate_create_report_configuration":
-      payload = await agent_validate_create_report_configuration(args);
+    case "search_model_forms":
+      payload = await agent_search_model_forms(args);
       break;
-    case "validate_update_report_configuration":
-      payload = await agent_validate_update_report_configuration(args);
+    case "get_model_form":
+      payload = await agent_get_model_form(args);
       break;
-    case "validate_delete_report_configuration":
-      payload = await agent_validate_delete_report_configuration(args);
+    case "validate_create_model_form":
+      payload = await agent_validate_create_model_form(args);
       break;
-    case "create_report_configuration":
-      payload = await agent_create_report_configuration(args);
+    case "create_model_form":
+      payload = await agent_create_model_form(args);
       break;
-    case "update_report_configuration":
-      payload = await agent_update_report_configuration(args);
+    case "validate_update_model_form":
+      payload = await agent_validate_update_model_form(args);
       break;
-    case "delete_report_configuration":
-      payload = await agent_delete_report_configuration(args);
+    case "update_model_form":
+      payload = await agent_update_model_form(args);
+      break;
+    case "download_model_form_template":
+      payload = await agent_download_model_form_template(args);
+      break;
+    case "stage_model_form_template_file":
+      payload = await agent_stage_model_form_template_file(args);
+      break;
+    case "upload_model_form_template":
+      payload = await agent_upload_model_form_template(args);
+      break;
+    case "validate_create_report":
+      payload = await agent_validate_create_report(args);
+      break;
+    case "validate_update_report":
+      payload = await agent_validate_update_report(args);
+      break;
+    case "validate_delete_report":
+      payload = await agent_validate_delete_report(args);
+      break;
+    case "create_report":
+      payload = await agent_create_report(args);
+      break;
+    case "update_report":
+      payload = await agent_update_report(args);
+      break;
+    case "delete_report":
+      payload = await agent_delete_report(args);
       break;
     case "get_pipeline":
       payload = await agent_get_pipeline(args);

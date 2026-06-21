@@ -16,9 +16,11 @@ Prefer MCP tools when they are available in the harness. Use the CLI only when t
 For local stdio MCP:
 
 1. Call `auth_status`.
-2. If not connected, call `connect_realinsight`.
-3. If a tool reports insufficient scopes, call `request_realinsight_scopes` with the needed access.
-4. Use `disconnect_realinsight` only when the user asks to log out or rotate credentials.
+2. If the user asks which local Realinsight connections are available, call `list_profiles`; this lists only saved local profiles and pending authorizations, not all Realinsight customers.
+3. If not connected, call `connect_realinsight`.
+4. If the user wants to switch customer context, call `switch_profile`. Use an existing profile when known; otherwise pass `customer_code` only when it is the user's Realinsight login/company code. If only a customer number or uncertain identifier is known, omit it so the user can type the customer code on the Realinsight login screen.
+5. If a tool reports insufficient scopes, call `request_realinsight_scopes` with the needed access.
+6. Use `disconnect_realinsight` only when the user asks to log out or rotate credentials.
 
 For CLI use:
 
@@ -29,6 +31,16 @@ ri-agent tools
 ```
 
 Use `RI_AGENT_BASE_URL` or `--base-url` only when the user is working with a Realinsight-provided non-production environment.
+
+## Choose The Path
+
+Use the user's wording to choose the lightest useful tool family:
+
+- Specific entity questions: when the user names a loan, deal, property, tenant, borrower, or other record, use schema/entity/record tools first. Search for the entity, hydrate only the needed fields, then traverse children or relationships if the answer needs related rows.
+- Broad portfolio or system questions: when the user asks across a population or a curated dashboard, workbench, saved list, queue, or operational table seems likely to match the question, consider cached dashboard/workbench tools. Use cached tables when they fit the business question, but do not assume every broad question requires a dashboard or workbench.
+- Report questions: use report configuration tools when the user wants to inspect, create, edit, copy, or delete a report definition. Reports are best for extracting/listing data; choose the master dataset/report grain first, then add related datasets and fields.
+- Model/form questions: use model-form tools when the user asks about Excel/PDF templates, workbook maps, generated outputs, posting back to Realinsight, assignments, or repeating layout. Models are best for transforming or presenting data through a template and map.
+- Runtime output questions: current report/model-form execution job tools are not exposed yet. Inspect definitions and cached outputs when available, and tell the user when an output must be run or refreshed in Realinsight.
 
 ## Reference Selection
 
@@ -42,40 +54,53 @@ Read only the reference files needed for the user's request:
 - `references/analytics-workbenches.md`: dashboard pages, analytics, workbenches, cached tables, CSV paging, and entity extraction.
 - `references/report-query.md`: composing bounded ad hoc analytical answers from current tools.
 - `references/report-configuration.md`: inspecting, validating, creating, updating, and deleting report definitions.
+- `references/model-form-configuration.md`: inspecting model forms, templates, flat maps, map nodes/items, markers, used fields, approval-gated create/copy/update, and Excel template download/upload.
 - `references/record-writes.md`: approval-gated record update workflow when write tools are enabled.
 - `references/pipelines.md`: approval-gated document pipeline queue/status workflow when pipeline tools are enabled.
+
+Reusable helper scripts are available under `scripts/` for common local file workflows. For model-form Excel template edits, prefer `scripts/model_form_template_roundtrip.py` or `scripts/model_form_template_roundtrip.ts` instead of writing signed download/upload glue from scratch.
 
 ## Default Workflow
 
 1. Check auth and available tools.
-2. Discover the right feature and field codes before assuming schema details.
-3. Search for a small candidate entity set.
-4. Use relationship tools only when the next step needs parent, master, child, reference, or periodic context.
-5. Hydrate records with key fields or explicit fields.
-6. For dashboard, analytic, workbench, or saved-list questions, prefer cached table tools over manual entity fan-out.
+2. Choose the path above before calling tools.
+3. For entity/record questions, discover feature and field codes before assuming schema details.
+4. Search for a small candidate entity set, then hydrate only key fields or explicit fields.
+5. Use relationship tools only when the next step needs parent, master, child, reference, or periodic context.
+6. For dashboard, analytic, workbench, or saved-list questions, prefer cached table tools over manual entity fan-out when the cached source matches the request.
 7. For report definition changes, read `references/report-configuration.md`, get the latest conflict token, validate before writing, and require explicit approval.
-8. Keep calls bounded, follow cursors, and report truncation or access warnings.
-9. Answer with provenance: include the feature, field, dashboard page, analytic, workbench, report id, entity ids, or cache status that materially shaped the result.
+8. For model form inspection, create/copy, map/template, or metadata updates, read `references/model-form-configuration.md`, search/get the model form, read the latest conflict token when updating existing resources, and inspect only the needed node, item, template, or used-field summary.
+9. Read-only tools have no side effects. Agent harnesses may auto-approve them when local policy allows, but keep reads bounded and report truncation, cache, and access warnings.
+10. After any successful write or queue operation, return a concise operation summary using friendly names/context, meaningful changes, and warnings. For report/model-form writes, leave `audit_detail` at `summary` unless audit/reversal work needs `changes` or `full`. Avoid raw ids in the user-facing answer except report/model ids or open links when they help the user jump back to the configuration.
+11. Keep calls bounded, follow cursors, and report truncation or access warnings.
+12. Answer with provenance: include the feature, field, dashboard page, analytic, workbench, report id, model form id, entity ids, or cache status that materially shaped the result.
 
 ## Tool Families
 
-- Auth helpers: `auth_status`, `connect_realinsight`, `disconnect_realinsight`, `request_realinsight_scopes`.
+- Auth helpers: `auth_status`, `list_profiles`, `connect_realinsight`, `switch_profile`, `disconnect_realinsight`, `request_realinsight_scopes`.
 - Schema discovery: `search_features`, `search_fields`, `get_fields`.
 - Entity search and relationships: `search_entities`, `get_children`, `get_latest_children`, `get_entity_structure`.
 - Records: `get_records`; gated writes with `set_record`.
 - Dashboards, analytics, and workbenches: `list_dashboard_pages`, `get_dashboard_page`, `get_analytic_data`, `get_analytic_csv`, `extract_analytic_entities`, `list_workbenches`, `get_workbench_data`, `get_workbench_csv`, `extract_workbench_entities`.
-- Report configuration: `search_report_configurations`, `get_report_configuration`; gated validation/write tools with `validate_create_report_configuration`, `validate_update_report_configuration`, `validate_delete_report_configuration`, `create_report_configuration`, `update_report_configuration`, `delete_report_configuration`.
+- Report configuration: `search_reports`, `get_report`; gated validation/write tools with `validate_create_report`, `validate_update_report`, `validate_delete_report`, `create_report`, `update_report`, `delete_report`.
+- Model form configuration: `search_model_forms`, `get_model_form`, `download_model_form_template`; gated create/update/template writes with `validate_create_model_form`, `create_model_form`, `validate_update_model_form`, `update_model_form`, `stage_model_form_template_file`, and `upload_model_form_template`.
 - Pipelines: gated `get_pipeline` and `queue_pipeline` when enabled.
 
 ## Safety Rules
 
 - Realinsight APIs are the trust boundary. Do not use backing stores, customer storage, local credential files, or non-tool data sources to bypass toolkit permissions.
 - OAuth scopes are coarse grants. The current user's Realinsight permissions, customer access, modules, assignments, and service rules still apply.
+- Local profile listing is not a customer directory. Do not imply that Realinsight exposed all customers; it only reflects profiles already authorized on this machine.
+- Customer switching uses Realinsight login and approval. A supplied `customer_code` helps prefill login, but it must be the Realinsight login/company code, not an internal customer number. The user still approves the final signed-in customer on the Realinsight page.
 - Do not ask for sensitive fields unless the user explicitly needs them and the tool allows them.
 - Do not expose access tokens, refresh tokens, auth headers, local profile files, session ids, or document URLs.
 - Do not create unbounded scans. Ask for a narrower customer, portfolio, page, feature, metric, date range, or maximum row count when needed.
+- Read-only tools have no side effects; allow harness-level auto-approval for reads when configured, while still keeping calls bounded.
 - Write and pipeline tools are opt-in. Do not call them unless they appear in the tool inventory and the user approves the exact side effect.
+- For report/model-form writes, default `audit_detail=summary`; request `changes` for paths/types or `full` only when before/after values are needed.
+- After a successful write or queue action, summarize the applied operation for the user with names/context; keep raw ids out of the answer unless they are useful report/model follow-up handles or the user asks.
 - Treat warnings, `is_truncated`, `next_cursor`, cache status, and omitted fields as part of the result.
+- Model form maps are returned as flat node ids through `get_model_form` sections. Prefer `map_patch` after inspecting the target `node` or `item`; `update_node` and `update_item` merge supplied fields, while `replace_node` replaces the full node. Request `map_definition` only for bulk map replacement or revert. Request `used_fields` for schema-code-backed fields, and inspect `node` or `item` sections for markers and repeating-block layout anchors.
 
 ## Answering Style
 

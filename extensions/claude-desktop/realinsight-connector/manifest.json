@@ -54,8 +54,16 @@
       "description": "Check the local Realinsight auth profile and complete any pending browser/device authorization after the user approves it."
     },
     {
+      "name": "list_profiles",
+      "description": "List local ri-agent auth profiles and pending browser/device authorizations already stored on this machine. This does not query or expose a Realinsight customer directory."
+    },
+    {
       "name": "connect_realinsight",
       "description": "Start a browser-based Realinsight login for the local MCP server without requiring the user to use a terminal. By default this waits up to five minutes for browser approval and stores the profile when approval completes."
+    },
+    {
+      "name": "switch_profile",
+      "description": "Switch the active local ri-agent profile, or start a forced browser login for a different customer. Pass customer_code only when it is the user's Realinsight login/company code; omit it when the user wants to type the customer code on the login screen or only a customer number is known."
     },
     {
       "name": "disconnect_realinsight",
@@ -67,47 +75,51 @@
     },
     {
       "name": "search_features",
-      "description": "Find Realinsight feature/entity types that may satisfy a user request."
+      "description": "Find Realinsight feature/entity types from business language. Use this when you need the system feature code for a concept before searching records, child datasets, report fields, or model-form root datasets."
     },
     {
       "name": "search_fields",
-      "description": "Find runtime fields across all features or within one feature."
+      "description": "Find runtime fields by label or business wording, across all features or within one feature. Use this before record hydration, report columns/filters/sorts, update planning, or interpreting model-map field references."
     },
     {
       "name": "get_fields",
-      "description": "List runtime fields for a feature with pagination."
+      "description": "List runtime fields for one feature with pagination. Use this when you already know the feature_code and need exact field names, schema codes, display labels, data types, or postable/read-only status."
     },
     {
       "name": "search_entities",
-      "description": "Find Realinsight entities using generic top-toolbar style search, or by searching one or more explicit CustomerDataSearch fields."
+      "description": "Find concrete Realinsight entity ids using generic top-toolbar style search or explicit searchable fields. Prefer this for named loan/deal/property/tenant/borrower questions before using get_records, relationship traversal, or child tools."
     },
     {
       "name": "get_children",
-      "description": "Fetch child entities for one or more parent entity ids, with optional filters, sorts, global limit, or per-parent limit."
+      "description": "Fetch child entities for known parent ids with optional filters, sorts, global limit, or per-parent limit. Use after search_entities/get_entity_structure when the user asks for related rows such as payments, rent roll, collateral, owners, inspections, statements, or comments."
     },
     {
       "name": "get_latest_children",
-      "description": "Fetch one latest child entity per parent id using an explicit child date/order field. Use this for latest loan servicing, inspection, operating statement, payment, or rent-roll child records before hydrating the returned child ids."
+      "description": "Fetch one latest/top child entity per parent id using an explicit child date/order field. Use this for latest loan servicing, inspection, operating statement, payment, or rent-roll child records before hydrating the returned child ids."
     },
     {
       "name": "get_records",
       "description": "Hydrate one or more Realinsight entity ids with key fields or explicitly requested record fields. Values may include display_value plus expansion hints for dictionary/reference/user/document fields."
     },
     {
+      "name": "set_record",
+      "description": "Set updateable fields on one concrete Realinsight entity record after explicit user approval. Search and read the record first unless the user has already supplied the exact entity id, fields, and new values. After success, summarize the record using its friendly name/context, applied fields, skipped/warning fields, and provenance; avoid showing raw ids unless the user needs them."
+    },
+    {
       "name": "get_entity_structure",
-      "description": "Traverse parent, master, child, reference, referenced-by, or periodic relationships for one or more entities and return a compact graph."
+      "description": "Traverse parent, master, child, reference, referenced-by, or periodic relationships for one or more entities and return a compact graph. Use this to understand what datasets are reachable for a specific record, report grain, or model-form map plan."
     },
     {
       "name": "list_dashboard_pages",
-      "description": "List dashboard pages available to the authenticated Realinsight user."
+      "description": "List dashboard pages available to the authenticated Realinsight user. Use for dashboards, portfolio pages, curated analytics, broad page-level summaries, or fallback discovery when a curated analytic is likely useful; for a named entity, usually search_entities/get_records first."
     },
     {
       "name": "get_dashboard_page",
-      "description": "Describe a dashboard page, its analytics, global filters, cache status, and backing reports."
+      "description": "Describe one dashboard page, its analytics, global filters, cache status, and backing reports. Use after list_dashboard_pages to choose the right analytic id; do not use this as a substitute for direct entity lookup when the user names a specific record."
     },
     {
       "name": "get_analytic_data",
-      "description": "Read cached analytic data, analytic JSON, and base report column metadata for the current user. Use get_analytic_csv for large local-table analysis and extract_analytic_entities for compact entity handoff."
+      "description": "Read cached analytic data, analytic JSON, and base report column metadata for the current user. Use for selected dashboard analytics or broad cached summaries; use get_analytic_csv for large local-table analysis and extract_analytic_entities for compact entity handoff."
     },
     {
       "name": "get_analytic_csv",
@@ -119,11 +131,11 @@
     },
     {
       "name": "list_workbenches",
-      "description": "List saved workbench lists available to the authenticated user, optionally filtered by workbench code."
+      "description": "List saved workbench lists available to the authenticated user, optionally filtered by workbench code. Use for module workbenches, queues, saved lists, operational list reports, or fallback discovery when a cached operational list is likely useful."
     },
     {
       "name": "get_workbench_data",
-      "description": "Read cached workbench table data and backing report column metadata for the current user. Use get_workbench_csv for large local-table analysis and extract_workbench_entities for compact entity handoff."
+      "description": "Read cached workbench/list-report table data and backing report column metadata for the current user. Use for selected saved lists or broad operational tables; use get_workbench_csv for large local-table analysis and extract_workbench_entities for compact entity handoff."
     },
     {
       "name": "get_workbench_csv",
@@ -134,12 +146,72 @@
       "description": "Extract compact entity refs from cached workbench/list-report rows so the agent can hydrate or traverse the underlying population with get_records, get_children, or get_latest_children."
     },
     {
-      "name": "search_report_configurations",
-      "description": "Search compact report configuration summaries visible to the authenticated user. Use this before editing, copying, or deleting a report so the agent can choose the correct report_id and then call get_report_configuration for the latest conflict token."
+      "name": "search_reports",
+      "description": "Search compact report-definition summaries visible to the authenticated user. Use this for report catalog/design questions, or before editing, copying, or deleting a report so the agent can choose the correct report_id and then call get_report for detail and the latest conflict token."
     },
     {
-      "name": "get_report_configuration",
-      "description": "Read one compact report configuration, including editable LIST configuration and the latest conflict_token. Always call this immediately before validate_update_report_configuration, update_report_configuration, validate_delete_report_configuration, or delete_report_configuration."
+      "name": "get_report",
+      "description": "Read one compact report definition, including editable LIST setup and the latest conflict_token. This inspects configuration, not report execution output. Always call it immediately before validate_update_report, update_report, validate_delete_report, or delete_report."
+    },
+    {
+      "name": "search_model_forms",
+      "description": "Search compact model/form summaries visible to the authenticated user. Use this for Excel/PDF template, model map, generated output, posting, or model assignment questions so the agent can choose the correct model_form_id and then call get_model_form."
+    },
+    {
+      "name": "get_model_form",
+      "description": "Read one compact model/form overview and optionally request focused sections such as template, map_tree, map_definition, node, item, or used_fields. Start with the overview for root dataset, template, map counts, assignment, and conflict token, then request only the map/template detail needed. Use map_definition only before create/update map planning because it can be larger."
+    },
+    {
+      "name": "validate_create_model_form",
+      "description": "Validate a model/form create or derivative copy without writing. Use source_model_form_id plus the source expected_conflict_token from get_model_form when copying an existing model form. For scratch creates, provide root_feature_code and optional map derived from get_model_form map_definition shape."
+    },
+    {
+      "name": "create_model_form",
+      "description": "Create a model/form or derivative copy after explicit user approval. Prefer source_model_form_id when extending an existing model, then download/upload the template and update the map only if needed. Core validates Configuration/Admin access and derives ConfigAuditLog changes server-side. Default audit_detail is summary; request changes or full only when audit/reversal work needs it. After success, summarize the new model form name, source/copy context, root feature, major map/template details, warnings, and a model_form_id or link only when useful."
+    },
+    {
+      "name": "validate_update_model_form",
+      "description": "Validate model/form metadata plus either focused map_patch edits or full flat map replacement without writing. Prefer map_patch for small node/item edits after reading the target node or item; use map only for bulk replacement/revert after requesting map_definition. Root dataset changes on existing model forms are blocked; create a derivative model instead."
+    },
+    {
+      "name": "update_model_form",
+      "description": "Update model/form metadata plus either focused map_patch edits or full flat map replacement after explicit user approval. Prefer map_patch for small node/item edits after reading the target node or item; update_node and update_item merge only supplied fields, while replace_node intentionally replaces a whole node. Use map only for bulk replacement/revert after requesting map_definition. Core validates folder access, checks Configuration/Admin module access, and derives ConfigAuditLog changes server-side. Default audit_detail is summary; request changes or full only when audit/reversal work needs it. After success, summarize changed metadata/map sections, model/form name, warnings, and an open link or model_form_id only when useful for the user to jump back to it."
+    },
+    {
+      "name": "download_model_form_template",
+      "description": "Download the current Excel template metadata and a short-lived signed download_url for a model form. In local stdio MCP/CLI usage, pass output_path so the workbook is fetched outside the tool result and written to a local file. In hosted MCP, use download_url only when the harness can fetch files outside model context."
+    },
+    {
+      "name": "stage_model_form_template_file",
+      "description": "Create a signed upload session for an Excel template after explicit user approval. Local CLI/stdio MCP callers can pass file_path and the toolkit uploads it to upload_url outside chat context. Hosted clients should call this with file_name/content_type, upload the file as multipart form field `file` to the returned upload_url, then pass staged_file_id to upload_model_form_template. The staged file is bound to this model form and user."
+    },
+    {
+      "name": "upload_model_form_template",
+      "description": "Finalize a replacement Excel template after explicit user approval. Prefer file_path in local stdio MCP/CLI usage, which creates a signed upload session, uploads the file outside chat context, and then sends staged_file_id. Hosted clients should pass staged_file_id after uploading to the signed upload_url from stage_model_form_template_file. Call get_model_form first for expected_conflict_token. Core validates Excel type, stores a new repository file, consumes the staged file, updates template metadata, and derives ConfigAuditLog changes server-side. Default audit_detail is summary; request changes or full only when audit/reversal work needs it. After success, summarize the model form name, file name, template change, warnings, and model_form_id only when useful."
+    },
+    {
+      "name": "validate_create_report",
+      "description": "Validate and normalize a LIST report create request without writing. Choose the report grain with one master_feature_code first, then use search_features/get_entity_structure/get_fields to add only related datasets and valid fields under the same top-level feature family."
+    },
+    {
+      "name": "validate_update_report",
+      "description": "Validate and normalize a LIST report update request without writing. Call get_report first and pass its latest conflict_token as expected_conflict_token. Use get_fields for dataset feature codes before adding or changing columns, filters, sorts, or prompts."
+    },
+    {
+      "name": "validate_delete_report",
+      "description": "Validate LIST report delete prerequisites without writing. Call get_report first and pass its latest conflict_token. If active schedules, related analytics, dashboard references, or workbench lists would be changed, validation blocks the delete and the user must use the Realinsight app for the cascading cleanup."
+    },
+    {
+      "name": "create_report",
+      "description": "Create a LIST report definition after explicit user approval. Run validate_create_report first, review normalized_preview/errors with the user, then call this with approved=true. Core validates again, persists the definition, and derives ConfigAuditLog changes server-side. Default audit_detail is summary; request changes or full only when audit/reversal work needs it. After success, summarize the report name, master feature, meaningful saved sections, warnings, and an open link or report_id only when useful for the user to jump back to it."
+    },
+    {
+      "name": "update_report",
+      "description": "Update a LIST report definition after explicit user approval. Call get_report first, pass the latest expected_conflict_token, run validate_update_report, then call this with approved=true. Core derives ConfigAuditLog changes server-side. Default audit_detail is summary; request changes or full only when audit/reversal work needs it. After success, summarize the report name, meaningful changed sections, warnings, and an open link or report_id only when useful for the user to jump back to it."
+    },
+    {
+      "name": "delete_report",
+      "description": "Soft-delete a LIST report definition after explicit user approval only when validate_delete_report reports no active downstream resources. Core validates the latest conflict token and derives ConfigAuditLog changes server-side. Default audit_detail is summary; request changes or full only when audit/reversal work needs it. After success, summarize the deleted report name and warnings without raw ids unless needed for follow-up."
     }
   ],
   "tools_generated": true,

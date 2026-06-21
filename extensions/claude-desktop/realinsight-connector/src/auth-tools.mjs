@@ -3,6 +3,7 @@ import os from "node:os";
 import {
   build_profile,
   create_device_authorization,
+  enrich_profile_with_current_user,
   exchange_device_authorization,
   load_fresh_profile_by_name,
   normalize_base_url,
@@ -22,7 +23,6 @@ import {
 
 const DEFAULT_AUTH_POLL_TIMEOUT_SECONDS = 300;
 const DEFAULT_AUTH_POLL_INTERVAL_SECONDS = 5;
-const DEFAULT_PROFILE_NAME = process.env.RI_AGENT_PROFILE || "default";
 
 export async function agent_auth_status(input = {}) {
   const profile_name = optional_string(input, "profile");
@@ -56,8 +56,8 @@ export async function agent_auth_status(input = {}) {
       profile: resolved_profile_name,
       base_url: refreshed_profile.base_url,
       client_id: refreshed_profile.client_id,
-      customer_number: current_user.customer_number,
-      customer_id: current_user.customer_id,
+      customer_name: current_user.customer_name,
+      customer_code: current_user.customer_code,
       user_id: current_user.user_id,
       credential_type: current_user.credential_type,
       scopes: current_user.scopes || refreshed_profile.scope || [],
@@ -71,13 +71,46 @@ export async function agent_auth_status(input = {}) {
       profile: resolved_profile_name,
       base_url: profile.base_url,
       client_id: profile.client_id,
-      customer_number: profile.customer_number,
+      customer_name: profile.customer_name || "",
+      customer_code: profile.customer_code || "",
       user_id: profile.user_id,
       config_path: CONFIG_PATH,
       error: format_error_message(error),
       next_action: "Call connect_realinsight or request_realinsight_scopes to reconnect through browser login.",
     };
   }
+}
+
+export async function agent_list_profiles(input = {}) {
+  const include_pending = optional_boolean(input, "include_pending") ?? true;
+  const config = await read_config();
+  const profiles = Object.entries(config.profiles || {}).map(([name, profile]) => ({
+    name,
+    active: config.active_profile === name,
+    status: "connected",
+    base_url: profile.base_url,
+    client_id: profile.client_id,
+    customer_name: profile.customer_name || "",
+    customer_code: profile.customer_code || "",
+    scopes: profile.scope || [],
+    expires_at_utc: profile.expires_at_utc,
+  }));
+  const pending_authorizations = include_pending
+    ? Object.entries(config.pending_authorizations || {}).map(([name, pending]) => ({
+      name,
+      active: config.active_profile === name,
+      status: "authorization_pending",
+      ...redact_pending_authorization(pending),
+    }))
+    : [];
+
+  return {
+    status: "ok",
+    active_profile: config.active_profile || "",
+    profiles,
+    pending_authorizations,
+    config_path: CONFIG_PATH,
+  };
 }
 
 export async function agent_connect_realinsight(input = {}) {
@@ -88,6 +121,49 @@ export async function agent_request_realinsight_scopes(input = {}) {
   const requested_scope = scope_from_input(input) || DEFAULT_SCOPE;
 
   return await start_pending_authorization(input, requested_scope, "request_realinsight_scopes");
+}
+
+export async function agent_switch_profile(input = {}) {
+  const config = await read_config();
+  const requested_profile_name = optional_string(input, "profile");
+  const customer_code = normalize_customer_code(optional_string(input, "customer_code"));
+  const reauthorize = optional_boolean(input, "reauthorize");
+  const existing_profile = requested_profile_name
+    ? config.profiles?.[requested_profile_name]
+    : null;
+  const should_start_login = reauthorize ?? Boolean(customer_code || !existing_profile);
+
+  if (!should_start_login && existing_profile) {
+    config.active_profile = requested_profile_name;
+    await write_config(config);
+
+    return {
+      status: "active_profile_switched",
+      profile: requested_profile_name,
+      base_url: existing_profile.base_url,
+      client_id: existing_profile.client_id,
+      customer_name: existing_profile.customer_name || "",
+      customer_code: existing_profile.customer_code || "",
+      scopes: existing_profile.scope || [],
+      expires_at_utc: existing_profile.expires_at_utc,
+      config_path: CONFIG_PATH,
+      next_action: "Use Realinsight tools normally. They will use this profile unless a tool call supplies another profile name.",
+    };
+  }
+
+  const profile_name = resolve_switch_profile_name(requested_profile_name, customer_code);
+  const active_profile = config.profiles?.[config.active_profile];
+  const force_login = optional_boolean(input, "force_login") ?? true;
+
+  return await start_pending_authorization({
+    ...input,
+    profile: profile_name,
+    customer_code,
+    base_url: optional_string(input, "base_url") || active_profile?.base_url,
+    client_id: optional_string(input, "client_id") || active_profile?.client_id,
+    force_login,
+    prompt: optional_string(input, "prompt") || (force_login ? "login" : ""),
+  }, DEFAULT_SCOPE, "switch_profile");
 }
 
 export async function agent_disconnect_realinsight(input = {}) {
@@ -122,7 +198,7 @@ export async function agent_disconnect_realinsight(input = {}) {
 
 async function start_pending_authorization(input, default_scope, tool_name) {
   const config = await read_config();
-  const profile_name = optional_string(input, "profile") || process.env.RI_AGENT_PROFILE || config.active_profile || "default";
+  const profile_name = optional_string(input, "profile") || config.active_profile || "default";
   const existing_profile = config.profiles?.[profile_name];
   const base_url = normalize_base_url(optional_string(input, "base_url")
     || process.env.RI_AGENT_BASE_URL
@@ -134,6 +210,9 @@ async function start_pending_authorization(input, default_scope, tool_name) {
     || DEFAULT_CLIENT_ID;
   const scope = scope_from_input(input) || default_scope;
   const device_label = optional_string(input, "device_label") || `${os.hostname()} (${process.platform})`;
+  const customer_code = normalize_customer_code(optional_string(input, "customer_code"));
+  const force_login = optional_boolean(input, "force_login") ?? false;
+  const prompt = optional_string(input, "prompt") || (force_login ? "login" : "");
   const should_open_browser = optional_boolean(input, "open_browser") ?? true;
   const wait_for_approval = optional_boolean(input, "wait_for_approval") ?? true;
   const timeout_seconds = normalize_positive_integer(
@@ -148,6 +227,9 @@ async function start_pending_authorization(input, default_scope, tool_name) {
     client_id,
     scope,
     device_label,
+    customer_code,
+    prompt,
+    force_login,
   });
 
   const expires_at_utc = new Date(Date.now() + Math.max(1, Number(authorization.expires_in || 600)) * 1000).toISOString();
@@ -164,6 +246,8 @@ async function start_pending_authorization(input, default_scope, tool_name) {
     user_code: authorization.user_code,
     verification_uri: authorization.verification_uri,
     verification_uri_complete: authorization.verification_uri_complete,
+    customer_code,
+    force_login,
     expires_at_utc,
     created_at_utc: new Date().toISOString(),
     source_tool: tool_name,
@@ -182,6 +266,8 @@ async function start_pending_authorization(input, default_scope, tool_name) {
     base_url,
     client_id,
     scope: scope.split(/\s+/).filter(Boolean),
+    customer_code,
+    force_login,
     verification_uri: authorization.verification_uri,
     verification_uri_complete: authorization.verification_uri_complete,
     user_code: authorization.user_code,
@@ -278,7 +364,9 @@ async function try_complete_pending_authorization(config, profile_name) {
       device_code: pending.device_code,
       timeout_ms: 10000,
     });
-    const profile = build_profile(pending.base_url, pending.client_id, token);
+    const profile = await enrich_profile_with_current_user(build_profile(pending.base_url, pending.client_id, token), {
+      timeout_ms: 10000,
+    });
 
     config.version = 1;
     config.active_profile = profile_name;
@@ -293,7 +381,8 @@ async function try_complete_pending_authorization(config, profile_name) {
       profile: profile_name,
       base_url: profile.base_url,
       client_id: profile.client_id,
-      customer_number: profile.customer_number,
+      customer_name: profile.customer_name,
+      customer_code: profile.customer_code,
       user_id: profile.user_id,
       scopes: profile.scope || [],
       expires_at_utc: profile.expires_at_utc,
@@ -333,7 +422,18 @@ async function try_complete_pending_authorization(config, profile_name) {
 }
 
 function resolve_profile_name(config, requested_profile_name) {
-  return requested_profile_name || process.env.RI_AGENT_PROFILE || config.active_profile || Object.keys(config.profiles || {})[0] || DEFAULT_PROFILE_NAME;
+  return requested_profile_name || config.active_profile || Object.keys(config.profiles || {})[0] || "default";
+}
+
+function resolve_switch_profile_name(requested_profile_name, customer_code) {
+  if (requested_profile_name) return requested_profile_name;
+  if (customer_code) return customer_code.replace(/[^a-zA-Z0-9_.-]+/g, "-") || "customer";
+
+  return `customer-switch-${new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z")}`;
+}
+
+function normalize_customer_code(value) {
+  return String(value || "").trim();
 }
 
 function scope_from_input(input) {
@@ -353,6 +453,8 @@ function redact_pending_authorization(pending) {
     base_url: pending.base_url,
     client_id: pending.client_id,
     scope: String(pending.scope || "").split(/\s+/).filter(Boolean),
+    customer_code: pending.customer_code || "",
+    force_login: Boolean(pending.force_login),
     user_code: pending.user_code,
     verification_uri: pending.verification_uri,
     verification_uri_complete: pending.verification_uri_complete,

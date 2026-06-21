@@ -23,6 +23,7 @@ Implemented tools:
 - Use `get_pipeline` for read-only status checks when a pipeline id is known.
 - Queueing is a side effect. Do not call `queue_pipeline` until the user explicitly approves that exact queue action.
 - Pass `approved: true` only after explicit approval.
+- After queueing, summarize the pipeline type, document/property/page context, initial status, and any warnings. Do not show the raw pipeline id unless the user asks for it.
 - `queue_pipeline` requires a `DocumentTracking` id through `doc_id`; direct local file upload is not available yet.
 - `rent_roll_extract`, `financial_extraction`, and `op_stmt_spread` require a known property context through `property_entity_id` or `cre_master_id`.
 - Page-scoped pipelines require `start_page`; use `end_page: 0` to continue through the end of the document.

@@ -14,12 +14,10 @@ import {
   REFRESH_SKEW_MS,
 } from "./tool-definitions.mjs";
 
-const DEFAULT_PROFILE_NAME = process.env.RI_AGENT_PROFILE || "default";
-
 export async function login(options) {
   const base_url = normalize_base_url(option_value(options, "base-url", process.env.RI_AGENT_BASE_URL || DEFAULT_BASE_URL));
   const client_id = option_value(options, "client-id", process.env.RI_AGENT_CLIENT_ID || DEFAULT_CLIENT_ID);
-  const profile_name = option_value(options, "profile", DEFAULT_PROFILE_NAME);
+  const profile_name = option_value(options, "profile", "default");
   const scope = option_value(options, "scope", DEFAULT_SCOPE);
   const device_label = option_value(options, "device-label", `${os.hostname()} (${process.platform})`);
   const should_open_browser = !option_bool(options, "no-browser", false);
@@ -59,7 +57,7 @@ export async function login(options) {
       });
 
       const config = await read_config();
-      const profile = build_profile(base_url, client_id, token);
+      const profile = await enrich_profile_with_current_user(build_profile(base_url, client_id, token));
 
       config.version = 1;
       config.active_profile = profile_name;
@@ -68,7 +66,7 @@ export async function login(options) {
 
       await write_config(config);
 
-      console.log(`Authenticated as user ${profile.user_id} for customer ${profile.customer_number}.`);
+      console.log(`Authenticated as user ${profile.user_id} for customer ${format_customer_label(profile)}.`);
       console.log(`Saved credentials to ${CONFIG_PATH}.`);
       return;
     }
@@ -105,8 +103,8 @@ export async function status(options) {
       profile: name,
       base_url: refreshed_profile.base_url,
       client_id: refreshed_profile.client_id,
-      customer_number: current_user.customer_number,
-      customer_id: current_user.customer_id,
+      customer_name: current_user.customer_name,
+      customer_code: current_user.customer_code,
       user_id: current_user.user_id,
       credential_type: current_user.credential_type,
       scopes: current_user.scopes || [],
@@ -119,7 +117,7 @@ export async function status(options) {
   console.log(`Profile: ${name}`);
   console.log(`Base URL: ${refreshed_profile.base_url}`);
   console.log(`Client: ${refreshed_profile.client_id}`);
-  console.log(`Customer: ${current_user.customer_number}`);
+  console.log(`Customer: ${format_customer_label(current_user)}`);
   console.log(`User: ${current_user.user_id}`);
   console.log(`Credential: ${current_user.credential_type}`);
   console.log(`Expires: ${current_user.expires_at_utc || refreshed_profile.expires_at_utc}`);
@@ -152,7 +150,8 @@ export async function list_profiles(options) {
     active: config.active_profile === name,
     base_url: profile.base_url,
     client_id: profile.client_id,
-    customer_number: profile.customer_number,
+    customer_name: profile.customer_name || "",
+    customer_code: profile.customer_code || "",
     user_id: profile.user_id,
     expires_at_utc: profile.expires_at_utc,
   }));
@@ -169,7 +168,7 @@ export async function list_profiles(options) {
 
   for (const profile of profiles) {
     const marker = profile.active ? "*" : " ";
-    console.log(`${marker} ${profile.name} ${profile.base_url} customer=${profile.customer_number} user=${profile.user_id}`);
+    console.log(`${marker} ${profile.name} ${profile.base_url} customer=${format_customer_label(profile)} user=${profile.user_id}`);
   }
 }
 
@@ -214,7 +213,11 @@ async function ensure_fresh_profile(config, profile_name, profile, request_optio
     timeout_ms: request_options.timeout_ms,
   });
 
-  const refreshed_profile = build_profile(profile.base_url, profile.client_id || token.client_id || DEFAULT_CLIENT_ID, token);
+  const refreshed_profile = {
+    ...build_profile(profile.base_url, profile.client_id || token.client_id || DEFAULT_CLIENT_ID, token),
+    customer_name: token.customer_name || profile.customer_name || "",
+    customer_code: token.customer_code || profile.customer_code || "",
+  };
 
   config.profiles[profile_name] = refreshed_profile;
   await write_config(config);
@@ -239,13 +242,24 @@ export async function revoke_token(profile, token) {
   }
 }
 
-export async function create_device_authorization({ base_url, client_id, scope, device_label }) {
+export async function create_device_authorization({
+  base_url,
+  client_id,
+  scope,
+  device_label,
+  customer_code,
+  prompt,
+  force_login,
+}) {
   return await request_json(`${base_url}/oauth/device_authorization`, {
     method: "POST",
     body: {
       client_id,
       scope,
       device_label,
+      customer_code,
+      prompt,
+      force_login,
     },
   });
 }
@@ -271,16 +285,47 @@ export function build_profile(base_url, client_id, token) {
     token_type: token.token_type || "Bearer",
     expires_at_utc: new Date(Date.now() + Math.max(1, Number(token.expires_in || 3600)) * 1000).toISOString(),
     scope: String(token.scope || "").split(" ").filter(Boolean),
-    customer_number: token.customer_number,
+    customer_name: token.customer_name || "",
+    customer_code: token.customer_code || "",
     user_id: token.user_id,
     updated_at_utc: new Date().toISOString(),
   };
 }
 
+export async function enrich_profile_with_current_user(profile, request_options = {}) {
+  const current_user = await request_json(`${profile.base_url}/oauth/me`, {
+    method: "GET",
+    bearer_token: profile.access_token,
+    timeout_ms: request_options.timeout_ms,
+  });
+  const profile_without_customer_id = { ...profile };
+  delete profile_without_customer_id.customer_id;
+
+  return {
+    ...profile_without_customer_id,
+    customer_name: current_user.customer_name || profile.customer_name || "",
+    customer_code: current_user.customer_code || profile.customer_code || "",
+    user_id: current_user.user_id || profile.user_id,
+    scope: current_user.scopes || profile.scope || [],
+    expires_at_utc: current_user.expires_at_utc || profile.expires_at_utc,
+  };
+}
+
+export function format_customer_label(source = {}) {
+  const customer_name = source.customer_name || "";
+  const customer_code = source.customer_code || "";
+
+  if (customer_name && customer_code) return `${customer_name} (${customer_code})`;
+  if (customer_name) return customer_name;
+  if (customer_code) return customer_code;
+
+  return "unknown customer";
+}
+
 async function load_profile(requested_profile_name) {
   const config = await read_config();
   const profiles = config.profiles || {};
-  const name = requested_profile_name || process.env.RI_AGENT_PROFILE || config.active_profile || Object.keys(profiles)[0];
+  const name = requested_profile_name || config.active_profile || Object.keys(profiles)[0];
 
   if (!name || !profiles[name]) {
     throw new Error("No Realinsight auth profile found. Run ri-agent auth login first.");

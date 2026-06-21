@@ -9,16 +9,24 @@ const ACCESS_TOKEN = "riat_contract_test";
 const REFRESH_TOKEN = "rirt_contract_test";
 const NODE_BIN = process.env.NODE || "node";
 const TOOLKIT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const CUSTOMER_NUMBER = 80;
+const CUSTOMER_CODE = "TEST";
+const CUSTOMER_NAME = "Test Customer";
+const CUSTOMER_ID = "customer-80";
 const USER_ID = "contract-user";
 const SCOPES = [
   "ri:profile.read",
+  "ri:customer.list",
+  "ri:customer.switch",
   "ri:schema.read",
   "ri:entity.search",
   "ri:entity.read",
   "ri:record.read",
+  "ri:record.write",
   "ri:structure.read",
   "ri:analytics.read",
+  "ri:model_forms.read",
+  "ri:model_forms.write",
+  "ri:reports.write",
 ];
 
 let base_url = "";
@@ -46,10 +54,8 @@ async function main() {
     agent_tools = AGENT_TOOLS;
 
     run_build_url_smoke(build_url);
-    run_tool_inventory_smoke();
     await run_doctor_smoke(config_path);
-    await run_env_profile_smoke(config_path);
-    await run_tool_call_smoke(call_agent_tool);
+    await run_tool_call_smoke(call_agent_tool, temp_dir);
     await run_mcp_smoke(config_path);
     run_result_limit_smoke(enforce_tool_result_limit);
 
@@ -80,47 +86,62 @@ function run_build_url_smoke(build_url) {
   );
 }
 
-function run_tool_inventory_smoke() {
-  const tool_names = new Set(agent_tools.map((tool) => tool.name));
-
-  assert(tool_names.has("search_report_configurations"), "search_report_configurations missing from default tools");
-  assert(tool_names.has("get_report_configuration"), "get_report_configuration missing from default tools");
-  assert(!tool_names.has("validate_create_report_configuration"), "write report validation tool should be disabled by default");
-  assert(!tool_names.has("create_report_configuration"), "write report create tool should be disabled by default");
-  assert(!tool_names.has("update_report_configuration"), "write report update tool should be disabled by default");
-  assert(!tool_names.has("delete_report_configuration"), "write report delete tool should be disabled by default");
-}
-
 async function run_doctor_smoke(config_path) {
   const result = await run_node_cli(["doctor", "--json"], config_path);
 
   assert(result.status === 0, `doctor failed: ${result.stderr || result.stdout}`);
   assert(!result.stdout.includes(ACCESS_TOKEN), "doctor output leaked access token");
   assert(!result.stdout.includes(REFRESH_TOKEN), "doctor output leaked refresh token");
+  assert(!result.stdout.includes("customer_number"), "doctor output leaked customer_number");
+  assert(!result.stdout.includes("customer_id"), "doctor output leaked customer_id");
 
   const payload = JSON.parse(result.stdout);
   assert(payload.ok === true, "doctor did not report ok=true");
   assert(payload.summary.fail === 0, "doctor reported failures");
+  assert(payload.profile.customer_code === CUSTOMER_CODE, "doctor did not include customer_code");
+  assert(payload.profile.customer_name === CUSTOMER_NAME, "doctor did not include customer_name");
   assert(payload.checks.some((check) => check.name === "tool_inventory" && check.status === "pass"), "doctor did not pass tool inventory check");
 }
 
-async function run_env_profile_smoke(config_path) {
-  const result = await run_node_cli(["auth", "status", "--json"], config_path, {
-    RI_AGENT_PROFILE: "envtest",
-  });
-
-  assert(result.status === 0, `auth status with RI_AGENT_PROFILE failed: ${result.stderr || result.stdout}`);
-
-  const payload = JSON.parse(result.stdout);
-  assert(payload.profile === "envtest", `RI_AGENT_PROFILE did not select envtest: ${payload.profile}`);
-}
-
-async function run_tool_call_smoke(call_agent_tool) {
+async function run_tool_call_smoke(call_agent_tool, temp_dir) {
   const auth_status_result = await call_agent_tool("auth_status", {});
   assert(auth_status_result.status === "connected", "auth_status did not report connected");
+  assert(!("customer_number" in auth_status_result), "auth_status returned customer_number");
+  assert(!("customer_id" in auth_status_result), "auth_status returned customer_id");
+  assert(auth_status_result.customer_code === CUSTOMER_CODE, "auth_status did not include customer_code");
+  assert(auth_status_result.customer_name === CUSTOMER_NAME, "auth_status did not include customer_name");
+
+  const profiles_result = await call_agent_tool("list_profiles", {});
+  assert(profiles_result.profiles[0].customer_code === CUSTOMER_CODE, "list_profiles did not include customer_code");
+  assert(!("customer_number" in profiles_result.profiles[0]), "list_profiles returned customer_number");
+  assert(!("customer_id" in profiles_result.profiles[0]), "list_profiles returned customer_id");
+
+  const switch_result = await call_agent_tool("switch_profile", { profile: "default" });
+  assert(switch_result.status === "active_profile_switched", "switch_profile did not activate an existing profile");
+  assert(switch_result.customer_code === CUSTOMER_CODE, "switch_profile did not return customer_code");
+
+  const pending_switch_result = await call_agent_tool("switch_profile", {
+    customer_code: "NEXT",
+    base_url,
+    open_browser: false,
+    wait_for_approval: false,
+  });
+  assert(pending_switch_result.status === "authorization_pending", "switch_profile did not start a pending customer login");
+  assert(pending_switch_result.profile === "NEXT", "switch_profile did not use customer_code as the profile name");
+  assert(pending_switch_result.customer_code === "NEXT", "switch_profile did not keep the customer_code login hint");
+  assert(pending_switch_result.force_login === true, "switch_profile did not default force_login to true");
+  assert(pending_switch_result.verification_uri_complete.includes("customer_code=NEXT"), "switch_profile verification URL did not include customer_code");
+  assert(pending_switch_result.verification_uri_complete.includes("prompt=login"), "switch_profile verification URL did not include prompt=login");
+
+  const return_switch_result = await call_agent_tool("switch_profile", { profile: "default" });
+  assert(return_switch_result.status === "active_profile_switched", "switch_profile did not switch back to default");
 
   const feature_result = await call_agent_tool("search_features", { query: "loan" });
   assert(feature_result.items[0].feature_code === "Loan", "search_features did not return Loan");
+  assert(!("customer_number" in feature_result.provenance), "tool provenance returned customer_number");
+  assert(!("customer_id" in feature_result.provenance), "tool provenance returned customer_id");
+  assert(feature_result.provenance.customer_code === CUSTOMER_CODE, "tool provenance did not include customer_code");
+  assert(feature_result.provenance.customer_name === CUSTOMER_NAME, "tool provenance did not include customer_name");
 
   const field_result = await call_agent_tool("search_fields", { query: "balance", feature_code: "Loan" });
   assert(field_result.items[0].schema_code === "Loan.Balance", "search_fields did not return Loan.Balance");
@@ -166,14 +187,78 @@ async function run_tool_call_smoke(call_agent_tool) {
   const workbench_data_result = await call_agent_tool("get_workbench_data", { workbench_id: "workbench-list-1", limit: 1 });
   assert(workbench_data_result.items[0].rows[0]["col-balance"] === 1250000, "get_workbench_data did not return balance");
 
-  const report_search_result = await call_agent_tool("search_report_configurations", {
-    report_type: "LIST",
-    search_text: "Loan",
-  });
-  assert(report_search_result.items[0].report_id === "report-2", "search_report_configurations did not return report-2");
+  const report_search_result = await call_agent_tool("search_reports", { search_text: "Loan" });
+  assert(report_search_result.items[0].report_id === "report-2", "search_reports did not return report-2");
 
-  const report_config_result = await call_agent_tool("get_report_configuration", { report_id: "report-2" });
-  assert(report_config_result.items[0].conflict_token === "conflict-2", "get_report_configuration did not return conflict token");
+  const report_config_result = await call_agent_tool("get_report", { report_id: "report-2" });
+  assert(report_config_result.items[0].conflict_token === "conflict-report-2", "get_report did not return latest conflict token");
+
+  const model_form_search_result = await call_agent_tool("search_model_forms", { search_text: "Loan" });
+  assert(model_form_search_result.items[0].model_form_id === "model-form-1", "search_model_forms did not return model-form-1");
+
+  const model_form_result = await call_agent_tool("get_model_form", { model_form_id: "model-form-1" });
+  assert(model_form_result.items[0].model_form.conflict_token === "conflict-model-form-1", "get_model_form did not return latest conflict token");
+
+  const model_form_detail_result = await call_agent_tool("get_model_form", {
+    model_form_id: "model-form-1",
+    sections: "template,map_tree,node,item,used_fields",
+    node_id: "map-1",
+    map_item_id: "map-item-1",
+  });
+  assert(model_form_detail_result.items[0].template.template.template_id === "template-1", "get_model_form did not return template-1");
+  assert(model_form_detail_result.items[0].map_tree.nodes[0].node_id === "map-1", "get_model_form did not return map-1");
+  assert(model_form_detail_result.items[0].node.map_items[0].map_item_id === "map-item-1", "get_model_form did not return map-item-1");
+  assert(model_form_detail_result.items[0].item.item.schema_code === "Loan.Balance", "get_model_form did not return Loan.Balance item");
+  assert(model_form_detail_result.items[0].used_fields.fields[0].schema_code === "Loan.Balance", "get_model_form did not return Loan.Balance field");
+
+  const model_form_download_path = path.join(temp_dir, "loan-model-download.xlsx");
+  const model_form_download_result = await call_agent_tool("download_model_form_template", {
+    model_form_id: "model-form-1",
+    output_path: model_form_download_path,
+  });
+  assert(model_form_download_result.items[0].local_file_path === model_form_download_path, "download_model_form_template did not write local_file_path");
+  assert((await fs.readFile(model_form_download_path, "utf8")) === "contract download", "download_model_form_template did not fetch signed download_url");
+
+  const model_form_update_request = {
+    process_name: "Loan Model Updated",
+    process_description: "Updated by contract smoke",
+    parent_folder_id: "WORKBOOKPROCESS",
+    global_assignment: true,
+    file_name_template: "Loan Model",
+    expected_conflict_token: "conflict-model-form-1",
+    change_reason: "contract smoke",
+  };
+  const model_form_validation_result = await call_agent_tool("validate_update_model_form", {
+    model_form_id: "model-form-1",
+    ...model_form_update_request,
+  });
+  assert(model_form_validation_result.items[0].can_apply === true, "validate_update_model_form did not return can_apply");
+
+  const model_form_update_result = await call_agent_tool("update_model_form", {
+    model_form_id: "model-form-1",
+    ...model_form_update_request,
+    approved: true,
+  });
+  assert(model_form_update_result.items[0].model_form.process_name === "Loan Model Updated", "update_model_form did not update process_name");
+
+  const model_form_template_path = path.join(temp_dir, "loan-model.xlsx");
+  await fs.writeFile(model_form_template_path, "contract smoke");
+
+  const model_form_stage_result = await call_agent_tool("stage_model_form_template_file", {
+    model_form_id: "model-form-1",
+    file_path: model_form_template_path,
+    approved: true,
+  });
+  assert(model_form_stage_result.items[0].staged_file_id === "staged-file-1", "stage_model_form_template_file did not return staged_file_id");
+  assert(!("upload_url" in model_form_stage_result.items[0]), "stage_model_form_template_file should remove signed upload_url after local upload");
+
+  const model_form_upload_result = await call_agent_tool("upload_model_form_template", {
+    model_form_id: "model-form-1",
+    staged_file_id: "staged-file-1",
+    expected_conflict_token: "conflict-model-form-1",
+    approved: true,
+  });
+  assert(model_form_upload_result.items[0].model_form.template_file_name === "loan-model.xlsx", "upload_model_form_template did not consume staged file handle");
 }
 
 async function run_mcp_smoke(config_path) {
@@ -274,7 +359,7 @@ function run_result_limit_smoke(enforce_tool_result_limit) {
 
 async function handle_request(request, response) {
   const url = new URL(request.url, base_url || "http://127.0.0.1");
-  const body = await read_json_body(request);
+  const body = await read_request_body(request);
   requests.push({
     method: request.method,
     path: url.pathname,
@@ -306,11 +391,27 @@ async function handle_request(request, response) {
       client_id: "realinsight-agent-toolkit",
       grant_id: "grant-1",
       token_id: "token-1",
-      customer_number: CUSTOMER_NUMBER,
-      customer_id: "customer-80",
+      customer_name: CUSTOMER_NAME,
+      customer_code: CUSTOMER_CODE,
+      customer_id: CUSTOMER_ID,
       user_id: USER_ID,
       scopes: SCOPES,
       expires_at_utc: new Date(Date.now() + 3600000).toISOString(),
+    });
+    return;
+  }
+
+  if (request.method === "POST" && url.pathname === "/oauth/device_authorization") {
+    assert(body.customer_code === "NEXT", "device authorization did not receive customer_code");
+    assert(body.prompt === "login", "device authorization did not receive prompt=login");
+    assert(body.force_login === true, "device authorization did not receive force_login");
+    write_json(response, 200, {
+      device_code: "ridc_pending_switch",
+      user_code: "NEXT-CODE",
+      verification_uri: `${base_url}/oauth/device`,
+      verification_uri_complete: `${base_url}/oauth/device?user_code=NEXT-CODE&customer_code=NEXT&prompt=login`,
+      expires_in: 600,
+      interval: 5,
     });
     return;
   }
@@ -574,40 +675,452 @@ async function handle_request(request, response) {
   }
 
   if (request.method === "GET" && url.pathname === "/agent/reports/configurations/search") {
-    assert(url.searchParams.get("report_type") === "LIST", "search_report_configurations did not pass report_type");
-    assert(url.searchParams.get("search_text") === "Loan", "search_report_configurations did not pass search_text");
-    write_json(response, 200, agent_result("search_report_configurations", "ri:analytics.read", [
+    write_json(response, 200, agent_result("search_reports", "ri:analytics.read", [
       {
         report_id: "report-2",
         report_type: "LIST",
         active: true,
+        parent_folder_id: "REPORT",
         report_name: "Loan List",
         master_feature_code: "Loan",
         column_count: 1,
-        conflict_token: "conflict-2",
+        conflict_token: "conflict-report-2",
       },
     ]));
     return;
   }
 
   if (request.method === "GET" && url.pathname === "/agent/reports/configurations/report-2") {
-    write_json(response, 200, agent_result("get_report_configuration", "ri:analytics.read", [
+    write_json(response, 200, agent_result("get_report", "ri:analytics.read", [
       {
         report_id: "report-2",
         report_type: "LIST",
         active: true,
+        parent_folder_id: "REPORT",
         report_name: "Loan List",
-        conflict_token: "conflict-2",
+        master_feature_code: "Loan",
+        column_count: 1,
+        conflict_token: "conflict-report-2",
         list: {
           master_feature_code: "Loan",
+          data_sets: [
+            {
+              data_set_id: "dataset-1",
+              feature_code: "Loan",
+            },
+          ],
           columns: [
             {
-              column_id: "col-balance",
+              column_id: "column-1",
+              data_set_id: "dataset-1",
+              field_name: "Balance",
               schema_code: "Loan.Balance",
-              label: "Balance",
             },
           ],
         },
+      },
+    ]));
+    return;
+  }
+
+  if (request.method === "GET" && url.pathname === "/agent/model-forms/configurations/search") {
+    write_json(response, 200, agent_result("search_model_forms", "ri:model_forms.read", [
+      {
+        model_form_id: "model-form-1",
+        active: true,
+        global_assignment: true,
+        parent_folder_id: "WORKBOOKPROCESS",
+        process_type: "FORM",
+        process_name: "Loan Model",
+        root_feature_code: "Loan",
+        map_id: "map-1",
+        template_id: "template-1",
+        map_node_count: 1,
+        map_item_count: 1,
+        conflict_token: "conflict-model-form-1",
+      },
+    ]));
+    return;
+  }
+
+  if (request.method === "GET" && url.pathname === "/agent/model-forms/configurations/model-form-1") {
+    write_json(response, 200, agent_result("get_model_form", "ri:model_forms.read", [
+      {
+        model_form_id: "model-form-1",
+        detail_level: url.searchParams.get("detail_level") || "overview",
+        sections: (url.searchParams.get("sections") || "").split(",").filter(Boolean),
+        model_form: {
+          model_form_id: "model-form-1",
+          active: true,
+          global_assignment: true,
+          parent_folder_id: "WORKBOOKPROCESS",
+          process_type: "FORM",
+          process_name: "Loan Model",
+          root_feature_code: "Loan",
+          map_id: "map-1",
+          template_id: "template-1",
+          map_node_count: 1,
+          map_item_count: 1,
+          conflict_token: "conflict-model-form-1",
+          template: {
+            template_id: "template-1",
+            template_name: "Loan Model Template",
+            template_type: "EXCEL",
+          },
+          map: {
+            map_id: "map-1",
+            root_feature_code: "Loan",
+            total_map_node_count: 1,
+            total_map_item_count: 1,
+          },
+        },
+        template: {
+          model_form_id: "model-form-1",
+          template: {
+            template_id: "template-1",
+            active: true,
+            template_name: "Loan Model Template",
+            template_type: "EXCEL",
+            has_repository_file: true,
+            version_count: 1,
+            form_field_count: 0,
+          },
+        },
+        map_tree: {
+          model_form_id: "model-form-1",
+          map_id: "map-1",
+          root_node_id: "map-1",
+          nodes: [
+            {
+              node_id: "map-1",
+              node_type: "root",
+              map_name: "Loan Map",
+              relationship: "ROOT",
+              feature_code: "Loan",
+              map_item_count: 1,
+            },
+          ],
+        },
+        node: {
+          node_id: "map-1",
+          node_type: "root",
+          map_name: "Loan Map",
+          relationship: "ROOT",
+          feature_code: "Loan",
+          child_node_ids: [],
+          map_items: [
+            {
+              node_id: "map-1",
+              map_item_id: "map-item-1",
+              map_order: 1,
+              item_type: "FIELD",
+              schema_code: "Loan.Balance",
+              cell: "B2",
+            },
+          ],
+        },
+        item: {
+          model_form_id: "model-form-1",
+          map_id: "map-1",
+          node_id: "map-1",
+          item: {
+            node_id: "map-1",
+            map_item_id: "map-item-1",
+            map_order: 1,
+            item_type: "FIELD",
+            schema_code: "Loan.Balance",
+            cell: "B2",
+            feature_code: "Loan",
+            is_field_mapping: true,
+            is_marker: false,
+            pdf_field_mappings: [],
+          },
+        },
+        used_fields: {
+          model_form_id: "model-form-1",
+          map_id: "map-1",
+          total_node_count: 1,
+          total_field_reference_count: 1,
+          nodes: [
+            {
+              node_id: "map-1",
+              feature_code: "Loan",
+              map_name: "Loan Map",
+              relationship: "ROOT",
+              field_reference_count: 1,
+              marker_count: 0,
+              non_field_map_item_count: 0,
+            },
+          ],
+          fields: [
+            {
+              node_id: "map-1",
+              map_item_id: "map-item-1",
+              map_order: 1,
+              item_type: "FIELD",
+              schema_code: "Loan.Balance",
+              cell: "B2",
+              feature_code: "Loan",
+            },
+          ],
+        },
+      },
+    ]));
+    return;
+  }
+
+  if (request.method === "POST" && url.pathname === "/agent/model-forms/configurations/model-form-1/validate-update") {
+    assert(body.expected_conflict_token === "conflict-model-form-1", "validate_update_model_form did not send expected_conflict_token");
+    write_json(response, 200, agent_result("validate_update_model_form", "ri:model_forms.write", [
+      {
+        can_apply: true,
+        errors: [],
+        warnings: [],
+        normalized_preview: {
+          model_form_id: "model-form-1",
+          active: true,
+          global_assignment: body.global_assignment,
+          parent_folder_id: body.parent_folder_id,
+          process_type: "FORM",
+          process_name: body.process_name,
+          process_description: body.process_description,
+          root_feature_code: "Loan",
+          map_id: "map-1",
+          template_id: "template-1",
+          map_node_count: 1,
+          map_item_count: 1,
+          conflict_token: "conflict-model-form-1",
+        },
+      },
+    ]));
+    return;
+  }
+
+  if (request.method === "POST" && url.pathname === "/agent/model-forms/configurations/model-form-1") {
+    assert(body.approved === true, "update_model_form did not send approved=true");
+    write_json(response, 200, agent_result("update_model_form", "ri:model_forms.write", [
+      {
+        model_form: {
+          model_form_id: "model-form-1",
+          active: true,
+          global_assignment: body.global_assignment,
+          parent_folder_id: body.parent_folder_id,
+          process_type: "FORM",
+          process_name: body.process_name,
+          process_description: body.process_description,
+          root_feature_code: "Loan",
+          map_id: "map-1",
+          template_id: "template-1",
+          map_node_count: 1,
+          map_item_count: 1,
+          conflict_token: "conflict-model-form-2",
+        },
+        audit_log: {
+          operation_id: "config-op-1",
+          resource_family: "model_forms",
+          resource_type: "model_form",
+          resource_id: "model-form-1",
+        },
+      },
+    ]));
+    return;
+  }
+
+  if (request.method === "GET" && url.pathname === "/agent/model-forms/configurations/model-form-1/template-file") {
+    write_json(response, 200, agent_result("download_model_form_template", "ri:model_forms.read", [
+      {
+        model_form_id: "model-form-1",
+        template_id: "template-1",
+        repository_id: "repo-template-1",
+        file_name: "loan-model.xlsx",
+        content_type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        size_bytes: 17,
+        download_url: `${base_url}/signed/model-form-download`,
+      },
+    ]));
+    return;
+  }
+
+  if (request.method === "GET" && url.pathname === "/signed/model-form-download") {
+    response.writeHead(200, {
+      "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    response.end("contract download");
+    return;
+  }
+
+  if (request.method === "POST" && url.pathname === "/agent/model-forms/configurations/model-form-1/template-file/stage") {
+    assert(body.approved === true, "stage_model_form_template_file did not send approved=true");
+    assert(body.file_name === "loan-model.xlsx", "stage_model_form_template_file did not send file_name");
+    assert(!("content_base64" in body), "stage_model_form_template_file should not send content_base64");
+    write_json(response, 200, agent_result("stage_model_form_template_file", "ri:model_forms.write", [
+      {
+        model_form_id: "model-form-1",
+        staged_file_id: "staged-file-1",
+        file_name: body.file_name,
+        content_type: body.content_type,
+        upload_url: `${base_url}/signed/model-form-upload`,
+        upload_method: "POST",
+        upload_form_field: "file",
+      },
+    ]));
+    return;
+  }
+
+  if (request.method === "POST" && url.pathname === "/signed/model-form-upload") {
+    assert(String(request.headers["content-type"] || "").startsWith("multipart/form-data"), "signed template upload did not use multipart/form-data");
+    assert(body.__raw_text.includes("contract smoke"), "signed template upload did not include file bytes");
+    write_json(response, 200, {
+      model_form_id: "model-form-1",
+      staged_file_id: "staged-file-1",
+      file_name: "loan-model.xlsx",
+      content_type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    return;
+  }
+
+  if (request.method === "POST" && url.pathname === "/agent/model-forms/configurations/model-form-1/template-file") {
+    assert(body.approved === true, "upload_model_form_template did not send approved=true");
+    assert(body.staged_file_id === "staged-file-1", "upload_model_form_template did not send staged_file_id");
+    assert(!("content_base64" in body), "upload_model_form_template should not send content_base64 when staged_file_id is supplied");
+    assert(body.expected_conflict_token === "conflict-model-form-1", "upload_model_form_template did not send expected_conflict_token");
+    write_json(response, 200, agent_result("upload_model_form_template", "ri:model_forms.write", [
+      {
+        model_form: {
+          model_form_id: "model-form-1",
+          active: true,
+          process_type: "FORM",
+          process_name: "Loan Model",
+          root_feature_code: "Loan",
+          template_file_name: "loan-model.xlsx",
+          conflict_token: "conflict-model-form-3",
+        },
+        audit_log: {
+          operation_id: "config-op-2",
+          resource_family: "model_forms",
+          resource_type: "model_form_template",
+          resource_id: "model-form-1",
+        },
+      },
+    ]));
+    return;
+  }
+
+  if (request.method === "GET" && url.pathname === "/agent/model-forms/configurations/model-form-1/template") {
+    write_json(response, 200, agent_result("get_model_form_template", "ri:model_forms.read", [
+      {
+        model_form_id: "model-form-1",
+        template: {
+          template_id: "template-1",
+          active: true,
+          template_name: "Loan Model Template",
+          template_type: "EXCEL",
+          has_repository_file: true,
+          version_count: 1,
+          form_field_count: 0,
+        },
+      },
+    ]));
+    return;
+  }
+
+  if (request.method === "GET" && url.pathname === "/agent/model-forms/configurations/model-form-1/map-tree") {
+    write_json(response, 200, agent_result("get_model_form_map_tree", "ri:model_forms.read", [
+      {
+        model_form_id: "model-form-1",
+        map_id: "map-1",
+        root_node_id: "map-1",
+        nodes: [
+          {
+            node_id: "map-1",
+            node_type: "root",
+            map_name: "Loan Map",
+            relationship: "ROOT",
+            feature_code: "Loan",
+            map_item_count: 1,
+          },
+        ],
+      },
+    ]));
+    return;
+  }
+
+  if (request.method === "GET" && url.pathname === "/agent/model-forms/configurations/model-form-1/map-nodes/map-1") {
+    write_json(response, 200, agent_result("get_model_form_map_node", "ri:model_forms.read", [
+      {
+        node_id: "map-1",
+        node_type: "root",
+        map_name: "Loan Map",
+        relationship: "ROOT",
+        feature_code: "Loan",
+        child_node_ids: [],
+        map_items: [
+          {
+            node_id: "map-1",
+            map_item_id: "map-item-1",
+            map_order: 1,
+            item_type: "FIELD",
+            schema_code: "Loan.Balance",
+            cell: "B2",
+          },
+        ],
+      },
+    ]));
+    return;
+  }
+
+  if (request.method === "GET" && url.pathname === "/agent/model-forms/configurations/model-form-1/map-nodes/map-1/map-items/map-item-1") {
+    write_json(response, 200, agent_result("get_model_form_map_item", "ri:model_forms.read", [
+      {
+        model_form_id: "model-form-1",
+        map_id: "map-1",
+        node_id: "map-1",
+        item: {
+          node_id: "map-1",
+          map_item_id: "map-item-1",
+          map_order: 1,
+          item_type: "FIELD",
+          schema_code: "Loan.Balance",
+          cell: "B2",
+          feature_code: "Loan",
+          is_field_mapping: true,
+          is_marker: false,
+          pdf_field_mappings: [],
+        },
+      },
+    ]));
+    return;
+  }
+
+  if (request.method === "GET" && url.pathname === "/agent/model-forms/configurations/model-form-1/used-fields") {
+    write_json(response, 200, agent_result("get_model_form_used_fields", "ri:model_forms.read", [
+      {
+        model_form_id: "model-form-1",
+        map_id: "map-1",
+        total_node_count: 1,
+        total_field_reference_count: 1,
+        nodes: [
+          {
+            node_id: "map-1",
+            feature_code: "Loan",
+            map_name: "Loan Map",
+            relationship: "ROOT",
+            field_reference_count: 1,
+            marker_count: 0,
+            non_field_map_item_count: 0,
+          },
+        ],
+        fields: [
+          {
+            node_id: "map-1",
+            map_item_id: "map-item-1",
+            map_order: 1,
+            item_type: "FIELD",
+            schema_code: "Loan.Balance",
+            feature_code: "Loan",
+            cell: "B2",
+          },
+        ],
       },
     ]));
     return;
@@ -628,21 +1141,20 @@ function agent_result(tool, required_scope, items) {
       tool,
       source: "mock_core_api",
       required_scope,
-      customer_number: CUSTOMER_NUMBER,
-      customer_id: "customer-80",
+      customer_name: CUSTOMER_NAME,
+      customer_code: CUSTOMER_CODE,
       generated_at_utc: new Date().toISOString(),
     },
   };
 }
 
-async function run_node_cli(args, config_path, env = {}) {
+async function run_node_cli(args, config_path) {
   return await new Promise((resolve, reject) => {
     const child = spawn(NODE_BIN, ["./src/ri-agent.mjs", ...args], {
       cwd: TOOLKIT_ROOT,
       env: {
         ...process.env,
         REALINSIGHT_AGENT_CONFIG: config_path,
-        ...env,
       },
       stdio: ["ignore", "pipe", "pipe"],
     });
@@ -682,19 +1194,9 @@ async function write_config(config_path) {
         token_type: "Bearer",
         expires_at_utc: new Date(Date.now() + 3600000).toISOString(),
         scope: SCOPES,
-        customer_number: CUSTOMER_NUMBER,
-        user_id: USER_ID,
-        updated_at_utc: new Date().toISOString(),
-      },
-      envtest: {
-        base_url,
-        client_id: "realinsight-agent-toolkit",
-        access_token: ACCESS_TOKEN,
-        refresh_token: REFRESH_TOKEN,
-        token_type: "Bearer",
-        expires_at_utc: new Date(Date.now() + 3600000).toISOString(),
-        scope: SCOPES,
-        customer_number: CUSTOMER_NUMBER,
+        customer_name: CUSTOMER_NAME,
+        customer_code: CUSTOMER_CODE,
+        customer_id: CUSTOMER_ID,
         user_id: USER_ID,
         updated_at_utc: new Date().toISOString(),
       },
@@ -709,7 +1211,7 @@ async function listen(server) {
   });
 }
 
-async function read_json_body(request) {
+async function read_request_body(request) {
   const chunks = [];
 
   for await (const chunk of request) {
@@ -718,7 +1220,16 @@ async function read_json_body(request) {
 
   if (chunks.length === 0) return {};
 
-  return JSON.parse(Buffer.concat(chunks).toString("utf8"));
+  const buffer = Buffer.concat(chunks);
+  const content_type = String(request.headers["content-type"] || "");
+  if (!content_type.includes("application/json")) {
+    return {
+      __raw_buffer: buffer,
+      __raw_text: buffer.toString("utf8"),
+    };
+  }
+
+  return JSON.parse(buffer.toString("utf8"));
 }
 
 function write_json(response, status, payload) {

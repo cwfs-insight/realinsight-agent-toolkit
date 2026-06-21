@@ -19,7 +19,7 @@ Use this when a user asks for data but does not name exact Realinsight schema co
 
 - Do not guess field names when the question depends on a precise metric. Search fields first.
 - Treat field display labels as user-facing hints, not stable ids. Use `schema_code` or `field_name` from tool output in follow-up calls.
-- `postable_only` is for future write planning. Current toolkit tools are read-only.
+- `postable_only` is for write planning. Write tools still require the matching write scope and explicit approval.
 - `include_sensitive` should stay false unless the user explicitly asks for a sensitive field and the tool allows it.
 - `used_fields` is not implemented yet for record hydration. Use `key_fields` or explicit fields.
 

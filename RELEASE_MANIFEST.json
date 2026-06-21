@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "environment": "prod",
   "base_url": "https://www.realinsight.cloud/api/v1",
-  "generated_at_utc": "2026-06-06T20:43:09.941Z",
+  "generated_at_utc": "2026-06-21T17:48:15.841Z",
   "sources": {
     "package": "agent-toolkit-runtime",
     "plugin": "realinsight-connector",
@@ -13,6 +13,11 @@
   "managed_roots": [
     {
       "path": "packages/agent-toolkit/src",
+      "owner": "realinsight-release-pipeline",
+      "overwrite": true
+    },
+    {
+      "path": "packages/agent-toolkit/test",
       "owner": "realinsight-release-pipeline",
       "overwrite": true
     },
@@ -65,17 +70,19 @@
       "purpose": "Agent-readable Realinsight documentation corpora packaged from source documentation repositories."
     }
   ],
-  "source_commit": "8e57a4d255af83f7a3d3bcf1c0839df4931eae15",
+  "source_commit": "cf6b49aeb1d368ecf38e5245e084601a86863286",
   "managed_root_checksums": {
-    "packages/agent-toolkit/src": "ea420fc9741df370b120278bcc77ea2a384f2372492300f57be50668e037c5b2",
-    "skills": "1ea39e510dd3f0222b9c8bab503dfe7d264a6890e070756690f5629e2d2b7c2a",
-    "plugins/codex/realinsight-connector/skills": "1ea39e510dd3f0222b9c8bab503dfe7d264a6890e070756690f5629e2d2b7c2a",
-    "plugins/claude/realinsight-connector/skills": "1ea39e510dd3f0222b9c8bab503dfe7d264a6890e070756690f5629e2d2b7c2a",
-    "extensions/claude-desktop/realinsight-connector/src": "ea420fc9741df370b120278bcc77ea2a384f2372492300f57be50668e037c5b2",
-    "extensions/claude-desktop/realinsight-connector/skills": "1ea39e510dd3f0222b9c8bab503dfe7d264a6890e070756690f5629e2d2b7c2a"
+    "packages/agent-toolkit/src": "72bc5b1c3956546fd45984656d3da1b07fa61a7d0f312f8dbe19c8df6716aef7",
+    "packages/agent-toolkit/test": "72bfd6e98b45db2c7accbb79ea56a4e807b8f881c70cb8d3046caa243684ba71",
+    "skills": "1b6734c7beff1db3ddb80c230db5fd98938946255e027c9fe74fc9567ea7251c",
+    "plugins/codex/realinsight-connector/skills": "1b6734c7beff1db3ddb80c230db5fd98938946255e027c9fe74fc9567ea7251c",
+    "plugins/claude/realinsight-connector/skills": "1b6734c7beff1db3ddb80c230db5fd98938946255e027c9fe74fc9567ea7251c",
+    "extensions/claude-desktop/realinsight-connector/src": "72bc5b1c3956546fd45984656d3da1b07fa61a7d0f312f8dbe19c8df6716aef7",
+    "extensions/claude-desktop/realinsight-connector/skills": "1b6734c7beff1db3ddb80c230db5fd98938946255e027c9fe74fc9567ea7251c"
   },
   "source_ids": {
     "packages/agent-toolkit/src": "agent-toolkit-runtime",
+    "packages/agent-toolkit/test": "agent-toolkit-contract-tests",
     "skills": "realinsight-agent-skills",
     "plugins/codex/realinsight-connector/skills": "realinsight-agent-skills",
     "plugins/claude/realinsight-connector/skills": "realinsight-agent-skills",

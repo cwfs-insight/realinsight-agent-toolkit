@@ -8,26 +8,37 @@ import { doctor } from "./doctor.mjs";
 import { search_entities } from "./entity-tools.mjs";
 import { format_error_message, HttpJsonError } from "./http.mjs";
 import { start_mcp_server } from "./mcp-server.mjs";
+import {
+  create_model_form,
+  download_model_form_template,
+  get_model_form,
+  search_model_forms,
+  stage_model_form_template_file,
+  upload_model_form_template,
+  update_model_form,
+  validate_create_model_form,
+  validate_update_model_form,
+} from "./model-form-tools.mjs";
 import { get_pipeline, queue_pipeline } from "./pipeline-tools.mjs";
 import { get_records, set_record } from "./record-tools.mjs";
 import {
-  create_report_configuration,
-  delete_report_configuration,
+  create_report,
+  delete_report,
   extract_analytic_entities,
   extract_workbench_entities,
   get_analytic_data,
   get_analytic_csv,
   get_dashboard_page,
-  get_report_configuration,
+  get_report,
   get_workbench_data,
   get_workbench_csv,
   list_dashboard_pages,
   list_workbenches,
-  search_report_configurations,
-  update_report_configuration,
-  validate_create_report_configuration,
-  validate_delete_report_configuration,
-  validate_update_report_configuration,
+  search_reports,
+  update_report,
+  validate_create_report,
+  validate_delete_report,
+  validate_update_report,
 } from "./report-tools.mjs";
 import { get_fields, search_features, search_fields } from "./schema-tools.mjs";
 import { get_entity_structure } from "./structure-tools.mjs";
@@ -35,6 +46,8 @@ import {
   CONFIG_PATH,
   DEFAULT_BASE_URL,
   DEFAULT_CLIENT_ID,
+  MODEL_FORMS_READ_SCOPE,
+  MODEL_FORMS_WRITE_SCOPE,
   PIPELINE_TOOLS_ENABLED,
   SCHEMA_READ_SCOPE,
   WRITE_TOOLS_ENABLED,
@@ -82,6 +95,11 @@ async function main() {
 
   if (command === "reports" || command === "analytics") {
     await run_report_command(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "model-forms" || command === "model_forms" || command === "models") {
+    await run_model_form_command(parsed.positionals.slice(1), parsed.options);
     return;
   }
 
@@ -176,49 +194,134 @@ async function main() {
     return;
   }
 
-  if (command === "search-report-configurations" || command === "search_report_configurations") {
-    await search_report_configurations(parsed.positionals.slice(1), parsed.options);
+  if (command === "search-reports" || command === "search_reports" || command === "search-report-configurations") {
+    await search_reports(parsed.positionals.slice(1), parsed.options);
     return;
   }
 
-  if (command === "get-report-configuration" || command === "get_report_configuration") {
-    await get_report_configuration(parsed.positionals.slice(1), parsed.options);
+  if (command === "get-report" || command === "get_report" || command === "get-report-configuration") {
+    await get_report(parsed.positionals.slice(1), parsed.options);
     return;
   }
 
-  if (command === "validate-create-report-configuration" || command === "validate_create_report_configuration") {
+  if (command === "search-model-forms" || command === "search_model_forms" || command === "search-model-form-configurations") {
+    await search_model_forms(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "get-model-form" || command === "get_model_form" || command === "get-model-form-configuration") {
+    await get_model_form(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "get-model-form-template" || command === "get_model_form_template") {
+    await get_model_form(parsed.positionals.slice(1), { ...parsed.options, sections: "template" });
+    return;
+  }
+
+  if (command === "get-model-form-map-tree" || command === "get_model_form_map_tree") {
+    await get_model_form(parsed.positionals.slice(1), { ...parsed.options, sections: "map_tree" });
+    return;
+  }
+
+  if (command === "get-model-form-map-node" || command === "get_model_form_map_node") {
+    await get_model_form(parsed.positionals.slice(1), {
+      ...parsed.options,
+      sections: "node",
+      "node-id": parsed.options["node-id"] || parsed.options.node_id || parsed.positionals[2],
+    });
+    return;
+  }
+
+  if (command === "get-model-form-map-item" || command === "get_model_form_map_item") {
+    await get_model_form(parsed.positionals.slice(1), {
+      ...parsed.options,
+      sections: "item",
+      "node-id": parsed.options["node-id"] || parsed.options.node_id || parsed.positionals[2],
+      "map-item-id": parsed.options["map-item-id"] || parsed.options.map_item_id || parsed.positionals[3],
+    });
+    return;
+  }
+
+  if (command === "get-model-form-used-fields" || command === "get_model_form_used_fields") {
+    await get_model_form(parsed.positionals.slice(1), { ...parsed.options, sections: "used_fields" });
+    return;
+  }
+
+  if (command === "validate-create-model-form" || command === "validate_create_model_form") {
     assert_write_tools_enabled();
-    await validate_create_report_configuration(parsed.positionals.slice(1), parsed.options);
+    await validate_create_model_form(parsed.positionals.slice(1), parsed.options);
     return;
   }
 
-  if (command === "validate-update-report-configuration" || command === "validate_update_report_configuration") {
+  if (command === "create-model-form" || command === "create_model_form") {
     assert_write_tools_enabled();
-    await validate_update_report_configuration(parsed.positionals.slice(1), parsed.options);
+    await create_model_form(parsed.positionals.slice(1), parsed.options);
     return;
   }
 
-  if (command === "validate-delete-report-configuration" || command === "validate_delete_report_configuration") {
+  if (command === "validate-update-model-form" || command === "validate_update_model_form") {
     assert_write_tools_enabled();
-    await validate_delete_report_configuration(parsed.positionals.slice(1), parsed.options);
+    await validate_update_model_form(parsed.positionals.slice(1), parsed.options);
     return;
   }
 
-  if (command === "create-report-configuration" || command === "create_report_configuration") {
+  if (command === "update-model-form" || command === "update_model_form") {
     assert_write_tools_enabled();
-    await create_report_configuration(parsed.positionals.slice(1), parsed.options);
+    await update_model_form(parsed.positionals.slice(1), parsed.options);
     return;
   }
 
-  if (command === "update-report-configuration" || command === "update_report_configuration") {
-    assert_write_tools_enabled();
-    await update_report_configuration(parsed.positionals.slice(1), parsed.options);
+  if (command === "download-model-form-template" || command === "download_model_form_template") {
+    await download_model_form_template(parsed.positionals.slice(1), parsed.options);
     return;
   }
 
-  if (command === "delete-report-configuration" || command === "delete_report_configuration") {
+  if (command === "stage-model-form-template" || command === "stage_model_form_template" || command === "stage-model-form-template-file" || command === "stage_model_form_template_file") {
     assert_write_tools_enabled();
-    await delete_report_configuration(parsed.positionals.slice(1), parsed.options);
+    await stage_model_form_template_file(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "upload-model-form-template" || command === "upload_model_form_template") {
+    assert_write_tools_enabled();
+    await upload_model_form_template(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "validate-create-report" || command === "validate_create_report" || command === "validate-create-report-configuration") {
+    assert_write_tools_enabled();
+    await validate_create_report(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "validate-update-report" || command === "validate_update_report" || command === "validate-update-report-configuration") {
+    assert_write_tools_enabled();
+    await validate_update_report(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "validate-delete-report" || command === "validate_delete_report" || command === "validate-delete-report-configuration") {
+    assert_write_tools_enabled();
+    await validate_delete_report(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "create-report" || command === "create_report" || command === "create-report-configuration") {
+    assert_write_tools_enabled();
+    await create_report(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "update-report" || command === "update_report" || command === "update-report-configuration") {
+    assert_write_tools_enabled();
+    await update_report(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "delete-report" || command === "delete_report" || command === "delete-report-configuration") {
+    assert_write_tools_enabled();
+    await delete_report(parsed.positionals.slice(1), parsed.options);
     return;
   }
 
@@ -335,6 +438,98 @@ async function run_pipeline_command(positionals, options) {
   throw new Error(`Unknown pipeline command: ${command}`);
 }
 
+async function run_model_form_command(positionals, options) {
+  const command = positionals[0];
+
+  if (!command || command === "help" || command === "--help" || command === "-h") {
+    print_model_form_help();
+    return;
+  }
+
+  if (command === "search" || command === "search-model-forms" || command === "search-configurations" || command === "search_model_forms") {
+    await search_model_forms(positionals.slice(1), options);
+    return;
+  }
+
+  if (command === "get" || command === "get-model-form" || command === "configuration" || command === "get-model-form-configuration" || command === "get_model_form") {
+    await get_model_form(positionals.slice(1), options);
+    return;
+  }
+
+  if (command === "template" || command === "get-template" || command === "get_model_form_template") {
+    await get_model_form(positionals.slice(1), { ...options, sections: "template" });
+    return;
+  }
+
+  if (command === "map-tree" || command === "tree" || command === "get_model_form_map_tree") {
+    await get_model_form(positionals.slice(1), { ...options, sections: "map_tree" });
+    return;
+  }
+
+  if (command === "map-node" || command === "node" || command === "get_model_form_map_node") {
+    await get_model_form(positionals.slice(1), { ...options, sections: "node", "node-id": options["node-id"] || options.node_id || positionals[2] });
+    return;
+  }
+
+  if (command === "map-item" || command === "item" || command === "get_model_form_map_item") {
+    await get_model_form(positionals.slice(1), {
+      ...options,
+      sections: "item",
+      "node-id": options["node-id"] || options.node_id || positionals[2],
+      "map-item-id": options["map-item-id"] || options.map_item_id || positionals[3],
+    });
+    return;
+  }
+
+  if (command === "used-fields" || command === "fields" || command === "get_model_form_used_fields") {
+    await get_model_form(positionals.slice(1), { ...options, sections: "used_fields" });
+    return;
+  }
+
+  if (command === "validate-create" || command === "validate-create-model-form" || command === "validate_create_model_form") {
+    assert_write_tools_enabled();
+    await validate_create_model_form(positionals.slice(1), options);
+    return;
+  }
+
+  if (command === "create" || command === "create-model-form" || command === "create_model_form") {
+    assert_write_tools_enabled();
+    await create_model_form(positionals.slice(1), options);
+    return;
+  }
+
+  if (command === "validate-update" || command === "validate-update-model-form" || command === "validate_update_model_form") {
+    assert_write_tools_enabled();
+    await validate_update_model_form(positionals.slice(1), options);
+    return;
+  }
+
+  if (command === "update" || command === "update-model-form" || command === "update_model_form") {
+    assert_write_tools_enabled();
+    await update_model_form(positionals.slice(1), options);
+    return;
+  }
+
+  if (command === "download-template" || command === "download-model-form-template" || command === "download_model_form_template") {
+    await download_model_form_template(positionals.slice(1), options);
+    return;
+  }
+
+  if (command === "stage-template" || command === "stage-model-form-template" || command === "stage_model_form_template" || command === "stage-model-form-template-file" || command === "stage_model_form_template_file") {
+    assert_write_tools_enabled();
+    await stage_model_form_template_file(positionals.slice(1), options);
+    return;
+  }
+
+  if (command === "upload-template" || command === "upload-model-form-template" || command === "upload_model_form_template") {
+    assert_write_tools_enabled();
+    await upload_model_form_template(positionals.slice(1), options);
+    return;
+  }
+
+  throw new Error(`Unknown model-forms command: ${command}`);
+}
+
 async function run_report_command(positionals, options) {
   const command = positionals[0];
 
@@ -388,49 +583,49 @@ async function run_report_command(positionals, options) {
     return;
   }
 
-  if (command === "search-report-configurations" || command === "search_report_configurations" || command === "search-configurations" || command === "search") {
-    await search_report_configurations(positionals.slice(1), options);
+  if (command === "search-reports" || command === "search_reports" || command === "search-report-configurations" || command === "search-configurations" || command === "search") {
+    await search_reports(positionals.slice(1), options);
     return;
   }
 
-  if (command === "get-report-configuration" || command === "get_report_configuration" || command === "configuration" || command === "get") {
-    await get_report_configuration(positionals.slice(1), options);
+  if (command === "get-report" || command === "get_report" || command === "get-report-configuration" || command === "configuration" || command === "get") {
+    await get_report(positionals.slice(1), options);
     return;
   }
 
-  if (command === "validate-create-report-configuration" || command === "validate_create_report_configuration" || command === "validate-create") {
+  if (command === "validate-create-report" || command === "validate_create_report" || command === "validate-create-report-configuration" || command === "validate-create") {
     assert_write_tools_enabled();
-    await validate_create_report_configuration(positionals.slice(1), options);
+    await validate_create_report(positionals.slice(1), options);
     return;
   }
 
-  if (command === "validate-update-report-configuration" || command === "validate_update_report_configuration" || command === "validate-update") {
+  if (command === "validate-update-report" || command === "validate_update_report" || command === "validate-update-report-configuration" || command === "validate-update") {
     assert_write_tools_enabled();
-    await validate_update_report_configuration(positionals.slice(1), options);
+    await validate_update_report(positionals.slice(1), options);
     return;
   }
 
-  if (command === "validate-delete-report-configuration" || command === "validate_delete_report_configuration" || command === "validate-delete") {
+  if (command === "validate-delete-report" || command === "validate_delete_report" || command === "validate-delete-report-configuration" || command === "validate-delete") {
     assert_write_tools_enabled();
-    await validate_delete_report_configuration(positionals.slice(1), options);
+    await validate_delete_report(positionals.slice(1), options);
     return;
   }
 
-  if (command === "create-report-configuration" || command === "create_report_configuration" || command === "create") {
+  if (command === "create-report" || command === "create_report" || command === "create-report-configuration" || command === "create") {
     assert_write_tools_enabled();
-    await create_report_configuration(positionals.slice(1), options);
+    await create_report(positionals.slice(1), options);
     return;
   }
 
-  if (command === "update-report-configuration" || command === "update_report_configuration" || command === "update") {
+  if (command === "update-report" || command === "update_report" || command === "update-report-configuration" || command === "update") {
     assert_write_tools_enabled();
-    await update_report_configuration(positionals.slice(1), options);
+    await update_report(positionals.slice(1), options);
     return;
   }
 
-  if (command === "delete-report-configuration" || command === "delete_report_configuration" || command === "delete") {
+  if (command === "delete-report" || command === "delete_report" || command === "delete-report-configuration" || command === "delete") {
     assert_write_tools_enabled();
-    await delete_report_configuration(positionals.slice(1), options);
+    await delete_report(positionals.slice(1), options);
     return;
   }
 
@@ -446,12 +641,14 @@ function print_help() {
     : "";
   const write_help = WRITE_TOOLS_ENABLED
     ? `  ri-agent set-record ENTITY_ID --record-json JSON --approved [--update-fields A,B] [--table]
-  ri-agent validate-create-report-configuration --request-json JSON [--table]
-  ri-agent validate-update-report-configuration REPORT_ID --request-json JSON [--expected-conflict-token TOKEN] [--table]
-  ri-agent validate-delete-report-configuration REPORT_ID --expected-conflict-token TOKEN [--table]
-  ri-agent create-report-configuration --request-json JSON --approved [--table]
-  ri-agent update-report-configuration REPORT_ID --request-json JSON --expected-conflict-token TOKEN --approved [--table]
-  ri-agent delete-report-configuration REPORT_ID --expected-conflict-token TOKEN --approved [--table]
+  ri-agent validate-create-report --request-json JSON [--table]
+  ri-agent validate-update-report REPORT_ID --request-json JSON [--expected-conflict-token TOKEN] [--table]
+  ri-agent validate-delete-report REPORT_ID --expected-conflict-token TOKEN [--table]
+  ri-agent create-report --request-json JSON --approved [--table]
+  ri-agent update-report REPORT_ID --request-json JSON --expected-conflict-token TOKEN --approved [--table]
+  ri-agent delete-report REPORT_ID --expected-conflict-token TOKEN --approved [--table]
+  ri-agent validate-update-model-form MODEL_FORM_ID --request-json JSON [--expected-conflict-token TOKEN] [--table]
+  ri-agent update-model-form MODEL_FORM_ID --request-json JSON --expected-conflict-token TOKEN --approved [--table]
 `
     : "";
 
@@ -482,9 +679,14 @@ ${write_help.trimEnd()}
   ri-agent get-workbench-data WORKBENCH_ID [--limit N|--all] [--cursor CURSOR] [--table]
   ri-agent get-workbench-csv WORKBENCH_ID [--limit N|--all] [--cursor CURSOR] [--raw]
   ri-agent extract-workbench-entities WORKBENCH_ID [--limit N|--all] [--cursor CURSOR] [--table]
-  ri-agent search-report-configurations [--report-type LIST] [--search-text TEXT] [--table]
-  ri-agent get-report-configuration REPORT_ID [--table]
-  ri-agent reports <list-dashboard-pages|get-dashboard-page|get-analytic-data|get-analytic-csv|extract-analytic-entities|list-workbenches|get-workbench-data|get-workbench-csv|extract-workbench-entities|search-report-configurations|get-report-configuration|validate-create|validate-update|validate-delete|create|update|delete> ...
+  ri-agent search-reports [--report-type LIST] [--search-text TEXT] [--table]
+  ri-agent get-report REPORT_ID [--table]
+  ri-agent search-model-forms [--root-feature-code CODE] [--search-text TEXT] [--table]
+  ri-agent get-model-form MODEL_FORM_ID [--sections template,map_tree,used_fields] [--detail-level overview|map|node|item|full] [--table]
+  ri-agent stage-model-form-template MODEL_FORM_ID --file-path ./template.xlsx --approved
+  ri-agent upload-model-form-template MODEL_FORM_ID --file-path ./template.xlsx --expected-conflict-token TOKEN --approved
+  ri-agent model-forms <search|get|validate-create|create|validate-update|update|download-template|stage-template|upload-template> ...
+  ri-agent reports <list-dashboard-pages|get-dashboard-page|get-analytic-data|get-analytic-csv|extract-analytic-entities|list-workbenches|get-workbench-data|get-workbench-csv|extract-workbench-entities|search|get|validate-create|validate-update|validate-delete|create|update|delete> ...
   ri-agent schema <search-features|search-fields|get-fields> ...
 ${pipeline_help.trimEnd()}
   ri-agent tools
@@ -494,14 +696,14 @@ Environment:
   RI_AGENT_BASE_URL        Default Core API base URL. Defaults to ${DEFAULT_BASE_URL}
   RI_AGENT_CLIENT_ID       OAuth client id. Defaults to ${DEFAULT_CLIENT_ID}
   REALINSIGHT_AGENT_CONFIG Credential file path. Defaults to ${CONFIG_PATH}
-  RI_AGENT_ENABLE_WRITE_TOOLS Include write commands/tools in the local inventory when set to 1.
+  RI_AGENT_ENABLE_WRITE_TOOLS Set to 0 to hide completed write commands/tools from the local inventory.
 `);
 }
 
 function assert_write_tools_enabled() {
   if (WRITE_TOOLS_ENABLED) return;
 
-  throw new Error("Write tools are currently disabled. Set RI_AGENT_ENABLE_WRITE_TOOLS=1 and enable AgentToolkit:EnableWriteTools in Core API to use them.");
+  throw new Error("Write tools are currently disabled. Unset RI_AGENT_ENABLE_WRITE_TOOLS or set it to 1, and ensure AgentToolkit:EnableWriteTools is enabled in Core API to use them.");
 }
 
 function assert_pipeline_tools_enabled() {
@@ -544,6 +746,32 @@ Use --end-page 0 to continue through the end of the document.
 `);
 }
 
+function print_model_form_help() {
+  const model_form_write_help = WRITE_TOOLS_ENABLED
+    ? `  ri-agent model-forms validate-create --request-json JSON [--table]
+  ri-agent model-forms create --request-json JSON --approved [--table]
+  ri-agent model-forms validate-update MODEL_FORM_ID --request-json JSON [--expected-conflict-token TOKEN] [--table]
+  ri-agent model-forms update MODEL_FORM_ID --request-json JSON --expected-conflict-token TOKEN --approved [--table]
+  ri-agent model-forms upload-template MODEL_FORM_ID --file-path ./template.xlsx --expected-conflict-token TOKEN --approved [--table]
+`
+    : "";
+
+  console.log(`Realinsight Agent Toolkit model form commands
+
+Usage:
+  ri-agent model-forms search [--root-feature-code CODE] [--search-text TEXT] [--limit N] [--cursor CURSOR] [--table]
+  ri-agent model-forms get MODEL_FORM_ID [--sections template,map_tree,map_definition,node,item,used_fields] [--detail-level overview|map|definition|node|item|full] [--node-id NODE_ID] [--map-item-id MAP_ITEM_ID] [--table]
+  ri-agent model-forms download-template MODEL_FORM_ID --output-path ./template.xlsx [--table]
+${model_form_write_help}
+
+Model form maps are returned as flat node ids so deeply nested embedded maps do not require recursive JSON.
+Use get with focused sections so agents do not need separate template/map/node/item tools.
+Use source_model_form_id in create requests to make derivative copies from existing model forms.
+Write commands require explicit approval. Request map_definition only when changing map nodes/items; use download-template/upload-template for Excel template changes.
+Required OAuth scopes: ${MODEL_FORMS_READ_SCOPE}${WRITE_TOOLS_ENABLED ? `, ${MODEL_FORMS_WRITE_SCOPE} for writes` : ""}
+`);
+}
+
 function print_report_help() {
   const report_write_help = WRITE_TOOLS_ENABLED
     ? `  ri-agent reports validate-create --request-json JSON [--table]
@@ -567,12 +795,12 @@ Usage:
   ri-agent reports get-workbench-data WORKBENCH_ID [--limit N|--all] [--cursor CURSOR] [--table]
   ri-agent reports get-workbench-csv WORKBENCH_ID [--limit N|--all] [--cursor CURSOR] [--raw]
   ri-agent reports extract-workbench-entities WORKBENCH_ID [--limit N|--all] [--cursor CURSOR] [--table]
-  ri-agent reports search-report-configurations [--report-type LIST] [--search-text TEXT] [--table]
-  ri-agent reports get-report-configuration REPORT_ID [--table]
+  ri-agent reports search [--report-type LIST] [--search-text TEXT] [--table]
+  ri-agent reports get REPORT_ID [--table]
 ${report_write_help.trimEnd()}
 
 Cached analytic and workbench tables can be large. Prefer paging results into a temporary CSV/JSONL/SQLite file for multi-page analysis.
-Report configuration writes are side effects. Call get-report-configuration first for the latest conflict token, validate before saving, and use --approved only after explicit user approval.
+Report writes are side effects. Call get-report first for the latest conflict token, validate before saving, and use --approved only after explicit user approval.
 `);
 }
 

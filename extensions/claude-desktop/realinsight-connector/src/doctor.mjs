@@ -1,7 +1,7 @@
 import { promises as fs } from "node:fs";
 
 import { option_bool, option_value } from "./args.mjs";
-import { load_fresh_profile_by_name, load_stored_profile_by_name } from "./auth.mjs";
+import { format_customer_label, load_fresh_profile_by_name, load_stored_profile_by_name } from "./auth.mjs";
 import { build_url, format_error_message, request_json } from "./http.mjs";
 import {
   AGENT_TOOLS,
@@ -72,7 +72,8 @@ export async function doctor(options) {
         profile: stored_profile.name,
         base_url: stored_profile.profile.base_url,
         client_id: stored_profile.profile.client_id,
-        customer_number: stored_profile.profile.customer_number,
+        customer_name: stored_profile.profile.customer_name || "",
+        customer_code: stored_profile.profile.customer_code || "",
         user_id: stored_profile.profile.user_id,
         expires_at_utc: stored_profile.profile.expires_at_utc,
       },
@@ -119,7 +120,8 @@ export async function doctor(options) {
         profile: fresh_profile.name,
         base_url: fresh_profile.profile.base_url,
         client_id: fresh_profile.profile.client_id,
-        customer_number: fresh_profile.profile.customer_number,
+        customer_name: fresh_profile.profile.customer_name || "",
+        customer_code: fresh_profile.profile.customer_code || "",
         user_id: fresh_profile.profile.user_id,
         expires_at_utc: fresh_profile.profile.expires_at_utc,
       },
@@ -146,11 +148,11 @@ export async function doctor(options) {
     });
 
     return pass(
-      `Authenticated as user ${current_user.user_id} for customer ${current_user.customer_number}.`,
+      `Authenticated as user ${current_user.user_id} for customer ${format_customer_label(current_user)}.`,
       {
         credential_type: current_user.credential_type,
-        customer_number: current_user.customer_number,
-        customer_id: current_user.customer_id,
+        customer_name: current_user.customer_name,
+        customer_code: current_user.customer_code,
         user_id: current_user.user_id,
         expires_at_utc: current_user.expires_at_utc,
         scopes: current_user.scopes || [],
@@ -253,8 +255,8 @@ function finish(checks, json, loaded_profile, current_user) {
           name: loaded_profile.name,
           base_url: loaded_profile.profile.base_url,
           client_id: loaded_profile.profile.client_id,
-          customer_number: current_user?.customer_number ?? loaded_profile.profile.customer_number,
-          customer_id: current_user?.customer_id,
+          customer_name: current_user?.customer_name ?? loaded_profile.profile.customer_name ?? "",
+          customer_code: current_user?.customer_code ?? loaded_profile.profile.customer_code ?? "",
           user_id: current_user?.user_id ?? loaded_profile.profile.user_id,
         }
       : null,

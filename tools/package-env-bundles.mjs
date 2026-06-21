@@ -477,10 +477,10 @@ function build_mcp_server(env, runtime, package_version, host) {
         type: host === "claude-plugin" ? "stdio" : undefined,
         command: "node",
         args: [
-          "./src/ri-agent.mjs",
+          host === "claude-plugin" ? "${CLAUDE_PLUGIN_ROOT}/src/ri-agent.mjs" : "./src/ri-agent.mjs",
           "mcp",
         ],
-        cwd: host === "claude-plugin" ? "${CLAUDE_PLUGIN_ROOT}" : ".",
+        cwd: host === "claude-plugin" ? undefined : ".",
         env: build_mcp_env(env),
       }
     : {
@@ -495,6 +495,7 @@ function build_mcp_server(env, runtime, package_version, host) {
       };
 
   if (server.type === undefined) delete server.type;
+  if (server.cwd === undefined) delete server.cwd;
   return server;
 }
 

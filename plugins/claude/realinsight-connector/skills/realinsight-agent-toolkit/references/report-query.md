@@ -12,10 +12,10 @@ The toolkit exposes report definition search/read tools, but it does not yet run
 - `get_children`
 - `get_entity_structure`
 - `get_records`
-- `search_report_configurations`
-- `get_report_configuration`
+- `search_reports`
+- `get_report`
 
-If the user asks to run an existing RI report, say that report execution is not currently exposed through the toolkit. You can inspect the definition with `search_report_configurations` and `get_report_configuration`, then answer from cached analytics/workbenches or compose a bounded lower-level read when appropriate.
+If the user asks to run an existing RI report, say that report execution is not currently exposed through the toolkit. You can inspect the definition with `search_reports` and `get_report`, then answer from cached analytics/workbenches or compose a bounded lower-level read when appropriate.
 
 ## Deterministic Composition Pattern
 

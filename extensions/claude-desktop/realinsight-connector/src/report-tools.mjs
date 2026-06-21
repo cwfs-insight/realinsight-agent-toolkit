@@ -24,6 +24,7 @@ const REPORT_SAVE_FIELDS = [
   "reverses_operation_id",
   "correlation_id",
   "source_reference",
+  "audit_detail",
 ];
 
 export async function list_dashboard_pages(positionals, options) {
@@ -133,8 +134,8 @@ export async function extract_workbench_entities(positionals, options) {
   print_report_entity_refs_payload(payload, options);
 }
 
-export async function search_report_configurations(positionals, options) {
-  const payload = await agent_search_report_configurations({
+export async function search_reports(positionals, options) {
+  const payload = await agent_search_reports({
     profile: option_value(options, "profile", undefined),
     report_type: option_value(options, "report-type", option_value(options, "report_type", undefined)),
     parent_folder_id: option_value(options, "parent-folder-id", option_value(options, "parent_folder_id", undefined)),
@@ -147,8 +148,8 @@ export async function search_report_configurations(positionals, options) {
   print_report_configuration_payload(payload, options);
 }
 
-export async function get_report_configuration(positionals, options) {
-  const payload = await agent_get_report_configuration({
+export async function get_report(positionals, options) {
+  const payload = await agent_get_report({
     profile: option_value(options, "profile", undefined),
     report_id: option_value(options, "report-id", option_value(options, "report_id", positionals[0])),
   });
@@ -156,9 +157,9 @@ export async function get_report_configuration(positionals, options) {
   print_report_configuration_payload(payload, options);
 }
 
-export async function validate_create_report_configuration(positionals, options) {
+export async function validate_create_report(positionals, options) {
   const request = await read_report_request_from_options(options);
-  const payload = await agent_validate_create_report_configuration({
+  const payload = await agent_validate_create_report({
     profile: option_value(options, "profile", undefined),
     ...request,
   });
@@ -166,10 +167,10 @@ export async function validate_create_report_configuration(positionals, options)
   print_report_configuration_payload(payload, options);
 }
 
-export async function validate_update_report_configuration(positionals, options) {
+export async function validate_update_report(positionals, options) {
   const request = await read_report_request_from_options(options);
   const expected_conflict_token = option_value(options, "expected-conflict-token", option_value(options, "expected_conflict_token", undefined));
-  const payload = await agent_validate_update_report_configuration({
+  const payload = await agent_validate_update_report({
     profile: option_value(options, "profile", undefined),
     report_id: option_value(options, "report-id", option_value(options, "report_id", positionals[0])),
     ...request,
@@ -179,8 +180,8 @@ export async function validate_update_report_configuration(positionals, options)
   print_report_configuration_payload(payload, options);
 }
 
-export async function validate_delete_report_configuration(positionals, options) {
-  const payload = await agent_validate_delete_report_configuration({
+export async function validate_delete_report(positionals, options) {
+  const payload = await agent_validate_delete_report({
     profile: option_value(options, "profile", undefined),
     report_id: option_value(options, "report-id", option_value(options, "report_id", positionals[0])),
     expected_conflict_token: option_value(options, "expected-conflict-token", option_value(options, "expected_conflict_token", undefined)),
@@ -189,11 +190,12 @@ export async function validate_delete_report_configuration(positionals, options)
   print_report_configuration_payload(payload, options);
 }
 
-export async function create_report_configuration(positionals, options) {
+export async function create_report(positionals, options) {
   const request = await read_report_request_from_options(options);
-  const payload = await agent_create_report_configuration({
+  const payload = await agent_create_report({
     profile: option_value(options, "profile", undefined),
     ...request,
+    audit_detail: option_value(options, "audit-detail", option_value(options, "audit_detail", request.audit_detail)),
     approved: option_bool(options, "approved", false),
     confirm_save: option_bool(options, "confirm-save", option_bool(options, "confirm_save", false)),
   });
@@ -201,14 +203,15 @@ export async function create_report_configuration(positionals, options) {
   print_report_configuration_payload(payload, options);
 }
 
-export async function update_report_configuration(positionals, options) {
+export async function update_report(positionals, options) {
   const request = await read_report_request_from_options(options);
   const expected_conflict_token = option_value(options, "expected-conflict-token", option_value(options, "expected_conflict_token", undefined));
-  const payload = await agent_update_report_configuration({
+  const payload = await agent_update_report({
     profile: option_value(options, "profile", undefined),
     report_id: option_value(options, "report-id", option_value(options, "report_id", positionals[0])),
     ...request,
     expected_conflict_token: expected_conflict_token || request.expected_conflict_token,
+    audit_detail: option_value(options, "audit-detail", option_value(options, "audit_detail", request.audit_detail)),
     approved: option_bool(options, "approved", false),
     confirm_update: option_bool(options, "confirm-update", option_bool(options, "confirm_update", false)),
     confirm_save: option_bool(options, "confirm-save", option_bool(options, "confirm_save", false)),
@@ -217,8 +220,8 @@ export async function update_report_configuration(positionals, options) {
   print_report_configuration_payload(payload, options);
 }
 
-export async function delete_report_configuration(positionals, options) {
-  const payload = await agent_delete_report_configuration({
+export async function delete_report(positionals, options) {
+  const payload = await agent_delete_report({
     profile: option_value(options, "profile", undefined),
     report_id: option_value(options, "report-id", option_value(options, "report_id", positionals[0])),
     expected_conflict_token: option_value(options, "expected-conflict-token", option_value(options, "expected_conflict_token", undefined)),
@@ -226,6 +229,7 @@ export async function delete_report_configuration(positionals, options) {
     reverses_operation_id: option_value(options, "reverses-operation-id", option_value(options, "reverses_operation_id", undefined)),
     correlation_id: option_value(options, "correlation-id", option_value(options, "correlation_id", undefined)),
     source_reference: option_value(options, "source-reference", option_value(options, "source_reference", undefined)),
+    audit_detail: option_value(options, "audit-detail", option_value(options, "audit_detail", undefined)),
     approved: option_bool(options, "approved", false),
     confirm_delete: option_bool(options, "confirm-delete", option_bool(options, "confirm_delete", false)),
   });
@@ -330,7 +334,7 @@ export async function agent_extract_workbench_entities(input) {
   });
 }
 
-export async function agent_search_report_configurations(input) {
+export async function agent_search_reports(input) {
   const { profile } = await load_fresh_profile_by_name(optional_string(input, "profile"));
 
   return await request_agent_json(profile, "/agent/reports/configurations/search", {
@@ -343,26 +347,26 @@ export async function agent_search_report_configurations(input) {
   });
 }
 
-export async function agent_get_report_configuration(input) {
-  const report_id = required_string(input, "report_id", "get_report_configuration requires report_id.");
+export async function agent_get_report(input) {
+  const report_id = required_string(input, "report_id", "get_report requires report_id.");
   const { profile } = await load_fresh_profile_by_name(optional_string(input, "profile"));
 
   return await request_agent_json(profile, `/agent/reports/configurations/${encodeURIComponent(report_id)}`, {});
 }
 
-export async function agent_validate_create_report_configuration(input) {
+export async function agent_validate_create_report(input) {
   const request = resolve_report_save_request(input);
   const { profile } = await load_fresh_profile_by_name(optional_string(input, "profile"));
 
   return await post_agent_read_json(profile, "/agent/reports/configurations/validate-create", request);
 }
 
-export async function agent_validate_update_report_configuration(input) {
-  const report_id = required_string(input, "report_id", "validate_update_report_configuration requires report_id.");
+export async function agent_validate_update_report(input) {
+  const report_id = required_string(input, "report_id", "validate_update_report requires report_id.");
   const request = resolve_report_save_request(input);
 
   if (!request.expected_conflict_token) {
-    throw new JsonRpcError(-32602, "validate_update_report_configuration requires expected_conflict_token from get_report_configuration.");
+    throw new JsonRpcError(-32602, "validate_update_report requires expected_conflict_token from get_report.");
   }
 
   const { profile } = await load_fresh_profile_by_name(optional_string(input, "profile"));
@@ -370,9 +374,9 @@ export async function agent_validate_update_report_configuration(input) {
   return await post_agent_read_json(profile, `/agent/reports/configurations/${encodeURIComponent(report_id)}/validate-update`, request);
 }
 
-export async function agent_validate_delete_report_configuration(input) {
-  const report_id = required_string(input, "report_id", "validate_delete_report_configuration requires report_id.");
-  const expected_conflict_token = required_string(input, "expected_conflict_token", "validate_delete_report_configuration requires expected_conflict_token from get_report_configuration.");
+export async function agent_validate_delete_report(input) {
+  const report_id = required_string(input, "report_id", "validate_delete_report requires report_id.");
+  const expected_conflict_token = required_string(input, "expected_conflict_token", "validate_delete_report requires expected_conflict_token from get_report.");
   const { profile } = await load_fresh_profile_by_name(optional_string(input, "profile"));
 
   return await post_agent_read_json(profile, `/agent/reports/configurations/${encodeURIComponent(report_id)}/validate-delete`, {
@@ -380,12 +384,12 @@ export async function agent_validate_delete_report_configuration(input) {
   });
 }
 
-export async function agent_create_report_configuration(input) {
+export async function agent_create_report(input) {
   const request = resolve_report_save_request(input);
   const approved = optional_boolean(input, "approved") || optional_boolean(input, "confirm_save") || false;
 
   if (!approved) {
-    throw new JsonRpcError(-32602, "create_report_configuration requires approved=true after explicit user approval.");
+    throw new JsonRpcError(-32602, "create_report requires approved=true after explicit user approval.");
   }
 
   const { profile } = await load_fresh_profile_by_name(optional_string(input, "profile"));
@@ -397,17 +401,17 @@ export async function agent_create_report_configuration(input) {
   });
 }
 
-export async function agent_update_report_configuration(input) {
-  const report_id = required_string(input, "report_id", "update_report_configuration requires report_id.");
+export async function agent_update_report(input) {
+  const report_id = required_string(input, "report_id", "update_report requires report_id.");
   const request = resolve_report_save_request(input);
   const approved = optional_boolean(input, "approved") || optional_boolean(input, "confirm_update") || optional_boolean(input, "confirm_save") || false;
 
   if (!request.expected_conflict_token) {
-    throw new JsonRpcError(-32602, "update_report_configuration requires expected_conflict_token from get_report_configuration.");
+    throw new JsonRpcError(-32602, "update_report requires expected_conflict_token from get_report.");
   }
 
   if (!approved) {
-    throw new JsonRpcError(-32602, "update_report_configuration requires approved=true after explicit user approval.");
+    throw new JsonRpcError(-32602, "update_report requires approved=true after explicit user approval.");
   }
 
   const { profile } = await load_fresh_profile_by_name(optional_string(input, "profile"));
@@ -420,13 +424,13 @@ export async function agent_update_report_configuration(input) {
   });
 }
 
-export async function agent_delete_report_configuration(input) {
-  const report_id = required_string(input, "report_id", "delete_report_configuration requires report_id.");
-  const expected_conflict_token = required_string(input, "expected_conflict_token", "delete_report_configuration requires expected_conflict_token from get_report_configuration.");
+export async function agent_delete_report(input) {
+  const report_id = required_string(input, "report_id", "delete_report requires report_id.");
+  const expected_conflict_token = required_string(input, "expected_conflict_token", "delete_report requires expected_conflict_token from get_report.");
   const approved = optional_boolean(input, "approved") || optional_boolean(input, "confirm_delete") || false;
 
   if (!approved) {
-    throw new JsonRpcError(-32602, "delete_report_configuration requires approved=true after explicit user approval.");
+    throw new JsonRpcError(-32602, "delete_report requires approved=true after explicit user approval.");
   }
 
   const { profile } = await load_fresh_profile_by_name(optional_string(input, "profile"));
@@ -437,6 +441,7 @@ export async function agent_delete_report_configuration(input) {
     reverses_operation_id: optional_string(input, "reverses_operation_id"),
     correlation_id: optional_string(input, "correlation_id"),
     source_reference: optional_string(input, "source_reference"),
+    audit_detail: optional_string(input, "audit_detail"),
     approved: true,
     confirm_delete: optional_boolean(input, "confirm_delete") === true,
   });

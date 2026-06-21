@@ -1,11 +1,11 @@
 # Record Writes
 
-Use this only when write tools are explicitly enabled and the user asks to update Realinsight data.
+Use this only when write tools are available and the user asks to update Realinsight data.
 
 ## Preconditions
 
-- The connected Realinsight environment must have write tools enabled for this toolkit.
-- The local toolkit must have `RI_AGENT_ENABLE_WRITE_TOOLS=1`.
+- The connected Realinsight environment must expose write tools for this toolkit.
+- The local toolkit must not hide write tools with `RI_AGENT_ENABLE_WRITE_TOOLS=0`.
 - The active OAuth profile must include `ri:record.write`.
 - The user must approve the exact entity id, field names, and new values before the tool call.
 
@@ -16,7 +16,7 @@ Use this only when write tools are explicitly enabled and the user asks to updat
 3. Read current values with `get_records` unless the user already supplied the exact current and new values.
 4. Ask the user to approve the exact update.
 5. Call `set_record` with `approved: true`.
-6. Report the returned values, provenance, and warnings.
+6. Report a concise write summary with the target record's friendly name/context, applied fields, skipped or warning fields, provenance, and warnings.
 
 ## Rules
 
@@ -25,3 +25,4 @@ Use this only when write tools are explicitly enabled and the user asks to updat
 - Do not use `set_record` to create records, post pipeline output, or run workflow actions.
 - Treat warnings about locked, unavailable, computed, read-only, sensitive, or security-blocked fields as part of the answer.
 - Realinsight remains authoritative for edit permissions, locks, update rules, and audit behavior.
+- After the write, summarize what Realinsight applied instead of only returning the raw tool payload. Avoid showing raw ids unless the user asks for them.

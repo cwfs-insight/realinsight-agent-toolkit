@@ -2,6 +2,8 @@
 
 Use this when the user asks about an existing dashboard, analytic, portfolio page, watch list, workbench, saved list, or cached operational table in Realinsight.
 
+Do not use this family just because the request mentions business data. If the user names a specific loan, deal, property, tenant, borrower, or other record and asks for current facts about it, usually start with `search_entities` and `get_records`; fall back to dashboard/workbench tools when a curated page/list is likely useful, tool evidence points there, or a broad population/table is the better source.
+
 ## Current Tools
 
 - `list_dashboard_pages`: list dashboard pages available to the current user.
@@ -18,7 +20,7 @@ All of these require `ri:analytics.read` for OAuth callers, and Realinsight stil
 
 ## Dashboard And Analytic Flow
 
-1. Call `list_dashboard_pages` when the user refers to a dashboard page, portfolio page, watch list page, or curated analytics page.
+1. Call `list_dashboard_pages` when the question fits a dashboard page, portfolio page, watch list page, curated analytics page, or likely curated summary.
 2. Call `get_dashboard_page` with the selected `page_id`.
 3. Use the returned analytics list to choose an `analytic_report_id` and understand the backing `base_report_id`.
 4. Call `get_analytic_data` with a small `limit` first.
@@ -29,7 +31,7 @@ All of these require `ri:analytics.read` for OAuth callers, and Realinsight stil
 
 ## Workbench Flow
 
-1. Call `list_workbenches` when the user refers to a module workbench, saved list, or operational list report.
+1. Call `list_workbenches` when the question fits a module workbench, saved list, operational list report, queue, or likely cached operational table.
 2. Use `workbench_code` when the user clearly names a workbench type, otherwise list available workbenches and choose from names/descriptions.
 3. Call `get_workbench_data` with the selected `workbench_id` and a small `limit` first.
 4. For broad analysis, call `get_workbench_csv`, append each CSV page to a temporary file or table, and follow `next_cursor`.
