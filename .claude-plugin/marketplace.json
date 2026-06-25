@@ -7,11 +7,7 @@
   "plugins": [
     {
       "name": "realinsight-connector",
-      "source": {
-        "source": "git-subdir",
-        "url": "https://github.com/cwfs-insight/realinsight-agent-toolkit.git",
-        "path": "plugins/claude/realinsight-connector"
-      },
+      "source": "./plugins/claude/realinsight-connector",
       "description": "Connect Claude to Realinsight tools and skills.",
       "version": "0.2.0",
       "author": {
@@ -30,11 +26,7 @@
     {
       "name": "realinsight-connector-dev",
       "displayName": "Realinsight Connector Dev",
-      "source": {
-        "source": "git-subdir",
-        "url": "https://github.com/cwfs-insight/realinsight-agent-toolkit.git",
-        "path": "providers/claude/dev/plugins/claude/realinsight-connector-dev"
-      },
+      "source": "./providers/claude/dev/plugins/claude/realinsight-connector-dev",
       "description": "Connect Claude to Realinsight dev tools and skills.",
       "version": "0.2.0-dev",
       "author": {
@@ -54,11 +46,7 @@
     {
       "name": "realinsight-connector-qa",
       "displayName": "Realinsight Connector QA",
-      "source": {
-        "source": "git-subdir",
-        "url": "https://github.com/cwfs-insight/realinsight-agent-toolkit.git",
-        "path": "providers/claude/qa/plugins/claude/realinsight-connector-qa"
-      },
+      "source": "./providers/claude/qa/plugins/claude/realinsight-connector-qa",
       "description": "Connect Claude to Realinsight QA tools and skills.",
       "version": "0.2.0-qa",
       "author": {
