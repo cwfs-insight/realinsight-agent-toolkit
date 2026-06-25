@@ -31,11 +31,12 @@ cwfs-insight/realinsight-agent-toolkit
 
 | Host | Production | Development | QA |
 | --- | --- | --- | --- |
-| Codex marketplace path | Repository root, or `providers/codex/prod` | `providers/codex/dev` | `providers/codex/qa` |
+| Codex marketplace | Repository root, install `realinsight-connector` | Repository root, install `realinsight-connector-dev` | Repository root, install `realinsight-connector-qa` |
 | Claude marketplace path | Repository root, or `providers/claude/prod` | `providers/claude/dev` | `providers/claude/qa` |
 | Cursor plugin path | `providers/cursor/plugin` | `providers/cursor/dev/plugin` | `providers/cursor/qa/plugin` |
 
 Codex and Claude install from marketplace roots. Cursor installs from the plugin folder itself.
+In Codex Desktop, leave `Sparse paths` empty when adding this GitHub marketplace; sparse paths filter the checkout but do not change the marketplace root.
 
 Default production endpoints use:
 

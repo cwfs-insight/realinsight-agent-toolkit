@@ -34,6 +34,8 @@ main().catch((error) => {
 });
 
 async function main() {
+  await validate_root_codex_marketplace();
+
   for (const [env, expected] of Object.entries(EXPECTED)) {
     await validate_codex_provider(env, expected);
     await validate_claude_provider(env, expected);
@@ -48,6 +50,44 @@ async function main() {
   }
 
   console.log("Provider validation passed.");
+}
+
+async function validate_root_codex_marketplace() {
+  const marketplace = await read_json(path.join(REPO_ROOT, ".agents/plugins/marketplace.json"));
+  const expected_entries = [
+    ["prod", "./plugins/codex/realinsight-connector"],
+    ["dev", "./providers/codex/dev/plugins/codex/realinsight-connector-dev"],
+    ["qa", "./providers/codex/qa/plugins/codex/realinsight-connector-qa"],
+  ];
+
+  if (marketplace.name !== "realinsight") fail("root", `Codex marketplace name is ${marketplace.name || "(missing)"}.`);
+
+  for (const [env, plugin_path] of expected_entries) {
+    const expected = EXPECTED[env];
+    const entry = marketplace.plugins?.find((plugin) => plugin.name === expected.plugin);
+    if (!entry) {
+      fail("root", `Codex marketplace missing ${expected.plugin}.`);
+      continue;
+    }
+    if (entry.source?.path !== plugin_path) {
+      fail("root", `Codex ${expected.plugin} source path is ${entry.source?.path || "(missing)"}.`);
+      continue;
+    }
+    if (entry.policy?.installation !== "AVAILABLE") {
+      fail("root", `Codex ${expected.plugin} installation policy is ${entry.policy?.installation || "(missing)"}.`);
+    }
+    if (entry.policy?.authentication !== "ON_INSTALL") {
+      fail("root", `Codex ${expected.plugin} authentication policy is ${entry.policy?.authentication || "(missing)"}.`);
+    }
+
+    const plugin_root = path.resolve(REPO_ROOT, plugin_path);
+    const manifest = await read_json(path.join(plugin_root, ".codex-plugin/plugin.json"));
+    const mcp = await read_json(path.join(plugin_root, ".mcp.json"));
+    const server = mcp.mcpServers?.[expected.server];
+    if (manifest.name !== expected.plugin) fail("root", `Codex manifest name for ${expected.plugin} is ${manifest.name || "(missing)"}.`);
+    if (server?.type !== "http") fail("root", `Codex ${expected.plugin} MCP server type must be http.`);
+    if (server?.url !== expected.url) fail("root", `Codex ${expected.plugin} MCP URL is ${server?.url || "(missing)"}.`);
+  }
 }
 
 async function validate_claude_provider(env, expected) {

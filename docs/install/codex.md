@@ -15,7 +15,17 @@ codex
 In the plugin browser, choose the Realinsight marketplace and install `realinsight-connector`.
 The checked-in root marketplace defaults to production for general users.
 
-For an explicit environment marketplace from GitHub, use one of these repository paths:
+In Codex Desktop's GitHub marketplace form, use the repository root and leave `Sparse paths` empty. The root marketplace includes clearly named prod, dev, and QA entries:
+
+```text
+realinsight-connector
+realinsight-connector-dev
+realinsight-connector-qa
+```
+
+`Sparse paths` filters the checkout; it does not make a subdirectory the marketplace root.
+
+The rendered provider folders are kept in the repo for validation, local folder installs, and host layouts that can use a subdirectory as the actual marketplace root:
 
 ```text
 providers/codex/prod
@@ -40,13 +50,13 @@ RI_AGENT_BASE_URL=https://www.realinsight.cloud/api/v1
 RI_AGENT_PROFILE=realinsight-prod
 ```
 
-Dev and QA are separate checked-in provider marketplaces under `providers/codex/dev` and `providers/codex/qa`. Use [../environments.md](../environments.md) for the environment matrix and release guardrails.
+Dev and QA are available in the root GitHub marketplace as clearly named entries and are also rendered as checked-in provider marketplaces under `providers/codex/dev` and `providers/codex/qa`. Use [../environments.md](../environments.md) for the environment matrix and release guardrails.
 
-For non-production testing, prefer:
+For non-production testing in Codex Desktop, prefer adding the repository root and installing:
 
-- Dev: `providers/codex/dev`.
-- QA: `providers/codex/qa`.
-- Prod: the public plugin or hosted Streamable HTTP MCP connector.
+- Dev: `realinsight-connector-dev`.
+- QA: `realinsight-connector-qa`.
+- Prod: `realinsight-connector`.
 
 ## Plugin
 

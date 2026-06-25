@@ -15,6 +15,30 @@
         "authentication": "ON_INSTALL"
       },
       "category": "Developer Tools"
+    },
+    {
+      "name": "realinsight-connector-dev",
+      "source": {
+        "source": "local",
+        "path": "./providers/codex/dev/plugins/codex/realinsight-connector-dev"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    },
+    {
+      "name": "realinsight-connector-qa",
+      "source": {
+        "source": "local",
+        "path": "./providers/codex/qa/plugins/codex/realinsight-connector-qa"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
     }
   ]
 }

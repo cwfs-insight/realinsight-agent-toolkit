@@ -39,13 +39,13 @@ The exporter should be allowlist-driven:
 
 The checked-in public default remains production:
 
-- `.agents/plugins/marketplace.json` exposes the production `realinsight-connector`.
+- `.agents/plugins/marketplace.json` exposes the production `realinsight-connector` first, plus clearly named official dev and QA entries for Codex Desktop's repo-root marketplace flow.
 - The production Codex plugin points at the hosted production Streamable HTTP MCP endpoint.
 - `.claude-plugin/marketplace.json` exposes the production `realinsight-connector` first, plus clearly named official dev and QA entries.
 - The production Claude plugin points at the hosted production Streamable HTTP MCP endpoint.
 - The production Claude Desktop manifest defaults to the production API URL and `realinsight-prod`.
 
-Dev and QA Codex and Claude marketplaces are official checked-in provider distributions under `providers/codex/*` and `providers/claude/*`. They use distinct names, versions, marketplace roots, and MCP server ids. They must not silently replace the checked-in production default.
+Dev and QA Codex and Claude marketplaces are official checked-in provider distributions under `providers/codex/*` and `providers/claude/*`. Codex and Claude also expose dev and QA through their root marketplaces because their GitHub marketplace flows are repo-root oriented. They use distinct names, versions, marketplace roots, and MCP server ids. They must not silently replace the checked-in production default.
 
 Cursor provider plugins are checked in under `providers/cursor/plugin`, `providers/cursor/dev/plugin`, and `providers/cursor/qa/plugin`. They use the same hosted MCP endpoints and copied skill files as the Codex and Claude providers.
 

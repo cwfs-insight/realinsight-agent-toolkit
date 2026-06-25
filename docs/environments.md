@@ -68,7 +68,7 @@ Each variant should set:
 - `RI_AGENT_PROFILE` for the target local auth profile.
 - `REALINSIGHT_AGENT_CONFIG` when local credentials should be stored separately.
 
-The production Codex marketplace is the default marketplace in this repository. Dev and QA provider marketplaces are checked in under `providers/codex/*` and `providers/claude/*`. Cursor provider plugins are checked in under `providers/cursor/*`. The root Claude marketplace also lists prod, dev, and QA plugin entries because Claude's GitHub marketplace install flow is repo-root oriented.
+The production Codex marketplace is listed first in this repository. Dev and QA provider marketplaces are checked in under `providers/codex/*` and `providers/claude/*`. Cursor provider plugins are checked in under `providers/cursor/*`. The root Codex and Claude marketplaces also list prod, dev, and QA plugin entries because their GitHub marketplace install flows are repo-root oriented.
 
 For Claude Desktop, pack from a manifest whose `name`, `display_name`, `base_url` default, and `profile_name` default match the target environment.
 
@@ -111,7 +111,7 @@ For a temporary Codex dev plugin:
 4. Add a temporary marketplace entry that points to the copied plugin folder.
 5. Add that temporary marketplace root in Codex, then install `realinsight-connector-dev`.
 
-Do not put the dev entry in this repository's default `.agents/plugins/marketplace.json`; use the `providers/codex/dev` marketplace root instead.
+Keep dev entries clearly named and separate from the production `realinsight-connector` entry in `.agents/plugins/marketplace.json`.
 
 For a temporary Claude plugin:
 
