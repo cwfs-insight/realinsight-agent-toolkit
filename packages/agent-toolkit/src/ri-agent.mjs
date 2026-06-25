@@ -4,6 +4,7 @@ import { parse_args } from "./args.mjs";
 import { print_tools } from "./agent-tools.mjs";
 import { login, list_profiles, logout, status } from "./auth.mjs";
 import { get_children, get_latest_children } from "./child-tools.mjs";
+import { get_chart_of_accounts, set_chart_of_accounts } from "./chart-of-accounts-tools.mjs";
 import { doctor } from "./doctor.mjs";
 import { search_entities } from "./entity-tools.mjs";
 import { format_error_message, HttpJsonError } from "./http.mjs";
@@ -12,6 +13,7 @@ import {
   create_model_form,
   download_model_form_template,
   get_model_form,
+  search_model_form_folders,
   search_model_forms,
   stage_model_form_template_file,
   upload_model_form_template,
@@ -19,7 +21,6 @@ import {
   validate_create_model_form,
   validate_update_model_form,
 } from "./model-form-tools.mjs";
-import { get_pipeline, queue_pipeline } from "./pipeline-tools.mjs";
 import { get_records, set_record } from "./record-tools.mjs";
 import {
   create_report,
@@ -34,6 +35,7 @@ import {
   get_workbench_csv,
   list_dashboard_pages,
   list_workbenches,
+  search_report_folders,
   search_reports,
   update_report,
   validate_create_report,
@@ -44,11 +46,11 @@ import { get_fields, search_features, search_fields } from "./schema-tools.mjs";
 import { get_entity_structure } from "./structure-tools.mjs";
 import {
   CONFIG_PATH,
+  CHART_OF_ACCOUNTS_WRITE_SCOPE,
   DEFAULT_BASE_URL,
   DEFAULT_CLIENT_ID,
   MODEL_FORMS_READ_SCOPE,
   MODEL_FORMS_WRITE_SCOPE,
-  PIPELINE_TOOLS_ENABLED,
   SCHEMA_READ_SCOPE,
   WRITE_TOOLS_ENABLED,
 } from "./tool-definitions.mjs";
@@ -87,12 +89,6 @@ async function main() {
     return;
   }
 
-  if (command === "pipeline") {
-    assert_pipeline_tools_enabled();
-    await run_pipeline_command(parsed.positionals.slice(1), parsed.options);
-    return;
-  }
-
   if (command === "reports" || command === "analytics") {
     await run_report_command(parsed.positionals.slice(1), parsed.options);
     return;
@@ -100,6 +96,11 @@ async function main() {
 
   if (command === "model-forms" || command === "model_forms" || command === "models") {
     await run_model_form_command(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "chart-of-accounts" || command === "chart_of_accounts" || command === "coa") {
+    await run_chart_of_accounts_command(parsed.positionals.slice(1), parsed.options);
     return;
   }
 
@@ -199,13 +200,34 @@ async function main() {
     return;
   }
 
+  if (command === "search-report-folders" || command === "search_report_folders") {
+    await search_report_folders(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
   if (command === "get-report" || command === "get_report" || command === "get-report-configuration") {
     await get_report(parsed.positionals.slice(1), parsed.options);
     return;
   }
 
+  if (command === "get-chart-of-accounts" || command === "get_chart_of_accounts" || command === "get-coa" || command === "get_coa") {
+    await get_chart_of_accounts(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "set-chart-of-accounts" || command === "set_chart_of_accounts" || command === "set-coa" || command === "set_coa") {
+    assert_write_tools_enabled();
+    await set_chart_of_accounts(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
   if (command === "search-model-forms" || command === "search_model_forms" || command === "search-model-form-configurations") {
     await search_model_forms(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "search-model-form-folders" || command === "search_model_form_folders") {
+    await search_model_form_folders(parsed.positionals.slice(1), parsed.options);
     return;
   }
 
@@ -325,18 +347,6 @@ async function main() {
     return;
   }
 
-  if (command === "get-pipeline" || command === "get_pipeline") {
-    assert_pipeline_tools_enabled();
-    await get_pipeline(parsed.positionals.slice(1), parsed.options);
-    return;
-  }
-
-  if (command === "queue-pipeline" || command === "queue_pipeline") {
-    assert_pipeline_tools_enabled();
-    await queue_pipeline(parsed.positionals.slice(1), parsed.options);
-    return;
-  }
-
   if (command === "tools") {
     print_tools(parsed.options);
     return;
@@ -417,27 +427,6 @@ async function run_schema_command(positionals, options) {
   throw new Error(`Unknown schema command: ${command}`);
 }
 
-async function run_pipeline_command(positionals, options) {
-  const command = positionals[0];
-
-  if (!command || command === "help" || command === "--help" || command === "-h") {
-    print_pipeline_help();
-    return;
-  }
-
-  if (command === "get" || command === "status" || command === "get-pipeline" || command === "get_pipeline") {
-    await get_pipeline(positionals.slice(1), options);
-    return;
-  }
-
-  if (command === "queue" || command === "queue-pipeline" || command === "queue_pipeline") {
-    await queue_pipeline(positionals.slice(1), options);
-    return;
-  }
-
-  throw new Error(`Unknown pipeline command: ${command}`);
-}
-
 async function run_model_form_command(positionals, options) {
   const command = positionals[0];
 
@@ -448,6 +437,11 @@ async function run_model_form_command(positionals, options) {
 
   if (command === "search" || command === "search-model-forms" || command === "search-configurations" || command === "search_model_forms") {
     await search_model_forms(positionals.slice(1), options);
+    return;
+  }
+
+  if (command === "folders" || command === "search-folders" || command === "search-model-form-folders" || command === "search_model_form_folders") {
+    await search_model_form_folders(positionals.slice(1), options);
     return;
   }
 
@@ -530,6 +524,28 @@ async function run_model_form_command(positionals, options) {
   throw new Error(`Unknown model-forms command: ${command}`);
 }
 
+async function run_chart_of_accounts_command(positionals, options) {
+  const command = positionals[0];
+
+  if (!command || command === "help" || command === "--help" || command === "-h") {
+    print_chart_of_accounts_help();
+    return;
+  }
+
+  if (command === "get" || command === "get-chart-of-accounts" || command === "get_chart_of_accounts" || command === "configuration") {
+    await get_chart_of_accounts(positionals.slice(1), options);
+    return;
+  }
+
+  if (command === "set" || command === "set-chart-of-accounts" || command === "set_chart_of_accounts") {
+    assert_write_tools_enabled();
+    await set_chart_of_accounts(positionals.slice(1), options);
+    return;
+  }
+
+  throw new Error(`Unknown chart-of-accounts command: ${command}`);
+}
+
 async function run_report_command(positionals, options) {
   const command = positionals[0];
 
@@ -588,6 +604,11 @@ async function run_report_command(positionals, options) {
     return;
   }
 
+  if (command === "folders" || command === "search-folders" || command === "search-report-folders" || command === "search_report_folders") {
+    await search_report_folders(positionals.slice(1), options);
+    return;
+  }
+
   if (command === "get-report" || command === "get_report" || command === "get-report-configuration" || command === "configuration" || command === "get") {
     await get_report(positionals.slice(1), options);
     return;
@@ -633,14 +654,9 @@ async function run_report_command(positionals, options) {
 }
 
 function print_help() {
-  const pipeline_help = PIPELINE_TOOLS_ENABLED
-    ? `  ri-agent get-pipeline PIPELINE_ID [--table]
-  ri-agent queue-pipeline PIPELINE_TYPE --doc-id DOC_ID --approved [--property-entity-id CRE_ID] [--start-page N] [--end-page N] [--table]
-  ri-agent pipeline <get|queue> ...
-`
-    : "";
   const write_help = WRITE_TOOLS_ENABLED
     ? `  ri-agent set-record ENTITY_ID --record-json JSON --approved [--update-fields A,B] [--table]
+  ri-agent set-chart-of-accounts [COA_ID] --request-json JSON --approved
   ri-agent validate-create-report --request-json JSON [--table]
   ri-agent validate-update-report REPORT_ID --request-json JSON [--expected-conflict-token TOKEN] [--table]
   ri-agent validate-delete-report REPORT_ID --expected-conflict-token TOKEN [--table]
@@ -680,15 +696,18 @@ ${write_help.trimEnd()}
   ri-agent get-workbench-csv WORKBENCH_ID [--limit N|--all] [--cursor CURSOR] [--raw]
   ri-agent extract-workbench-entities WORKBENCH_ID [--limit N|--all] [--cursor CURSOR] [--table]
   ri-agent search-reports [--report-type LIST] [--search-text TEXT] [--table]
+  ri-agent search-report-folders [--parent-folder-id REPORT] [--table]
   ri-agent get-report REPORT_ID [--table]
+  ri-agent get-chart-of-accounts [COA_ID|--coa-data-id ID|--search-text TEXT]
   ri-agent search-model-forms [--root-feature-code CODE] [--search-text TEXT] [--table]
+  ri-agent search-model-form-folders [--parent-folder-id WORKBOOKPROCESS] [--table]
   ri-agent get-model-form MODEL_FORM_ID [--sections template,map_tree,used_fields] [--detail-level overview|map|node|item|full] [--table]
   ri-agent stage-model-form-template MODEL_FORM_ID --file-path ./template.xlsx --approved
   ri-agent upload-model-form-template MODEL_FORM_ID --file-path ./template.xlsx --expected-conflict-token TOKEN --approved
-  ri-agent model-forms <search|get|validate-create|create|validate-update|update|download-template|stage-template|upload-template> ...
-  ri-agent reports <list-dashboard-pages|get-dashboard-page|get-analytic-data|get-analytic-csv|extract-analytic-entities|list-workbenches|get-workbench-data|get-workbench-csv|extract-workbench-entities|search|get|validate-create|validate-update|validate-delete|create|update|delete> ...
+  ri-agent model-forms <search|folders|get|validate-create|create|validate-update|update|download-template|stage-template|upload-template> ...
+  ri-agent chart-of-accounts <get|set> ...
+  ri-agent reports <list-dashboard-pages|get-dashboard-page|get-analytic-data|get-analytic-csv|extract-analytic-entities|list-workbenches|get-workbench-data|get-workbench-csv|extract-workbench-entities|search|folders|get|validate-create|validate-update|validate-delete|create|update|delete> ...
   ri-agent schema <search-features|search-fields|get-fields> ...
-${pipeline_help.trimEnd()}
   ri-agent tools
   ri-agent mcp
 
@@ -706,12 +725,6 @@ function assert_write_tools_enabled() {
   throw new Error("Write tools are currently disabled. Unset RI_AGENT_ENABLE_WRITE_TOOLS or set it to 1, and ensure AgentToolkit:EnableWriteTools is enabled in Core API to use them.");
 }
 
-function assert_pipeline_tools_enabled() {
-  if (PIPELINE_TOOLS_ENABLED) return;
-
-  throw new Error("Pipeline tools are currently disabled. Set RI_AGENT_ENABLE_PIPELINE_TOOLS=1 and enable AgentToolkit:EnablePipelineTools in Core API to use them.");
-}
-
 function print_schema_help() {
   console.log(`Realinsight Agent Toolkit schema commands
 
@@ -723,26 +736,6 @@ Usage:
 Output is JSON by default. Add --table for a compact human-readable table.
 All commands use the active auth profile unless --profile NAME is supplied.
 Required OAuth scope: ${SCHEMA_READ_SCOPE}
-`);
-}
-
-function print_pipeline_help() {
-  console.log(`Realinsight Agent Toolkit pipeline commands
-
-Usage:
-  ri-agent pipeline get PIPELINE_ID [--table]
-  ri-agent pipeline queue PIPELINE_TYPE --doc-id DOC_ID --approved [--property-entity-id CRE_ID] [--start-page N] [--end-page N] [--table]
-
-Pipeline types:
-  doc_extract
-  rent_roll_extract
-  financial_extraction
-  entity_extraction
-  op_stmt_spread
-
-Queueing is a side effect and requires --approved after explicit user approval.
-Rent roll, financial extraction, and op-stmt spread require --property-entity-id or --cre-master-id.
-Use --end-page 0 to continue through the end of the document.
 `);
 }
 
@@ -760,6 +753,7 @@ function print_model_form_help() {
 
 Usage:
   ri-agent model-forms search [--root-feature-code CODE] [--search-text TEXT] [--limit N] [--cursor CURSOR] [--table]
+  ri-agent model-forms folders [--parent-folder-id WORKBOOKPROCESS] [--limit N] [--cursor CURSOR] [--table]
   ri-agent model-forms get MODEL_FORM_ID [--sections template,map_tree,map_definition,node,item,used_fields] [--detail-level overview|map|definition|node|item|full] [--node-id NODE_ID] [--map-item-id MAP_ITEM_ID] [--table]
   ri-agent model-forms download-template MODEL_FORM_ID --output-path ./template.xlsx [--table]
 ${model_form_write_help}
@@ -769,6 +763,24 @@ Use get with focused sections so agents do not need separate template/map/node/i
 Use source_model_form_id in create requests to make derivative copies from existing model forms.
 Write commands require explicit approval. Request map_definition only when changing map nodes/items; use download-template/upload-template for Excel template changes.
 Required OAuth scopes: ${MODEL_FORMS_READ_SCOPE}${WRITE_TOOLS_ENABLED ? `, ${MODEL_FORMS_WRITE_SCOPE} for writes` : ""}
+`);
+}
+
+function print_chart_of_accounts_help() {
+  const write_help = WRITE_TOOLS_ENABLED
+    ? `  ri-agent chart-of-accounts set [COA_ID] --request-json JSON --expected-conflict-token TOKEN --approved
+`
+    : "";
+
+  console.log(`Realinsight Agent Toolkit chart of accounts commands
+
+Usage:
+  ri-agent chart-of-accounts get [COA_ID] [--coa-data-id ID] [--search-text TEXT] [--item-types ACCT,LABEL,COMPUTE] [--account-types REV,EXP]
+${write_help}
+
+Use get with coa_data_id when an accounts record field returns a raw COAData id.
+Use set with dry_run=true before saving metadata, availability, rollup, external mapping, add/update/remove/move account operations.
+Required OAuth scopes: authenticated Realinsight context${WRITE_TOOLS_ENABLED ? `, ${CHART_OF_ACCOUNTS_WRITE_SCOPE} for writes` : ""}
 `);
 }
 
@@ -796,6 +808,7 @@ Usage:
   ri-agent reports get-workbench-csv WORKBENCH_ID [--limit N|--all] [--cursor CURSOR] [--raw]
   ri-agent reports extract-workbench-entities WORKBENCH_ID [--limit N|--all] [--cursor CURSOR] [--table]
   ri-agent reports search [--report-type LIST] [--search-text TEXT] [--table]
+  ri-agent reports folders [--parent-folder-id REPORT] [--limit N] [--cursor CURSOR] [--table]
   ri-agent reports get REPORT_ID [--table]
 ${report_write_help.trimEnd()}
 

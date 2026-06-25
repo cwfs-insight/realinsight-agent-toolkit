@@ -8,12 +8,14 @@ import {
   agent_switch_profile,
 } from "./auth-tools.mjs";
 import { agent_get_children, agent_get_latest_children } from "./child-tools.mjs";
+import { agent_get_chart_of_accounts, agent_set_chart_of_accounts } from "./chart-of-accounts-tools.mjs";
 import { agent_search_entities } from "./entity-tools.mjs";
 import { JsonRpcError } from "./json-rpc.mjs";
 import {
   agent_create_model_form,
   agent_download_model_form_template,
   agent_get_model_form,
+  agent_search_model_form_folders,
   agent_search_model_forms,
   agent_stage_model_form_template_file,
   agent_upload_model_form_template,
@@ -21,7 +23,6 @@ import {
   agent_validate_create_model_form,
   agent_validate_update_model_form,
 } from "./model-form-tools.mjs";
-import { agent_get_pipeline, agent_queue_pipeline } from "./pipeline-tools.mjs";
 import { agent_get_records, agent_set_record } from "./record-tools.mjs";
 import {
   agent_create_report,
@@ -36,6 +37,7 @@ import {
   agent_get_workbench_csv,
   agent_list_dashboard_pages,
   agent_list_workbenches,
+  agent_search_report_folders,
   agent_search_reports,
   agent_update_report,
   agent_validate_create_report,
@@ -45,6 +47,7 @@ import {
 import { agent_get_fields, agent_search_features, agent_search_fields } from "./schema-tools.mjs";
 import { agent_get_entity_structure } from "./structure-tools.mjs";
 import { AGENT_TOOLS } from "./tool-definitions.mjs";
+import { agent_get_tool_reference } from "./tool-reference.mjs";
 import { enforce_tool_result_limit } from "./tool-result-limits.mjs";
 
 export async function call_agent_tool(name, args) {
@@ -68,6 +71,9 @@ export async function call_agent_tool(name, args) {
       break;
     case "request_realinsight_scopes":
       payload = await agent_request_realinsight_scopes(args);
+      break;
+    case "get_tool_reference":
+      payload = agent_get_tool_reference(args);
       break;
     case "search_features":
       payload = await agent_search_features(args);
@@ -126,11 +132,23 @@ export async function call_agent_tool(name, args) {
     case "search_reports":
       payload = await agent_search_reports(args);
       break;
+    case "search_report_folders":
+      payload = await agent_search_report_folders(args);
+      break;
     case "get_report":
       payload = await agent_get_report(args);
       break;
+    case "get_chart_of_accounts":
+      payload = await agent_get_chart_of_accounts(args);
+      break;
+    case "set_chart_of_accounts":
+      payload = await agent_set_chart_of_accounts(args);
+      break;
     case "search_model_forms":
       payload = await agent_search_model_forms(args);
+      break;
+    case "search_model_form_folders":
+      payload = await agent_search_model_form_folders(args);
       break;
     case "get_model_form":
       payload = await agent_get_model_form(args);
@@ -173,12 +191,6 @@ export async function call_agent_tool(name, args) {
       break;
     case "delete_report":
       payload = await agent_delete_report(args);
-      break;
-    case "get_pipeline":
-      payload = await agent_get_pipeline(args);
-      break;
-    case "queue_pipeline":
-      payload = await agent_queue_pipeline(args);
       break;
     default:
       throw new JsonRpcError(-32602, `Unknown tool: ${name}`);

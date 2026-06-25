@@ -18,6 +18,7 @@ export async function get_records(positionals, options) {
     field_profile: option_value(options, "field-profile", option_value(options, "field_profile", undefined)),
     field_names: option_values(options, "field-names", option_values(options, "fields", undefined)),
     schema_codes: option_values(options, "schema-codes", option_values(options, "schema_codes", undefined)),
+    expand_values: option_values(options, "expand-values", option_values(options, "expand_values", undefined)),
     as_of_date: option_value(options, "as-of-date", option_value(options, "as_of_date", undefined)),
     target_currency_id: option_value(options, "target-currency-id", option_value(options, "target_currency_id", undefined)),
   });
@@ -44,6 +45,7 @@ export async function agent_get_records(input) {
   const entity_ids = optional_string_array(input, "entity_ids") || [];
   const field_names = optional_string_array(input, "field_names");
   const schema_codes = optional_string_array(input, "schema_codes");
+  const expand_values = optional_string_array(input, "expand_values");
   const field_profile = optional_string(input, "field_profile");
 
   if (entity_ids.length === 0) {
@@ -62,6 +64,7 @@ export async function agent_get_records(input) {
     field_profile,
     field_names,
     schema_codes,
+    expand_values,
     as_of_date: optional_string(input, "as_of_date"),
     target_currency_id: optional_string(input, "target_currency_id"),
   });

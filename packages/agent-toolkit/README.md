@@ -5,9 +5,9 @@
 ## Quick Start
 
 ```bash
-npx -y @realinsight/agent-toolkit@0.1.0 auth login --base-url https://www.realinsight.cloud/api/v1
-npx -y @realinsight/agent-toolkit@0.1.0 doctor --json
-npx -y @realinsight/agent-toolkit@0.1.0 mcp
+npm run ri-agent -- auth login --base-url https://www.realinsight.cloud/api/v1
+npm run ri-agent -- doctor --json
+npm run ri-agent -- mcp
 ```
 
 For non-production environments, set a separate base URL and profile:
@@ -15,8 +15,10 @@ For non-production environments, set a separate base URL and profile:
 ```bash
 RI_AGENT_BASE_URL=https://your-qa-realinsight-environment.example/api/v1 \
 RI_AGENT_PROFILE=realinsight-qa \
-npx -y @realinsight/agent-toolkit@0.1.0 mcp
+npm run ri-agent -- mcp
 ```
+
+The native `npx -y @realinsight/agent-toolkit@<version>` path is reserved for future npm publication.
 
 ## What This Package Owns
 

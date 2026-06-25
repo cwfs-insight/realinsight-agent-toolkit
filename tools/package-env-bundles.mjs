@@ -9,7 +9,6 @@ import { deflateRawSync } from "node:zlib";
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DEFAULT_DEST = ".tmp/plugin-packages";
 const CONNECTOR_BASE_NAME = "realinsight-connector";
-const PACKAGE_NAME = "@realinsight/agent-toolkit";
 const MAX_TOOL_RESULT_BYTES = "240000";
 const ALL_TYPES = ["codex", "claude-plugin", "claude-mcpb"];
 const DEFAULT_TYPES = ["codex", "claude-plugin"];
@@ -36,6 +35,16 @@ const ENV_DEFAULTS = {
     marketplace_display: "Realinsight Dev",
     base_url: process.env.RI_AGENT_DEV_BASE_URL || "https://www.ri2-dev.com/api/v1",
     profile: "realinsight-dev",
+  },
+  localhost: {
+    code: "localhost",
+    suffix: "localhost",
+    display_suffix: "Localhost",
+    display_name: "Realinsight Connector Localhost",
+    marketplace_name: "realinsight-localhost",
+    marketplace_display: "Realinsight Localhost",
+    base_url: process.env.RI_AGENT_LOCALHOST_BASE_URL || "http://localhost:7000",
+    profile: "realinsight-localhost",
   },
   qa: {
     code: "qa",
@@ -71,10 +80,10 @@ async function main() {
     for (const runtime of options.runtimes) {
       for (const type of options.types) {
         if (type === "codex") {
-          artifacts.push(...await render_codex_bundle({ env, runtime, package_version, dest_root }));
+          artifacts.push(...await render_codex_bundle({ env, runtime, package_version, dest_root, options }));
         }
         else if (type === "claude-plugin") {
-          artifacts.push(...await render_claude_plugin_bundle({ env, runtime, package_version, dest_root }));
+          artifacts.push(...await render_claude_plugin_bundle({ env, runtime, package_version, dest_root, options }));
         }
         else if (type === "claude-mcpb") {
           artifacts.push(...await render_claude_mcpb_bundle({ env, runtime, package_version, dest_root, options }));
@@ -100,6 +109,7 @@ async function parse_args(argv) {
     dest: DEFAULT_DEST,
     base_urls: {},
     package_version: "",
+    build_id: "",
     pack_mcpb: false,
     mcpb_packer: "auto",
     help: false,
@@ -135,14 +145,14 @@ async function parse_args(argv) {
       case "--node":
         options.runtimes = ["node"];
         break;
-      case "--npx":
-        options.runtimes = ["npx"];
-        break;
       case "--dest":
         options.dest = take();
         break;
       case "--package-version":
         options.package_version = take();
+        break;
+      case "--build-id":
+        options.build_id = sanitize_build_id(take());
         break;
       case "--base-url":
         parse_base_url_override(take(), options);
@@ -155,6 +165,9 @@ async function parse_args(argv) {
         break;
       case "--prod-base-url":
         options.base_urls.prod = take();
+        break;
+      case "--localhost-base-url":
+        options.base_urls.localhost = take();
         break;
       case "--pack-mcpb":
         options.pack_mcpb = true;
@@ -179,26 +192,27 @@ function print_help() {
   npm run package:plugins -- [options]
 
 Options:
-  --env dev,qa                 Environments to package. Defaults to dev.
+  --env prod,dev,qa,localhost  Environments to package. Defaults to dev.
   --type codex,claude-plugin   Bundle types. Use all for codex, claude-plugin, claude-mcpb.
-  --runtime node,npx           MCP runtime launch mode. Defaults to node.
+  --runtime node,http          MCP runtime launch mode. Defaults to node. Also supports mcp-remote.
   --node                       Shortcut for --runtime node.
-  --npx                        Shortcut for --runtime npx.
   --dest .tmp/plugin-packages  Output folder.
   --dev-base-url URL           Override development API base URL.
   --qa-base-url URL            Override QA API base URL.
   --prod-base-url URL          Override production API base URL.
+  --localhost-base-url URL     Override localhost API base URL.
   --base-url env=URL           Generic base URL override. Can be repeated.
-  --package-version VERSION    npm package version for npx runtime. Defaults to package version.
+  --package-version VERSION    Version metadata for generated plugin manifests. Defaults to package version.
+  --build-id ID                Optional non-prod plugin version suffix for refreshed test builds.
   --pack-mcpb                  Run mcpb pack for claude-mcpb bundles when available.
   --mcpb-packer auto|local|npx How to run mcpb pack. Defaults to auto.
 
 Examples:
   npm run package:plugins:dev
   npm run package:plugins:qa
-  npm run package:plugins:dev -- --npx
   npm run package:plugins -- --env qa --type all --runtime node
-  npm run package:plugins -- --env qa --type codex --runtime npx --package-version 0.1.0
+  npm run package:plugins -- --env dev --type codex,claude-plugin --runtime http
+  npm run package:plugins -- --env dev --type claude-plugin --runtime mcp-remote
 `);
 }
 
@@ -222,10 +236,19 @@ function normalize_env_code(value) {
 
 function normalize_runtime(value) {
   const normalized = String(value || "").trim().toLowerCase();
-  if (!["node", "npx"].includes(normalized)) {
-    throw new Error(`Unsupported runtime ${value}. Use node or npx.`);
+  if (!["node", "http", "mcp-remote"].includes(normalized)) {
+    throw new Error(`Unsupported runtime ${value}. Use node, http, or mcp-remote.`);
   }
   return normalized;
+}
+
+function sanitize_build_id(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^0-9a-z-]+/g, ".")
+    .replace(/\.+/g, ".")
+    .replace(/^[.-]+|[.-]+$/g, "");
 }
 
 function expand_types(values) {
@@ -259,7 +282,7 @@ function resolve_env(env_code, options) {
   const defaults = ENV_DEFAULTS[env_code];
 
   if (!defaults) {
-    throw new Error(`Unsupported environment ${env_code}. Use dev, qa, or prod.`);
+    throw new Error(`Unsupported environment ${env_code}. Use dev, qa, prod, or localhost.`);
   }
 
   const base_url = normalize_base_url(options.base_urls[env_code] || defaults.base_url);
@@ -284,10 +307,10 @@ function normalize_base_url(value) {
 
 async function read_package_version() {
   const package_json = await read_json(path.join(REPO_ROOT, "packages/agent-toolkit/package.json"));
-  return package_json.version || "0.1.0";
+  return package_json.version || "0.2.0";
 }
 
-async function render_codex_bundle({ env, runtime, package_version, dest_root }) {
+async function render_codex_bundle({ env, runtime, package_version, dest_root, options }) {
   const output_root = path.join(dest_root, env.code, runtime, "codex");
   const marketplace_root = path.join(output_root, "marketplace");
   const plugin_root = path.join(marketplace_root, "plugins/codex", env.plugin_name);
@@ -302,7 +325,10 @@ async function render_codex_bundle({ env, runtime, package_version, dest_root })
 
   await write_json(
     path.join(plugin_root, ".codex-plugin/plugin.json"),
-    build_codex_plugin_manifest(await read_json(path.join(plugin_root, ".codex-plugin/plugin.json")), env),
+    build_codex_plugin_manifest(await read_json(path.join(plugin_root, ".codex-plugin/plugin.json")), env, {
+      build_id: options.build_id,
+      runtime,
+    }),
   );
   await write_json(path.join(plugin_root, ".mcp.json"), build_codex_mcp_config(env, runtime, package_version));
   await fs.writeFile(path.join(plugin_root, "README.md"), build_plugin_readme("Codex", env, runtime, package_version));
@@ -319,7 +345,7 @@ async function render_codex_bundle({ env, runtime, package_version, dest_root })
   ];
 }
 
-async function render_claude_plugin_bundle({ env, runtime, package_version, dest_root }) {
+async function render_claude_plugin_bundle({ env, runtime, package_version, dest_root, options }) {
   const output_root = path.join(dest_root, env.code, runtime, "claude-plugin");
   const marketplace_root = path.join(output_root, "marketplace");
   const plugin_root = path.join(marketplace_root, "plugins/claude", env.plugin_name);
@@ -335,13 +361,17 @@ async function render_claude_plugin_bundle({ env, runtime, package_version, dest
 
   await write_json(
     path.join(plugin_root, ".claude-plugin/plugin.json"),
-    build_claude_plugin_manifest(await read_json(path.join(plugin_root, ".claude-plugin/plugin.json")), env),
+    build_claude_plugin_manifest(await read_json(path.join(plugin_root, ".claude-plugin/plugin.json")), env, {
+      build_id: options.build_id,
+    }),
   );
   await write_json(path.join(plugin_root, ".mcp.json"), build_claude_mcp_config(env, runtime, package_version));
   await fs.writeFile(path.join(plugin_root, "README.md"), build_plugin_readme("Claude", env, runtime, package_version));
   await write_json(
     path.join(marketplace_root, ".claude-plugin/marketplace.json"),
-    build_claude_marketplace(await read_json(path.join(REPO_ROOT, ".claude-plugin/marketplace.json")), env),
+    build_claude_marketplace(await read_json(path.join(REPO_ROOT, ".claude-plugin/marketplace.json")), env, {
+      build_id: options.build_id,
+    }),
   );
   await fs.writeFile(path.join(marketplace_root, "README.md"), build_marketplace_readme("Claude", env, runtime));
   await zip_directory(marketplace_root, marketplace_zip_path);
@@ -366,8 +396,8 @@ async function render_claude_mcpb_bundle({ env, runtime, package_version, dest_r
 
   await reset_dir(output_root);
   await copy_dir(path.join(REPO_ROOT, "extensions/claude-desktop/realinsight-connector"), source_root);
-  await write_json(path.join(source_root, "manifest.json"), build_mcpb_manifest(await read_json(path.join(source_root, "manifest.json")), env));
-  await write_json(path.join(source_root, "package.json"), build_mcpb_package(await read_json(path.join(source_root, "package.json")), env));
+  await write_json(path.join(source_root, "manifest.json"), build_mcpb_manifest(await read_json(path.join(source_root, "manifest.json")), env, options));
+  await write_json(path.join(source_root, "package.json"), build_mcpb_package(await read_json(path.join(source_root, "package.json")), env, options));
   await fs.writeFile(path.join(source_root, "README.md"), build_mcpb_readme(env));
   await zip_directory(source_root, source_zip_path);
 
@@ -384,23 +414,54 @@ async function render_claude_mcpb_bundle({ env, runtime, package_version, dest_r
   return artifacts;
 }
 
-function build_codex_plugin_manifest(manifest, env) {
+function build_codex_plugin_manifest(manifest, env, build_options = {}) {
+  const interface_config = manifest.interface || {};
+
   return {
     ...manifest,
     name: env.plugin_name,
+    version: version_for_env_upload(manifest.version, env, build_options.build_id),
     interface: {
-      ...(manifest.interface || {}),
+      ...interface_config,
       displayName: env.display_name,
+      longDescription: codex_long_description(interface_config.longDescription, build_options.runtime),
     },
   };
 }
 
-function build_claude_plugin_manifest(manifest, env) {
+function codex_long_description(description, runtime) {
+  const fallback = "Use Realinsight from Codex with Realinsight MCP tools and bundled skills.";
+  const value = description || fallback;
+
+  if (runtime === "http") {
+    return value.replace(
+      "Use Realinsight from Codex through the local ri-agent MCP server.",
+      "Use Realinsight from Codex through the hosted Realinsight Streamable HTTP MCP server.",
+    );
+  }
+
+  if (runtime === "node") {
+    return value.replace(
+      "Use Realinsight from Codex through the local ri-agent MCP server.",
+      "Use Realinsight from Codex through the bundled local ri-agent MCP server.",
+    );
+  }
+
+  return value;
+}
+
+function build_claude_plugin_manifest(manifest, env, build_options = {}) {
   return {
     ...manifest,
     name: env.plugin_name,
     displayName: env.display_name,
+    version: version_for_env_upload(manifest.version, env, build_options.build_id),
   };
+}
+
+function version_for_env_upload(version, env, build_id) {
+  if (!version || env.code === "prod" || !build_id) return version;
+  return `${version}-${env.code}.${build_id}`;
 }
 
 function build_codex_marketplace(marketplace, env) {
@@ -430,7 +491,7 @@ function build_codex_marketplace(marketplace, env) {
   };
 }
 
-function build_claude_marketplace(marketplace, env) {
+function build_claude_marketplace(marketplace, env, build_options = {}) {
   const plugin = source_marketplace_plugin(marketplace);
 
   return {
@@ -440,6 +501,7 @@ function build_claude_marketplace(marketplace, env) {
       {
         ...plugin,
         name: env.plugin_name,
+        version: version_for_env_upload(plugin.version, env, build_options.build_id),
         source: `./plugins/claude/${env.plugin_name}`,
       },
     ],
@@ -459,7 +521,9 @@ function source_marketplace_plugin(marketplace) {
 
 function build_codex_mcp_config(env, runtime, package_version) {
   return {
-    [env.server_name]: build_mcp_server(env, runtime, package_version, "codex"),
+    mcpServers: {
+      [env.server_name]: build_mcp_server(env, runtime, package_version, "codex"),
+    },
   };
 }
 
@@ -471,10 +535,15 @@ function build_claude_mcp_config(env, runtime, package_version) {
   };
 }
 
-function build_mcp_server(env, runtime, package_version, host) {
-  const server = runtime === "node"
+function build_mcp_server(env, runtime, _package_version, host) {
+  const server = runtime === "http"
     ? {
-        type: host === "claude-plugin" ? "stdio" : undefined,
+        type: "http",
+        url: `${env.base_url}/mcp`,
+      }
+    : runtime === "node"
+    ? {
+        type: "stdio",
         command: "node",
         args: [
           host === "claude-plugin" ? "${CLAUDE_PLUGIN_ROOT}/src/ri-agent.mjs" : "./src/ri-agent.mjs",
@@ -484,14 +553,17 @@ function build_mcp_server(env, runtime, package_version, host) {
         env: build_mcp_env(env),
       }
     : {
-        type: host === "claude-plugin" ? "stdio" : undefined,
+        type: "stdio",
         command: "npx",
         args: [
           "-y",
-          package_spec(package_version),
-          "mcp",
+          "mcp-remote@latest",
+          `${env.base_url}/mcp`,
+          "--transport",
+          "http-only",
+          "--auth-timeout",
+          "120",
         ],
-        env: build_mcp_env(env),
       };
 
   if (server.type === undefined) delete server.type;
@@ -507,11 +579,7 @@ function build_mcp_env(env) {
   };
 }
 
-function package_spec(package_version) {
-  return package_version === "latest" ? PACKAGE_NAME : `${PACKAGE_NAME}@${package_version}`;
-}
-
-function build_mcpb_manifest(manifest, env) {
+function build_mcpb_manifest(manifest, env, build_options = {}) {
   const server = manifest.server || {};
   const mcp_config = server.mcp_config || {};
 
@@ -519,6 +587,7 @@ function build_mcpb_manifest(manifest, env) {
     ...manifest,
     name: env.plugin_name,
     display_name: env.display_name,
+    version: version_for_env_upload(manifest.version, env, build_options.build_id),
     server: {
       ...server,
       mcp_config: {
@@ -543,10 +612,11 @@ function build_mcpb_manifest(manifest, env) {
   };
 }
 
-function build_mcpb_package(package_json, env) {
+function build_mcpb_package(package_json, env, build_options = {}) {
   return {
     ...package_json,
     name: package_name_for_env(package_json.name, env),
+    version: version_for_env_upload(package_json.version, env, build_options.build_id),
   };
 }
 
@@ -568,6 +638,13 @@ function package_name_for_env(package_name, env) {
 
 function build_marketplace_readme(host, env, runtime) {
   const install_target = host === "Codex" ? "Codex marketplace root" : "Claude marketplace root";
+  const target = runtime === "http" || runtime === "mcp-remote" ? `${env.base_url}/mcp` : env.base_url;
+  const auth_note = runtime === "http"
+    ? "Authentication is handled by the host connector flow for the hosted MCP endpoint."
+    : runtime === "mcp-remote"
+    ? "Authentication is handled by mcp-remote through the hosted MCP OAuth flow."
+    : `The default local auth profile is \`${env.profile}\`.`;
+
   return `# ${env.display_name} ${host} ${runtime} Bundle
 
 This folder is a local ${install_target} for ${env.display_name}.
@@ -577,31 +654,48 @@ Add this folder as the marketplace root, then install \`${env.plugin_name}\` fro
 The plugin points to:
 
 \`\`\`text
-${env.base_url}
+${target}
 \`\`\`
 
-The local auth profile is \`${env.profile}\`.
+${auth_note}
 `;
 }
 
 function build_plugin_readme(host, env, runtime, package_version) {
-  const runtime_text = runtime === "node"
+  const runtime_text = runtime === "http"
+    ? "hosted Streamable HTTP MCP endpoint"
+    : runtime === "node"
     ? "bundled local `ri-agent` runtime"
-    : `published npm package \`${package_spec(package_version)}\``;
-  const run_command = runtime === "node"
+    : "hosted Streamable HTTP MCP endpoint bridged through local stdio by `mcp-remote`";
+  const run_command = runtime === "http"
+    ? `${env.base_url}/mcp`
+    : runtime === "node"
     ? "node ./src/ri-agent.mjs mcp"
-    : `npx -y ${package_spec(package_version)} mcp`;
-  const login_command = runtime === "node"
+    : `npx -y mcp-remote@latest ${env.base_url}/mcp --transport http-only --auth-timeout 120`;
+  const login_command = runtime === "http"
+    ? "Use the host application's connector OAuth flow."
+    : runtime === "node"
     ? `node ./src/ri-agent.mjs auth login --base-url ${env.base_url} --profile ${env.profile}`
-    : `npx -y ${package_spec(package_version)} auth login --base-url ${env.base_url} --profile ${env.profile}`;
+    : "Complete the browser OAuth flow started by mcp-remote.";
+
+  const auth_section = runtime === "http" || runtime === "mcp-remote"
+    ? "Authentication is handled by the host application's connector/OAuth flow."
+    : `For manual auth testing:
+
+\`\`\`text
+${login_command}
+\`\`\``;
+  const profile_section = runtime === "http" || runtime === "mcp-remote"
+    ? ""
+    : `\nThe default local auth profile is \`${env.profile}\`.\n`;
 
   return `# ${env.display_name} For ${host}
 
-This temporary ${host} plugin bundles the Realinsight skill and launches the ${runtime_text}.
+This ${host} plugin bundles the Realinsight skill and connects to the ${runtime_text}.
 
 The MCP server runs:
 
-\`\`\`bash
+\`\`\`text
 ${run_command}
 \`\`\`
 
@@ -610,21 +704,16 @@ By default it points to:
 \`\`\`text
 ${env.base_url}
 \`\`\`
+${profile_section}
 
-The default local auth profile is \`${env.profile}\`.
-
-For manual auth testing:
-
-\`\`\`bash
-${login_command}
-\`\`\`
+${auth_section}
 `;
 }
 
 function build_mcpb_readme(env) {
   return `# ${env.display_name} For Claude Desktop
 
-This temporary folder is the source for a Claude Desktop \`.mcpb\` local extension.
+This folder is the source for a Claude Desktop \`.mcpb\` local extension.
 
 The manifest points to:
 

@@ -13,7 +13,7 @@ Use this for nontechnical users when the harness supports hosted connectors.
 Local stdio MCP uses the `ri-agent` CLI profile store:
 
 ```bash
-npx -y @realinsight/agent-toolkit@0.1.0 auth login --base-url https://www.realinsight.cloud/api/v1
+npm run ri-agent -- auth login --base-url https://www.realinsight.cloud/api/v1
 ```
 
 The local MCP server also exposes helper tools:

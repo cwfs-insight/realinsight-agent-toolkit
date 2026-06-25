@@ -77,6 +77,18 @@ export async function search_model_forms(positionals, options) {
   print_model_form_payload(payload, options);
 }
 
+export async function search_model_form_folders(positionals, options) {
+  const payload = await agent_search_model_form_folders({
+    profile: option_value(options, "profile", undefined),
+    parent_folder_id: option_value(options, "parent-folder-id", option_value(options, "parent_folder_id", positionals[0])),
+    include_inactive: option_bool_if_present(options, "include-inactive") ?? option_bool_if_present(options, "include_inactive"),
+    limit: option_value(options, "limit", undefined),
+    cursor: option_value(options, "cursor", undefined),
+  });
+
+  print_model_form_payload(payload, options);
+}
+
 export async function get_model_form(positionals, options) {
   const payload = await agent_get_model_form({
     profile: option_value(options, "profile", undefined),
@@ -208,6 +220,17 @@ export async function agent_search_model_forms(input) {
     root_feature_code: optional_string(input, "root_feature_code"),
     parent_folder_id: optional_string(input, "parent_folder_id"),
     search_text: optional_string(input, "search_text"),
+    include_inactive: optional_boolean(input, "include_inactive"),
+    limit: optional_integer(input, "limit"),
+    cursor: optional_string(input, "cursor"),
+  });
+}
+
+export async function agent_search_model_form_folders(input) {
+  const { profile } = await load_fresh_profile_by_name(optional_string(input, "profile"));
+
+  return await request_agent_json(profile, "/agent/model-forms/folders/search", {
+    parent_folder_id: optional_string(input, "parent_folder_id"),
     include_inactive: optional_boolean(input, "include_inactive"),
     limit: optional_integer(input, "limit"),
     cursor: optional_string(input, "cursor"),

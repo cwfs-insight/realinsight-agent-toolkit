@@ -16,10 +16,18 @@ Install the production connector:
 /plugin install realinsight-connector@realinsight
 ```
 
+For an explicit environment marketplace from GitHub, use one of these repository paths:
+
+```text
+providers/claude/prod
+providers/claude/dev
+providers/claude/qa
+```
+
 The plugin bundles:
 
 - `skills/realinsight-agent-toolkit/`
-- A plugin-root `.mcp.json` that starts the local Realinsight MCP server.
+- A plugin-root `.mcp.json` for the selected runtime.
 
 The installed skill is namespaced by the plugin name:
 
@@ -32,7 +40,7 @@ The installed skill is namespaced by the plugin name:
 Use this fallback when plugin installation is unavailable. Configure Claude Code to run:
 
 ```bash
-npx -y @realinsight/agent-toolkit@0.1.0 mcp
+node /path/to/ri-agent-toolkit/packages/agent-toolkit/src/ri-agent.mjs mcp
 ```
 
 with:
@@ -42,6 +50,8 @@ RI_AGENT_BASE_URL=https://www.realinsight.cloud/api/v1
 ```
 
 Use the files under `examples/mcp/` as the source for command, args, and environment settings.
+
+If Claude Code needs a local stdio process but should connect to the hosted MCP endpoint, use a generated `.tmp/dist/*/mcp-remote/` package when explicitly built. Those use `npx -y mcp-remote@latest <mcp-url>` and do not require the Realinsight toolkit to be published to npm.
 
 ## Skill Guidance
 

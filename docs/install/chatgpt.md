@@ -13,7 +13,4 @@ The preferred ChatGPT path is a hosted Realinsight Connector backed by the Reali
 
 The `@realinsight/agent-toolkit` package is still useful for local pilots, but ChatGPT users should not need to install Node, run `npx`, or manage local auth files.
 
-## Future Apps SDK Path
-
-If Realinsight later needs custom UI inside ChatGPT, add a ChatGPT app surface that reuses the hosted MCP tools and adds component resources for workflows that benefit from visual review.
-See [../openai-apps.md](../openai-apps.md) for the Apps SDK requirements and OpenAI submission path.
+Future official hosted connector work should be tracked outside the local package install guides. The generated packages in this repo are not marketplace submissions.

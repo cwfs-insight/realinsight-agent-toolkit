@@ -16,10 +16,10 @@ For a Realinsight-provided pilot or custom environment, use:
 examples/mcp/mcp.custom.json
 ```
 
-The server launches:
+The source-based stdio server launches:
 
 ```bash
-npx -y @realinsight/agent-toolkit@0.1.0 mcp
+node /path/to/ri-agent-toolkit/packages/agent-toolkit/src/ri-agent.mjs mcp
 ```
 
 ## Hosted MCP

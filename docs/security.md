@@ -24,4 +24,4 @@ Run a secret scan in the release workflow before pushing generated assets.
 
 ## Reporting
 
-Report vulnerabilities through this repository's GitHub Security Advisory workflow. If that workflow is unavailable, contact Realinsight through the security contact published on realinsight.cloud.
+Report vulnerabilities through this repository's GitHub Security Advisory workflow. If that workflow is unavailable, contact Realinsight through the security contact published on realinsight.com.

@@ -26,6 +26,7 @@ const SCOPES = [
   "ri:analytics.read",
   "ri:model_forms.read",
   "ri:model_forms.write",
+  "ri:chart_of_accounts.write",
   "ri:reports.write",
 ];
 
@@ -46,12 +47,14 @@ async function main() {
     base_url = `http://127.0.0.1:${address.port}`;
     await write_config(config_path);
 
-    const { AGENT_TOOLS } = await import("../src/tool-definitions.mjs");
+    const { AGENT_TOOLS, DEFAULT_SCOPE } = await import("../src/tool-definitions.mjs");
     const { call_agent_tool } = await import("../src/agent-tools.mjs");
     const { build_url } = await import("../src/http.mjs");
     const { enforce_tool_result_limit } = await import("../src/tool-result-limits.mjs");
 
     agent_tools = AGENT_TOOLS;
+    assert_no_pipeline_surface(DEFAULT_SCOPE, agent_tools);
+    assert_no_chart_of_accounts_read_scope(DEFAULT_SCOPE, agent_tools);
 
     run_build_url_smoke(build_url);
     await run_doctor_smoke(config_path);
@@ -72,6 +75,25 @@ async function main() {
     server.close();
     await fs.rm(temp_dir, { recursive: true, force: true });
   }
+}
+
+function assert_no_pipeline_surface(default_scope, tools) {
+  const forbidden = new Set(["ri:pipeline.read", "ri:pipeline.queue"]);
+  const default_scopes = String(default_scope || "").split(/\s+/).filter(Boolean);
+  const leaked_default_scope = default_scopes.find((scope) => forbidden.has(scope));
+  assert(!leaked_default_scope, `default scope still includes unsupported pipeline scope: ${leaked_default_scope}`);
+
+  const leaked_tool = tools.find((tool) => forbidden.has(tool.scope) || ["get_pipeline", "queue_pipeline"].includes(tool.name));
+  assert(!leaked_tool, `tool inventory still includes unsupported pipeline surface: ${leaked_tool?.name || leaked_tool?.scope}`);
+}
+
+function assert_no_chart_of_accounts_read_scope(default_scope, tools) {
+  const deprecated_scope = "ri:chart_of_accounts.read";
+  const default_scopes = String(default_scope || "").split(/\s+/).filter(Boolean);
+  assert(!default_scopes.includes(deprecated_scope), `default scope still includes deprecated COA read scope: ${deprecated_scope}`);
+
+  const leaked_tool = tools.find((tool) => tool.scope === deprecated_scope);
+  assert(!leaked_tool, `tool inventory still uses deprecated COA read scope: ${leaked_tool?.name || deprecated_scope}`);
 }
 
 function run_build_url_smoke(build_url) {
@@ -136,6 +158,30 @@ async function run_tool_call_smoke(call_agent_tool, temp_dir) {
   const return_switch_result = await call_agent_tool("switch_profile", { profile: "default" });
   assert(return_switch_result.status === "active_profile_switched", "switch_profile did not switch back to default");
 
+  const tool_reference_result = await call_agent_tool("get_tool_reference", {
+    topic: "reports",
+    format: "schema",
+  });
+  assert(tool_reference_result.topic === "reports", "get_tool_reference did not return reports topic");
+  assert(tool_reference_result.schema.list_fields.includes("master_feature_code"), "get_tool_reference did not return report schema fields");
+
+  const report_computed_reference_result = await call_agent_tool("get_tool_reference", {
+    topic: "report_computed_fields",
+    format: "schema",
+  });
+  assert(report_computed_reference_result.topic === "report_computed_fields", "get_tool_reference did not return report_computed_fields topic");
+  assert(report_computed_reference_result.schema.computed_column_types.includes("DATA"), "get_tool_reference did not return computed column types");
+
+  const model_form_map_reference_result = await call_agent_tool("get_tool_reference", {
+    topic: "model_form_map_schema",
+    format: "schema",
+  });
+  assert(model_form_map_reference_result.topic === "model_form_map_schema", "get_tool_reference did not return model_form_map_schema topic");
+  assert(model_form_map_reference_result.schema.map_item.fields.includes("coa_actuals_layout"), "model form map reference did not include coa_actuals_layout");
+  assert(model_form_map_reference_result.schema.coa_actuals_layout.fields.includes("coa_adjustment_column"), "model form map reference did not include actual adjustment column");
+  assert(model_form_map_reference_result.schema.coa_budget_layout.fields.includes("coa_total_column"), "model form map reference did not include budget total column");
+  assert(model_form_map_reference_result.schema.coa_servicing_balance_layout.fields.includes("value_column"), "model form map reference did not include servicing balance value column");
+
   const feature_result = await call_agent_tool("search_features", { query: "loan" });
   assert(feature_result.items[0].feature_code === "Loan", "search_features did not return Loan");
   assert(!("customer_number" in feature_result.provenance), "tool provenance returned customer_number");
@@ -190,11 +236,45 @@ async function run_tool_call_smoke(call_agent_tool, temp_dir) {
   const report_search_result = await call_agent_tool("search_reports", { search_text: "Loan" });
   assert(report_search_result.items[0].report_id === "report-2", "search_reports did not return report-2");
 
+  const report_folder_search_result = await call_agent_tool("search_report_folders", { parent_folder_id: "REPORT" });
+  assert(report_folder_search_result.items[0].folder_id === "report-folder-agent", "search_report_folders did not return report-folder-agent");
+
   const report_config_result = await call_agent_tool("get_report", { report_id: "report-2" });
   assert(report_config_result.items[0].conflict_token === "conflict-report-2", "get_report did not return latest conflict token");
 
+  const coa_result = await call_agent_tool("get_chart_of_accounts", {
+    coa_id: "coa-1",
+    include_accounts: true,
+  });
+  assert(coa_result.items[0].chart._id === "coa-1", "get_chart_of_accounts did not return coa-1");
+  assert(coa_result.items[0].chart.Layout[0].AccountType === "REV", "get_chart_of_accounts did not return revenue account");
+
+  const coa_dry_run_result = await call_agent_tool("set_chart_of_accounts", {
+    coa_id: "coa-1",
+    expected_conflict_token: "conflict-coa-1",
+    operations: [
+      { op: "update_account", item_id: "coa-item-1", account: { item_name: "Revenue Updated" } },
+    ],
+    dry_run: true,
+  });
+  assert(coa_dry_run_result.items[0].can_apply === true, "set_chart_of_accounts dry_run did not return can_apply");
+  assert(coa_dry_run_result.items[0].normalized_preview.chart.Layout[0].ItemName === "Revenue Updated", "set_chart_of_accounts dry_run did not preview account update");
+
+  const coa_update_result = await call_agent_tool("set_chart_of_accounts", {
+    coa_id: "coa-1",
+    expected_conflict_token: "conflict-coa-1",
+    operations: [
+      { op: "update_account", item_id: "coa-item-1", account: { item_name: "Revenue Updated" } },
+    ],
+    approved: true,
+  });
+  assert(coa_update_result.items[0].chart_of_accounts.chart.Layout[0].ItemName === "Revenue Updated", "set_chart_of_accounts did not update account name");
+
   const model_form_search_result = await call_agent_tool("search_model_forms", { search_text: "Loan" });
   assert(model_form_search_result.items[0].model_form_id === "model-form-1", "search_model_forms did not return model-form-1");
+
+  const model_form_folder_search_result = await call_agent_tool("search_model_form_folders", { parent_folder_id: "WORKBOOKPROCESS" });
+  assert(model_form_folder_search_result.items[0].folder_id === "model-form-folder-agent", "search_model_form_folders did not return model-form-folder-agent");
 
   const model_form_result = await call_agent_tool("get_model_form", { model_form_id: "model-form-1" });
   assert(model_form_result.items[0].model_form.conflict_token === "conflict-model-form-1", "get_model_form did not return latest conflict token");
@@ -418,7 +498,7 @@ async function handle_request(request, response) {
 
   if (request.method === "GET" && url.pathname === "/agent/metadata") {
     write_json(response, 200, {
-      api_version: "0.1.0",
+      api_version: "0.2.0",
         tools: agent_tools.map((tool) => ({
           name: tool.name,
           route: tool.route,
@@ -690,6 +770,21 @@ async function handle_request(request, response) {
     return;
   }
 
+  if (request.method === "GET" && url.pathname === "/agent/reports/folders/search") {
+    write_json(response, 200, agent_result("search_report_folders", "ri:analytics.read", [
+      {
+        folder_id: "report-folder-agent",
+        active: true,
+        parent_folder_id: "REPORT",
+        folder_name: "agent",
+        child_folder_count: 1,
+        report_count: 0,
+        conflict_token: "conflict-report-folder-agent",
+      },
+    ]));
+    return;
+  }
+
   if (request.method === "GET" && url.pathname === "/agent/reports/configurations/report-2") {
     write_json(response, 200, agent_result("get_report", "ri:analytics.read", [
       {
@@ -723,6 +818,114 @@ async function handle_request(request, response) {
     return;
   }
 
+  if (request.method === "POST" && url.pathname === "/agent/chart-of-accounts/get") {
+    write_json(response, 200, agent_result("get_chart_of_accounts", "", [
+      {
+        chart: {
+          _id: body.coa_id || "coa-1",
+          ChartOfAccountsCode: "OPERATING",
+          ChartName: "Operating Statement COA",
+          ChartDescription: "Contract smoke COA",
+          MasterFeatureCode: "CREMaster",
+          Availability: [
+            {
+              feature_code: "CREOpStmt",
+              template: "C",
+            },
+          ],
+          Layout: [
+            {
+              ItemId: "coa-item-1",
+              ChartOfAccountsItemCode: "4000",
+              ChartOrder: 1,
+              ItemType: "ACCT",
+              AccountId: "4000",
+              ItemName: "Revenue",
+              FieldType: "money",
+              AccountType: "REV",
+              ExternalGlXref: [
+                {
+                  ExternalGlSystemRef: "gl-1",
+                  AccountCode: "4000",
+                },
+              ],
+            },
+          ],
+          RollUpToCharts: [],
+          MonitorRuleSets: [],
+        },
+        conflict_token: "conflict-coa-1",
+        account_type_values: [
+          {
+            id: "acct-rev",
+            code: "REV",
+            display: "Revenue",
+          },
+        ],
+      },
+    ]));
+    return;
+  }
+
+  if (request.method === "POST" && url.pathname === "/agent/chart-of-accounts/set") {
+    assert(body.expected_conflict_token === "conflict-coa-1", "set_chart_of_accounts missing conflict token");
+    const dry_run = body.dry_run === true;
+
+    if (dry_run) {
+      write_json(response, 200, agent_result("set_chart_of_accounts", "ri:chart_of_accounts.write", [
+        {
+          can_apply: true,
+          errors: [],
+          warnings: [],
+          normalized_preview: {
+            chart: {
+              _id: body.coa_id || "coa-1",
+              ChartName: "Operating Statement COA",
+              Layout: [
+                {
+                  ItemId: "coa-item-1",
+                  ItemName: "Revenue Updated",
+                  AccountType: "REV",
+                },
+              ],
+            },
+            conflict_token: "conflict-coa-1",
+          },
+        },
+      ]));
+      return;
+    }
+
+    assert(body.approved === true, "set_chart_of_accounts did not send approved=true");
+    write_json(response, 200, agent_result("set_chart_of_accounts", "ri:chart_of_accounts.write", [
+      {
+        chart_of_accounts: {
+          chart: {
+            _id: body.coa_id || "coa-1",
+            ChartName: "Operating Statement COA",
+            Layout: [
+              {
+                ItemId: "coa-item-1",
+                ItemName: "Revenue Updated",
+                AccountType: "REV",
+              },
+            ],
+          },
+          conflict_token: "conflict-coa-2",
+        },
+        audit_log: {
+          resource_family: "configuration",
+          resource_type: "chart_of_accounts",
+          resource_id: body.coa_id || "coa-1",
+          action: "update",
+          operation_id: "op-coa-1",
+          changes: [],
+        },
+      },
+    ]));
+    return;
+  }
+
   if (request.method === "GET" && url.pathname === "/agent/model-forms/configurations/search") {
     write_json(response, 200, agent_result("search_model_forms", "ri:model_forms.read", [
       {
@@ -738,6 +941,21 @@ async function handle_request(request, response) {
         map_node_count: 1,
         map_item_count: 1,
         conflict_token: "conflict-model-form-1",
+      },
+    ]));
+    return;
+  }
+
+  if (request.method === "GET" && url.pathname === "/agent/model-forms/folders/search") {
+    write_json(response, 200, agent_result("search_model_form_folders", "ri:model_forms.read", [
+      {
+        folder_id: "model-form-folder-agent",
+        active: true,
+        parent_folder_id: "WORKBOOKPROCESS",
+        folder_name: "agent",
+        child_folder_count: 1,
+        model_form_count: 0,
+        conflict_token: "conflict-model-form-folder-agent",
       },
     ]));
     return;

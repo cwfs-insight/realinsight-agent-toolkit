@@ -5,9 +5,9 @@ The local `npx` path is still valuable for developers, pilots, and harnesses tha
 ## Baseline Flow
 
 ```bash
-npx -y @realinsight/agent-toolkit@0.1.0 auth login --base-url https://www.realinsight.cloud/api/v1
-npx -y @realinsight/agent-toolkit@0.1.0 auth status
-npx -y @realinsight/agent-toolkit@0.1.0 doctor --json
+npm run ri-agent -- auth login --base-url https://www.realinsight.cloud/api/v1
+npm run ri-agent -- auth status
+npm run ri-agent -- doctor --json
 ```
 
 `auth login` should open a browser when possible, display the user code as a fallback, and use the normal Realinsight login/SSO/MFA flow. The CLI stores profiles locally in `~/.realinsight/agent-toolkit.json` unless `REALINSIGHT_AGENT_CONFIG` is set.

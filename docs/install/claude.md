@@ -12,7 +12,7 @@ Use this for business users when the hosted Realinsight MCP endpoint is availabl
 
 ## Claude Plugin
 
-Use this for Claude Code or Claude surfaces that support plugin marketplaces. It installs the Realinsight skill and the local stdio MCP configuration together.
+Use this for Claude Code or Claude surfaces that support plugin marketplaces. It installs the Realinsight skill and a hosted Streamable HTTP MCP configuration together.
 
 Add the marketplace from this public repository:
 
@@ -33,7 +33,7 @@ For local testing from a checkout of this repository:
 /plugin install realinsight-connector@realinsight
 ```
 
-The bundled plugin lives at `plugins/claude/realinsight-connector/`. Its MCP config points to production and uses the `realinsight-prod` auth profile by default.
+The bundled plugin lives at `plugins/claude/realinsight-connector/`. Its MCP config points to the production hosted MCP endpoint by default.
 
 ## Claude Desktop Local Extension
 

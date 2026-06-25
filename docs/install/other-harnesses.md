@@ -6,10 +6,10 @@ Use this path for Pi, OpenClaw, and other agent harnesses when their install mod
 
 Prefer hosted Streamable HTTP MCP for business users. Use local stdio MCP for developer and pilot installs.
 
-Local stdio command:
+Local stdio command from this repo:
 
 ```bash
-npx -y @realinsight/agent-toolkit@0.1.0 mcp
+node /path/to/ri-agent-toolkit/packages/agent-toolkit/src/ri-agent.mjs mcp
 ```
 
 Production environment:
@@ -31,8 +31,8 @@ skills/realinsight-agent-toolkit/SKILL.md
 Use the direct CLI as a fallback:
 
 ```bash
-npx -y @realinsight/agent-toolkit@0.1.0 doctor --json
-npx -y @realinsight/agent-toolkit@0.1.0 search-features loan
+npm run ri-agent -- doctor --json
+npm run ri-agent -- search-features loan
 ```
 
 Do not build a one-off integration that bypasses approved Realinsight APIs or the normal Realinsight auth flow.

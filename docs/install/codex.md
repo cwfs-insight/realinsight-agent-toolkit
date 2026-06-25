@@ -13,7 +13,15 @@ codex
 ```
 
 In the plugin browser, choose the Realinsight marketplace and install `realinsight-connector`.
-This public marketplace exposes production only.
+The checked-in root marketplace defaults to production for general users.
+
+For an explicit environment marketplace from GitHub, use one of these repository paths:
+
+```text
+providers/codex/prod
+providers/codex/dev
+providers/codex/qa
+```
 
 If you are testing a local checkout instead of GitHub, add the repository root:
 
@@ -21,7 +29,7 @@ If you are testing a local checkout instead of GitHub, add the repository root:
 codex plugin marketplace add /path/to/ri-agent-toolkit
 ```
 
-Do not point Codex directly at `plugins/codex/realinsight-connector` or `catalogs/codex`. Codex expects a marketplace root, and this repository exposes that at `.agents/plugins/marketplace.json`.
+Do not point Codex directly at `plugins/codex/realinsight-connector`. Codex expects a marketplace root, and this repository exposes that at `.agents/plugins/marketplace.json`.
 
 ## Environments
 
@@ -32,13 +40,13 @@ RI_AGENT_BASE_URL=https://www.realinsight.cloud/api/v1
 RI_AGENT_PROFILE=realinsight-prod
 ```
 
-Dev and QA should be separate opt-in plugin entries or local MCP configs, not entries in the public marketplace. Use [../environments.md](../environments.md) for the environment matrix and release guardrails.
+Dev and QA are separate checked-in provider marketplaces under `providers/codex/dev` and `providers/codex/qa`. Use [../environments.md](../environments.md) for the environment matrix and release guardrails.
 
-For internal testing, prefer:
+For non-production testing, prefer:
 
-- Dev: local source command with `RI_AGENT_PROFILE=realinsight-dev`.
-- QA: npm package or local source command with `RI_AGENT_PROFILE=realinsight-qa`.
-- Prod: the public plugin, npm package, or hosted Streamable HTTP MCP connector.
+- Dev: `providers/codex/dev`.
+- QA: `providers/codex/qa`.
+- Prod: the public plugin or hosted Streamable HTTP MCP connector.
 
 ## Plugin
 
@@ -51,10 +59,10 @@ plugins/codex/realinsight-connector
 The plugin bundles:
 
 - Realinsight skill instructions.
-- Stdio MCP server config for the published toolkit package.
+- MCP server config for the selected runtime.
 - User-facing metadata for the Codex plugin directory.
 
-## Marketplace Catalog
+## Marketplace
 
 Codex marketplace metadata is stored at:
 
@@ -62,26 +70,20 @@ Codex marketplace metadata is stored at:
 .agents/plugins/marketplace.json
 ```
 
-The legacy reference copy under `catalogs/codex/marketplace.json` should stay in sync, but the repo marketplace path above is the install surface.
+## MCP Runtime
 
-Keep the marketplace entry pointed at:
+The checked-in production Codex plugin points at the hosted production Streamable HTTP MCP endpoint:
 
 ```text
-./plugins/codex/realinsight-connector
+https://www.realinsight.cloud/api/v1/mcp
 ```
 
-## MCP Auth
+Provider marketplaces under `providers/codex/*` point Codex at hosted MCP URLs. Local generated `.tmp/dist/*/node/codex/` packages can include bundled Node source when explicitly built for local testing. Native `npx @realinsight/agent-toolkit` packages should not be used until npm publication exists.
 
-The plugin launches:
-
-```bash
-npx -y @realinsight/agent-toolkit@0.1.0 mcp
-```
-
-Use the `connect_realinsight` helper tool or run:
+For local stdio auth testing, run:
 
 ```bash
-npx -y @realinsight/agent-toolkit@0.1.0 auth login \
+npm run ri-agent -- auth login \
   --base-url https://www.realinsight.cloud/api/v1 \
   --profile realinsight-prod
 ```

@@ -1,6 +1,6 @@
 {
   "name": "@realinsight/agent-toolkit",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Realinsight CLI and stdio MCP server for authenticated agent access to Realinsight APIs.",
   "private": false,
   "type": "module",

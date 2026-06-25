@@ -1,0 +1,35 @@
+{
+  "name": "realinsight-connector-qa",
+  "version": "0.2.0-qa",
+  "description": "Codex plugin for authenticated Realinsight schema, entity, record, dashboard, analytic, and workbench tools.",
+  "author": {
+    "name": "Realinsight"
+  },
+  "keywords": [
+    "realinsight",
+    "mcp",
+    "commercial-real-estate",
+    "entity-search",
+    "records"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Realinsight Connector QA",
+    "shortDescription": "Connect Codex to Realinsight tools and skills",
+    "longDescription": "Use Realinsight from Codex through the hosted Realinsight Streamable HTTP MCP server. This connector supports browser-based Realinsight login, schema and field discovery, broad entity search, child/latest-child retrieval, structure traversal, read-only record hydration, dashboard/analytic/workbench cached data, CSV export pages, and entity-ref helpers using the active user's Realinsight permissions.",
+    "developerName": "Realinsight",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Search Realinsight for a loan or property and show key fields.",
+      "Find the Realinsight feature and fields for this request.",
+      "Use Realinsight records to answer my portfolio question."
+    ],
+    "brandColor": "#2563EB"
+  },
+  "mcpServers": "./.mcp.json"
+}

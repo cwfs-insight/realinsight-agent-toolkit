@@ -148,6 +148,18 @@ export async function search_reports(positionals, options) {
   print_report_configuration_payload(payload, options);
 }
 
+export async function search_report_folders(positionals, options) {
+  const payload = await agent_search_report_folders({
+    profile: option_value(options, "profile", undefined),
+    parent_folder_id: option_value(options, "parent-folder-id", option_value(options, "parent_folder_id", positionals[0])),
+    include_inactive: option_bool_if_present(options, "include-inactive") ?? option_bool_if_present(options, "include_inactive"),
+    limit: option_value(options, "limit", undefined),
+    cursor: option_value(options, "cursor", undefined),
+  });
+
+  print_report_configuration_payload(payload, options);
+}
+
 export async function get_report(positionals, options) {
   const payload = await agent_get_report({
     profile: option_value(options, "profile", undefined),
@@ -341,6 +353,17 @@ export async function agent_search_reports(input) {
     report_type: optional_string(input, "report_type"),
     parent_folder_id: optional_string(input, "parent_folder_id"),
     search_text: optional_string(input, "search_text"),
+    include_inactive: optional_boolean(input, "include_inactive"),
+    limit: optional_integer(input, "limit"),
+    cursor: optional_string(input, "cursor"),
+  });
+}
+
+export async function agent_search_report_folders(input) {
+  const { profile } = await load_fresh_profile_by_name(optional_string(input, "profile"));
+
+  return await request_agent_json(profile, "/agent/reports/folders/search", {
+    parent_folder_id: optional_string(input, "parent_folder_id"),
     include_inactive: optional_boolean(input, "include_inactive"),
     limit: optional_integer(input, "limit"),
     cursor: optional_string(input, "cursor"),

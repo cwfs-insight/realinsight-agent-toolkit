@@ -11,8 +11,9 @@ Use this when search results need real field values before answering.
    - `key_fields` for identity, labels, and lightweight disambiguation.
    - explicit `field_names` or `schema_codes` for a user-requested metric or column set.
 3. Call `get_records` with one feature code and bounded `entity_ids`.
-4. Use `display_value` for user-facing labels when present, and `value` for exact ids or codes.
-5. Use `warnings`, `is_truncated`, `limits`, and `provenance` in the final answer.
+4. Add `expand_values=["accounts"]` when an accounts field should include its chart layout and compact COAData detail.
+5. Use `display_value` for user-facing labels when present, and `value` for exact ids or codes.
+6. Use `warnings`, `is_truncated`, `limits`, and `provenance` in the final answer.
 
 ## Field Selection
 
@@ -29,7 +30,8 @@ Use this when search results need real field values before answering.
 - Some fields may be omitted if unavailable or not readable. Treat warnings as part of the answer, not as noise.
 - Do not infer missing values are zero or false.
 - Unset dates are returned as `value = null` with `is_unset_value = true` when possible. Older raw paths may show `0001-01-01` or `1900-01-01`; treat those as unset, not real business dates.
-- Dictionary, reference, user, document, currency, and index-rate fields may include `expansion_type` and `expansion_hint`. Prefer existing `display_value`; only make follow-up calls when the user needs richer detail.
+- Dictionary, reference, user, document, currency, index-rate, and accounts fields may include `expansion_type` and `expansion_hint`. Prefer existing `display_value`; only make follow-up calls when the user needs richer detail.
+- Accounts fields have `expansion_type = "account"` and usually store a `COAData` id in `value`. Use `expand_values=["accounts"]` for bounded inline expansion, or call `get_chart_of_accounts` with `coa_data_id` when the agent needs more focused chart/account filters.
 
 ## Example
 

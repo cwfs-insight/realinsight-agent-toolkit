@@ -1,0 +1,21 @@
+{
+  "name": "realinsight-connector-dev",
+  "displayName": "Realinsight Connector Dev",
+  "version": "0.2.0-dev",
+  "description": "Claude plugin for authenticated Realinsight schema, entity, record, dashboard, analytic, and workbench tools.",
+  "author": {
+    "name": "Realinsight"
+  },
+  "homepage": "https://www.realinsight.com",
+  "repository": "https://github.com/cwfs-insight/realinsight-agent-toolkit",
+  "license": "MIT",
+  "keywords": [
+    "realinsight",
+    "mcp",
+    "commercial-real-estate",
+    "entity-search",
+    "records"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json"
+}

@@ -14,9 +14,9 @@ Release automation should pass `--environment` or `--base-url` instead of editin
 
 ## Default Rule
 
-The public repo marketplace must install production by default.
+The public repo marketplace must install production by default for general users.
 
-Do not add dev or QA plugin entries to `.agents/plugins/marketplace.json`. Those environments are opt-in, internal, or pilot surfaces. Keeping them out of the default marketplace avoids accidental non-production access for public users.
+Development and QA are official generated distributions, but they must be clearly labeled as non-production. Keeping production as the default avoids accidental non-production access for public users.
 
 ## Environment Isolation
 
@@ -36,7 +36,7 @@ Example local login for QA:
 ```bash
 RI_AGENT_PROFILE=realinsight-qa \
 REALINSIGHT_AGENT_CONFIG="$HOME/.realinsight/agent-toolkit-qa.json" \
-npx -y @realinsight/agent-toolkit@0.1.0 auth login \
+node ./packages/agent-toolkit/src/ri-agent.mjs auth login \
   --base-url https://www.ri2-qa.com/api/v1
 ```
 
@@ -44,12 +44,14 @@ npx -y @realinsight/agent-toolkit@0.1.0 auth login \
 
 | Model | Production | QA | Development |
 | --- | --- | --- | --- |
-| Hosted Streamable HTTP MCP | Public default connector at the production MCP URL. | Optional QA connector for controlled testing only. | Usually not exposed publicly. |
-| Local stdio MCP with npm | `npx -y @realinsight/agent-toolkit@<version> mcp`. | Prefer a published QA/prerelease package once QA promotion occurs. | Avoid unless testing a published prerelease. |
-| Local stdio MCP from source | Useful for package verification. | Useful when validating a QA source snapshot. | Preferred developer path. |
-| Codex plugin | Public marketplace exposes prod only. | Internal marketplace or local checkout entry only. | Local checkout entry only. |
-| Claude plugin | Public marketplace exposes prod only. | Internal marketplace or local checkout entry only. | Local checkout entry only. |
-| Claude Desktop MCPB | Pack prod for public users. | Pack an internal QA MCPB with QA defaults. | Pack a local dev MCPB from source with dev defaults. |
+| Hosted Streamable HTTP MCP | Public default connector at the production MCP URL. | Official QA connector for controlled testing. | Official dev connector for development and selected external testing. |
+| Local stdio MCP from bundled Node source | Generated package includes `src/ri-agent.mjs`. | Generated package includes `src/ri-agent.mjs`. | Preferred developer path. |
+| Hosted MCP through `mcp-remote` | Optional compatibility bridge for stdio-only hosts. | Optional compatibility bridge for stdio-only hosts. | Optional compatibility bridge for stdio-only hosts. |
+| Local stdio MCP with npm | Future `npx -y @realinsight/agent-toolkit@<version> mcp` after npm publication. | Future prerelease package after npm publication. | Avoid until npm publication exists. |
+| Codex plugin | Checked-in public marketplace exposes prod by default. | Official provider marketplace under `providers/codex/qa`. | Official provider marketplace under `providers/codex/dev`. |
+| Claude plugin | Checked-in public marketplace exposes prod by default. | Official provider marketplace under `providers/claude/qa`. | Official provider marketplace under `providers/claude/dev`. |
+| Cursor plugin | Official provider plugin under `providers/cursor/plugin`. | Official provider plugin under `providers/cursor/qa/plugin`. | Official provider plugin under `providers/cursor/dev/plugin`. |
+| Claude Desktop MCPB | Pack prod for public users. | Pack an official QA MCPB with QA defaults. | Pack an official dev MCPB with dev defaults. |
 
 ## Manifest Strategy
 
@@ -66,7 +68,7 @@ Each variant should set:
 - `RI_AGENT_PROFILE` for the target local auth profile.
 - `REALINSIGHT_AGENT_CONFIG` when local credentials should be stored separately.
 
-The production Codex and Claude marketplaces are the only default marketplaces in this repository. Internal Codex or Claude marketplaces can be generated or copied from templates later, but they should not replace `.agents/plugins/marketplace.json` or `.claude-plugin/marketplace.json`.
+The production Codex marketplace is the default marketplace in this repository. Dev and QA provider marketplaces are checked in under `providers/codex/*` and `providers/claude/*`. Cursor provider plugins are checked in under `providers/cursor/*`. The root Claude marketplace also lists prod, dev, and QA plugin entries because Claude's GitHub marketplace install flow is repo-root oriented.
 
 For Claude Desktop, pack from a manifest whose `name`, `display_name`, `base_url` default, and `profile_name` default match the target environment.
 
@@ -81,12 +83,7 @@ npm run package:plugins:dev
 npm run package:plugins:qa
 ```
 
-These default to the bundled `node` runtime and package the Codex and Claude plugin bundles. Use `npx` only after `@realinsight/agent-toolkit` has been published:
-
-```bash
-npm run package:plugins:dev -- --npx
-npm run package:plugins:qa -- --npx
-```
+These default to the bundled `node` runtime and package the Codex and Claude plugin bundles. Use `--runtime mcp-remote` when a host needs a local stdio process that bridges to hosted HTTP MCP. Do not use the native toolkit `npx` runtime until `@realinsight/agent-toolkit` has been published.
 
 To include Claude Desktop MCPB source bundles too, pass `--type all`:
 
@@ -95,7 +92,7 @@ npm run package:plugins:dev -- --type all
 npm run package:plugins:qa -- --type all
 ```
 
-The `node` runtime bundles the current local `ri-agent` source into each plugin and sets `cwd` so the MCP server starts from the installed plugin folder. The `npx` runtime writes MCP configs that use `npx -y @realinsight/agent-toolkit@<version> mcp`; packaging does not execute `npx`.
+The `node` runtime bundles the current local `ri-agent` source into each plugin and sets `cwd` so the MCP server starts from the installed plugin folder. The `mcp-remote` runtime writes MCP configs that use `npx -y mcp-remote@latest <hosted-mcp-url>`; packaging does not execute the bridge.
 
 For direct local MCP testing:
 
@@ -114,7 +111,7 @@ For a temporary Codex dev plugin:
 4. Add a temporary marketplace entry that points to the copied plugin folder.
 5. Add that temporary marketplace root in Codex, then install `realinsight-connector-dev`.
 
-Do not put the dev entry in this repository's default `.agents/plugins/marketplace.json`.
+Do not put the dev entry in this repository's default `.agents/plugins/marketplace.json`; use the `providers/codex/dev` marketplace root instead.
 
 For a temporary Claude plugin:
 
@@ -124,7 +121,7 @@ For a temporary Claude plugin:
 4. Add a temporary Claude marketplace entry that points to the copied plugin folder.
 5. Add that temporary marketplace in Claude, then install `realinsight-connector-dev`.
 
-Do not put the dev entry in this repository's default `.claude-plugin/marketplace.json`.
+For Claude GitHub installs, the root `.claude-plugin/marketplace.json` lists `realinsight-connector-dev`. For local/provider-path testing, use the `providers/claude/dev` marketplace root.
 
 For a temporary Claude Desktop dev MCPB:
 
@@ -144,17 +141,17 @@ Because the production Claude manifest exposes `base_url` and `profile_name` as 
 
 General MCP harness examples:
 
-- Production npm: `examples/mcp/mcp.prod.json`
+- Production hosted HTTP: `examples/mcp/mcp.prod.json`
 - Production source: `examples/mcp/mcp.prod-source.json`
-- QA npm: `examples/mcp/mcp.qa.json`
+- QA hosted HTTP: `examples/mcp/mcp.qa.json`
 - QA source: `examples/mcp/mcp.qa-source.json`
 - Development source: `examples/mcp/mcp.dev-source.json`
-- Custom/pilot npm: `examples/mcp/mcp.custom.json`
+- Custom/pilot hosted HTTP: `examples/mcp/mcp.custom.json`
 - Custom/pilot source: `examples/mcp/mcp.custom-source.json`
 
 ## Release Guardrails
 
-- Never commit private dev or QA URLs into public default manifests.
+- Never commit private pilot URLs into public default manifests. Keep dev and QA URLs confined to clearly labeled generated distributions or explicit environment examples.
 - Keep Streamable HTTP MCP public docs pointed at production unless a specific QA connector is being tested.
 - Make `auth_status` part of every environment-specific install guide so the user and model can confirm `profile`, `base_url`, customer, user, and scopes before reading data.
-- When the Realinsight source repo publishes into this repo, it should update shared runtime code and skills, then render or validate environment-specific manifests without overwriting repo-owned docs and catalog defaults.
+- When the Realinsight source repo publishes into this repo, it should update shared runtime code and skills, then render or validate environment-specific manifests without overwriting repo-owned docs and provider defaults.

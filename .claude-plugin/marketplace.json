@@ -1,18 +1,23 @@
 {
   "name": "realinsight",
   "owner": {
-    "name": "Realinsight"
+    "name": "Realinsight",
+    "url": "https://www.realinsight.com"
   },
   "plugins": [
     {
       "name": "realinsight-connector",
-      "source": "./plugins/claude/realinsight-connector",
+      "source": {
+        "source": "git-subdir",
+        "url": "cwfs-insight/realinsight-agent-toolkit",
+        "path": "plugins/claude/realinsight-connector"
+      },
       "description": "Connect Claude to Realinsight tools and skills.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Realinsight"
       },
-      "homepage": "https://www.realinsight.cloud",
+      "homepage": "https://www.realinsight.com",
       "repository": "https://github.com/cwfs-insight/realinsight-agent-toolkit",
       "license": "MIT",
       "keywords": [
@@ -20,6 +25,54 @@
         "mcp",
         "commercial-real-estate",
         "analytics"
+      ]
+    },
+    {
+      "name": "realinsight-connector-dev",
+      "displayName": "Realinsight Connector Dev",
+      "source": {
+        "source": "git-subdir",
+        "url": "cwfs-insight/realinsight-agent-toolkit",
+        "path": "providers/claude/dev/plugins/claude/realinsight-connector-dev"
+      },
+      "description": "Connect Claude to Realinsight dev tools and skills.",
+      "version": "0.2.0-dev",
+      "author": {
+        "name": "Realinsight"
+      },
+      "homepage": "https://www.realinsight.com",
+      "repository": "https://github.com/cwfs-insight/realinsight-agent-toolkit",
+      "license": "MIT",
+      "keywords": [
+        "realinsight",
+        "mcp",
+        "commercial-real-estate",
+        "analytics",
+        "development"
+      ]
+    },
+    {
+      "name": "realinsight-connector-qa",
+      "displayName": "Realinsight Connector QA",
+      "source": {
+        "source": "git-subdir",
+        "url": "cwfs-insight/realinsight-agent-toolkit",
+        "path": "providers/claude/qa/plugins/claude/realinsight-connector-qa"
+      },
+      "description": "Connect Claude to Realinsight QA tools and skills.",
+      "version": "0.2.0-qa",
+      "author": {
+        "name": "Realinsight"
+      },
+      "homepage": "https://www.realinsight.com",
+      "repository": "https://github.com/cwfs-insight/realinsight-agent-toolkit",
+      "license": "MIT",
+      "keywords": [
+        "realinsight",
+        "mcp",
+        "commercial-real-estate",
+        "analytics",
+        "qa"
       ]
     }
   ]

@@ -1,18 +1,8 @@
 {
   "mcpServers": {
     "realinsight-agent-toolkit": {
-      "type": "stdio",
-      "command": "npx",
-      "args": [
-        "-y",
-        "@realinsight/agent-toolkit@0.1.0",
-        "mcp"
-      ],
-      "env": {
-        "RI_AGENT_BASE_URL": "https://your-realinsight-environment.example/api/v1",
-        "RI_AGENT_PROFILE": "realinsight-custom",
-        "RI_AGENT_MAX_TOOL_RESULT_BYTES": "240000"
-      }
+      "type": "http",
+      "url": "https://your-realinsight-environment.example/api/v1/mcp"
     }
   }
 }

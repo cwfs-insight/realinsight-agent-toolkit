@@ -17,6 +17,7 @@ export const DEFAULT_SCOPE = [
   "ri:analytics.read",
   "ri:model_forms.read",
   "ri:model_forms.write",
+  "ri:chart_of_accounts.write",
   "ri:reports.write",
 ].join(" ");
 export const REFRESH_SKEW_MS = 2 * 60 * 1000;
@@ -36,14 +37,12 @@ export const STRUCTURE_READ_SCOPE = "ri:structure.read";
 export const ANALYTICS_READ_SCOPE = "ri:analytics.read";
 export const MODEL_FORMS_READ_SCOPE = "ri:model_forms.read";
 export const MODEL_FORMS_WRITE_SCOPE = "ri:model_forms.write";
+export const CHART_OF_ACCOUNTS_WRITE_SCOPE = "ri:chart_of_accounts.write";
 export const REPORT_WRITE_SCOPE = "ri:reports.write";
-export const PIPELINE_READ_SCOPE = "ri:pipeline.read";
-export const PIPELINE_QUEUE_SCOPE = "ri:pipeline.queue";
-export const PIPELINE_TOOLS_ENABLED = parse_env_bool(process.env.RI_AGENT_ENABLE_PIPELINE_TOOLS);
 export const WRITE_TOOLS_ENABLED = parse_env_bool(process.env.RI_AGENT_ENABLE_WRITE_TOOLS, true);
-const PIPELINE_TOOL_NAMES = new Set(["get_pipeline", "queue_pipeline"]);
 const WRITE_TOOL_NAMES = new Set([
   "set_record",
+  "set_chart_of_accounts",
   "validate_create_report",
   "validate_update_report",
   "validate_delete_report",
@@ -67,11 +66,13 @@ export const MCP_SUPPORTED_PROTOCOL_VERSIONS = [
 export const MCP_SERVER_INFO = {
   name: "realinsight-agent-toolkit",
   title: "Realinsight Agent Toolkit",
-  version: "0.1.0",
+  version: "0.2.0",
 };
 export const MCP_INSTRUCTIONS = [
   "Realinsight is a commercial real estate asset management and servicing platform.",
   "All Realinsight tool calls run through Core API using the authenticated Realinsight user and customer context.",
+  "For harnesses that implement tool search, search by tool family first instead of loading every tool: schema features fields; entity search records structure children; analytics dashboard workbench CSV; report configuration folders; model form configuration folders template map; chart of accounts configuration COAData; tool reference schema. Common always-useful entry tools are get_tool_reference, search_features, search_fields, get_fields, search_entities, get_records, get_entity_structure, search_reports, search_report_folders, get_report, search_model_forms, search_model_form_folders, get_model_form, and get_chart_of_accounts.",
+  "If the Realinsight Agent Toolkit skill is unavailable, call get_tool_reference for compact workflow/schema guidance instead of relying on large inline tool schemas.",
   "Choose the tool family from the shape of the user's question. For a named loan, deal, property, tenant, borrower, or other specific record, use schema/entity/record tools first. For broad portfolio, system, dashboard, saved-list, or operational-table questions, inspect curated dashboard/workbench/cache tools when they match the request.",
   "Do not default to dashboard/workbench tools only because a question is broad business data; use them when the user mentions an existing page/list/analytic/workbench, when tool evidence points to one, or when a curated cached table is the best source for a portfolio/system-wide population.",
   "Use search_features when business terms need mapping to Realinsight feature/entity types such as loan, deal, lease, property, rent roll, or operating statement.",
@@ -80,16 +81,17 @@ export const MCP_INSTRUCTIONS = [
   "Use get_records after search_entities to hydrate entity ids with key fields or explicit field values.",
   "Use get_children after finding a parent entity when the user asks for payment history, rent-roll rows, collateral, owners, or another child dataset.",
   "Use get_latest_children when you need one latest child per parent, then hydrate returned child_entity_id values with get_records.",
-  "Record values can include display_value and expansion hints. Prefer display_value for user-facing answers and value for exact ids/codes.",
+  "Record values can include display_value and expansion hints. Prefer display_value for user-facing answers and value for exact ids/codes. For accounts fields, pass expand_values=['accounts'] to get_records or call get_chart_of_accounts with the returned COAData id.",
   "Use get_entity_structure for parent, master, child, reference, or periodic relationship traversal when the user asks how entities are connected.",
   "Use list_dashboard_pages/get_dashboard_page for dashboard pages, analytics, portfolio pages, curated visual/report tiles, or broad questions where an existing curated analytic is likely the best source.",
   "Use list_workbenches/get_workbench_data for existing workbench lists, saved lists, queues, cached operational tables, or broad questions where an operational list is likely the best source.",
-  "Use search_reports/get_report when the user asks to inspect, create, edit, copy, or delete report definitions. Reports are best for extracting/listing data: choose the report grain with master_feature_code first, then add related datasets and fields.",
-  "Use search_model_forms/get_model_form when the user asks about model/form templates, Excel/PDF outputs, workbook maps, generated files, posting, or repeating template layout. Models are best for transforming or presenting data through a template and map.",
-  "Model form maps are nested in storage but returned as flat node ids through get_model_form sections; inspect only the needed map nodes/items. Prefer map_patch for small add/update/remove node/item edits, and reserve full map replacement for bulk import/revert. Markers are repeating-block/layout anchors, not entity fields.",
-  "For model form writes, read the latest model form first, preserve unchanged metadata/map values, validate create/update requests when changing metadata or map structure, then write only after explicit approval. Use source_model_form_id to create a derivative copy from an existing model form.",
+  "Use search_reports/get_report when the user asks to inspect, create, edit, copy, or delete report definitions. Reports are best for extracting/listing data: choose the report grain with master_feature_code first, then add related datasets and fields. Use search_report_folders when the user asks to place a report in a specific folder.",
+  "Use search_model_forms/get_model_form when the user asks about model/form templates, Excel/PDF outputs, workbook maps, generated files, posting, or repeating template layout. Models are best for transforming or presenting data through a template and map. Use search_model_form_folders when the user asks to place a model form in a specific folder.",
+  "Use get_chart_of_accounts when the user asks about Chart of Accounts setup, account labels/computes, rollup mappings, external GL mappings, system-code mappings, availability, or when an accounts record field returns a COAData id.",
+  "Model form maps are nested in storage but returned as flat node ids through get_model_form sections; inspect only the needed map nodes/items. Prefer map_patch for small add/update/remove node/item edits, and reserve full map replacement for bulk import/revert. Markers are repeating-block/layout anchors, not entity fields. Read the model-form skill reference for map usage and embedded relationship semantics before writing.",
+  "For model form writes, read the latest model form first, preserve unchanged metadata/map values, validate create/update requests when changing metadata or map structure, then write only after explicit approval. Use source_model_form_id to create a derivative copy from an existing model form. If parent_folder_id is omitted on create, Core saves under agent/{current user name}; pass WORKBOOKPROCESS or ROOT only when the user explicitly asks for root.",
   "Use download_model_form_template with output_path when working locally so workbook bytes stay out of chat. In hosted flows, use the returned signed download_url outside model context. Modify the Excel file, call stage_model_form_template_file to get a signed multipart upload_url and staged_file_id, upload the file outside the tool call, then use upload_model_form_template with staged_file_id, expected_conflict_token, and approved=true.",
-  "Before building reports, use search_features/get_entity_structure/get_fields to choose one top-level master_feature_code, related datasets under that same top-level feature family, and exact field names.",
+  "Before building reports, use search_features/get_entity_structure/get_fields to choose one top-level master_feature_code, related datasets under that same top-level feature family, and exact field names. For report column order or computed formulas, use get_tool_reference topic=report_computed_fields or the report computed-fields skill reference before writing. If parent_folder_id is omitted on create, Core saves under agent/{current user name}; pass REPORT or ROOT only when the user explicitly asks for root.",
   "Use extract_analytic_entities or extract_workbench_entities to turn cached table rows into compact entity refs for later get_records/get_children calls.",
   "Cached analytic and workbench rows can be large; for multi-page analysis, use CSV tools or paged data tools, write pages to a temporary CSV/JSONL/SQLite table in your environment, then query that local copy.",
   "Server caps are reported in tool result limits. Default cached data pages are small; max page size is 1000 rows, and all=true is capped server-side.",
@@ -97,15 +99,46 @@ export const MCP_INSTRUCTIONS = [
   "Read-only tools have no side effects; agent harnesses may auto-approve read calls when local policy allows, but keep reads bounded and report truncation, cache, and access warnings.",
   "Local auth tools can list and switch only saved local ri-agent profiles. They must not imply that Realinsight exposes a directory of all customers. To switch to a different customer, start a fresh browser login with switch_profile, passing customer_code only when it is the user's Realinsight login/company code. If only a customer number or uncertain identifier is known, omit customer_code so the user can type it on the login screen.",
   ...(WRITE_TOOLS_ENABLED
-    ? ["set_record, report create/update/delete, and model form create/update/template upload are write operations: call them only after the user approves the exact side effect, with approved=true. Config writes default to audit_detail=summary; request audit_detail=changes for changed paths/types or audit_detail=full only when audit/reversal work needs before/after values. After a successful write, summarize what changed using friendly names/context, avoid raw ids in the user-facing answer except report/model ids or open links when useful, and include warnings."]
-    : []),
-  ...(PIPELINE_TOOLS_ENABLED
-    ? ["Queueing a pipeline is a side effect: call queue_pipeline only after explicit user approval, with approved=true, a DocumentTracking id, and required property/page context. After queueing, summarize the type, document/property/page context, and initial status without showing the raw pipeline id unless the user asks for it."]
+    ? ["set_record, set_chart_of_accounts, report create/update/delete, and model form create/update/template upload are write operations: call them only after the user approves the exact side effect, with approved=true. Config writes default to audit_detail=summary; request audit_detail=changes for changed paths/types or audit_detail=full only when audit/reversal work needs before/after values. After a successful write, summarize what changed using friendly names/context, avoid raw ids in the user-facing answer except report/model/COA ids or open links when useful, and include warnings."]
     : []),
   "Every tool call can include a profile name; otherwise the active local ri-agent auth profile is used.",
 ].join("\n");
 
 const ALL_AGENT_TOOLS = [
+  {
+    name: "get_tool_reference",
+    title: "Get Realinsight Tool Reference",
+    cli: "MCP: get_tool_reference",
+    route: "MCP static tool reference",
+    scope: PROFILE_READ_SCOPE,
+    description: "Return compact workflow or schema guidance for a Realinsight tool family. Use this when the toolkit skill/reference files are unavailable, or when a harness exposes many tools and the agent needs a small schema-only reference before choosing or calling write tools.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        topic: {
+          type: "string",
+          enum: [
+            "tool_discovery",
+            "model_forms",
+            "model_form_map_schema",
+            "model_form_layout",
+            "reports",
+            "report_computed_fields",
+            "chart_of_accounts",
+            "entities_records",
+            "analytics_workbenches",
+          ],
+          description: "Reference topic. Defaults to tool_discovery.",
+        },
+        format: {
+          type: "string",
+          enum: ["summary", "schema", "workflow"],
+          description: "Return the full compact reference, only schema fields, or only workflow/search guidance. Defaults to summary.",
+        },
+      },
+    },
+  },
   {
     name: "auth_status",
     title: "Check Realinsight Auth Status",
@@ -596,7 +629,7 @@ const ALL_AGENT_TOOLS = [
         },
         feature_code: {
           type: "string",
-          description: "Child feature code to retrieve, such as LoanPaymentHistory or RentRoll.",
+          description: "Child feature code to retrieve. Use schema or structure discovery before choosing it when uncertain.",
         },
         parent_ids: {
           type: "array",
@@ -713,7 +746,7 @@ const ALL_AGENT_TOOLS = [
         },
         feature_code: {
           type: "string",
-          description: "Child feature code to retrieve, such as LoanServicing, CREInspection, CREOpStmt, LoanPaymentHistory, or RentRoll.",
+          description: "Child feature code to retrieve. Use search_features, get_entity_structure, or get_tool_reference before choosing it when uncertain.",
         },
         parent_ids: {
           type: "array",
@@ -844,6 +877,14 @@ const ALL_AGENT_TOOLS = [
           },
           maxItems: 100,
           description: "Explicit schema codes in FeatureCode.FieldName format. Each schema code must match feature_code. Keep this list narrow for large populations.",
+        },
+        expand_values: {
+          type: "array",
+          items: {
+            type: "string",
+            enum: ["accounts", "account", "all"],
+          },
+          description: "Optional value expansion. Use accounts to resolve accounts field raw COAData ids into chart layout and COA data values.",
         },
         as_of_date: {
           type: "string",
@@ -1341,6 +1382,42 @@ const ALL_AGENT_TOOLS = [
     },
   },
   {
+    name: "search_report_folders",
+    title: "Search Realinsight Report Folders",
+    cli: "ri-agent search-report-folders [--parent-folder-id REPORT]",
+    route: "GET /agent/reports/folders/search",
+    scope: ANALYTICS_READ_SCOPE,
+    description: "Search report folders by parent folder. Use this when the user asks to place a report in a specific folder. Omitted parent_folder_id searches the report root.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        profile: {
+          type: "string",
+          description: "Optional local ri-agent auth profile name. Uses the active profile when omitted.",
+        },
+        parent_folder_id: {
+          type: "string",
+          description: "Optional parent report folder id. Use REPORT or ROOT for the root folder.",
+        },
+        include_inactive: {
+          type: "boolean",
+          description: "Include inactive folders when the current user is allowed to read them.",
+        },
+        limit: {
+          type: "integer",
+          minimum: 1,
+          maximum: 200,
+          description: "Maximum report folders to return.",
+        },
+        cursor: {
+          type: "string",
+          description: "Cursor returned by a previous search_report_folders response.",
+        },
+      },
+    },
+  },
+  {
     name: "get_report",
     title: "Get Realinsight Report",
     cli: "ri-agent get-report REPORT_ID",
@@ -1361,6 +1438,218 @@ const ALL_AGENT_TOOLS = [
         },
       },
       required: ["report_id"],
+    },
+  },
+  {
+    name: "get_chart_of_accounts",
+    title: "Get Realinsight Chart Of Accounts",
+    cli: "ri-agent get-chart-of-accounts [COA_ID|--coa-data-id ID|--search-text TEXT]",
+    route: "POST /agent/chart-of-accounts/get",
+    scope: "",
+    description: "Read or search chart-of-accounts data in the authenticated Realinsight context. Use this for account layouts, labels, COMPUTE rows, account types, availability, rollup mappings, external GL mappings, system-code mappings, or to resolve a raw COAData id returned by an accounts field in get_records. Results wrap the existing AccountsDTO as chart; account rows are in chart.Layout.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        profile: {
+          type: "string",
+          description: "Optional local ri-agent auth profile name. Uses the active profile when omitted.",
+        },
+        coa_id: {
+          type: "string",
+          description: "Chart of Accounts ObjectId. Use when reading one chart in detail.",
+        },
+        coa_ids: {
+          type: "array",
+          items: { type: "string" },
+          description: "One or more Chart of Accounts ids.",
+        },
+        chart_code: {
+          type: "string",
+          description: "Exact ChartOfAccountsCode lookup.",
+        },
+        chart_name: {
+          type: "string",
+          description: "Exact chart name lookup.",
+        },
+        coa_data_id: {
+          type: "string",
+          description: "COAData id from an accounts record field. The response includes the linked chart and compact COAData values.",
+        },
+        search_text: {
+          type: "string",
+          description: "Text search across chart name, description, code, account names, and account numbers.",
+        },
+        item_ids: {
+          type: "array",
+          items: { type: "string" },
+          description: "Filter returned account rows by COA item id.",
+        },
+        account_numbers: {
+          type: "array",
+          items: { type: "string" },
+          description: "Filter returned account rows by account number, using AccountId or AccountId-AccountSubId.",
+        },
+        account_names: {
+          type: "array",
+          items: { type: "string" },
+          description: "Filter returned account rows by account name contains-match.",
+        },
+        item_types: {
+          type: "array",
+          items: {
+            type: "string",
+            enum: ["ACCT", "LABEL", "COMPUTE"],
+          },
+          description: "Filter returned rows by COA item type.",
+        },
+        account_types: {
+          type: "array",
+          items: {
+            type: "string",
+            enum: ["REV", "EXP", "CAP", "MISC", "PAY", "REC", "STAT"],
+          },
+          description: "Filter returned rows by account type code. Values map to Revenue, Expense, Capital Expenditures, Miscellaneous, Payable, Receivable, and Statistical.",
+        },
+        sections: {
+          type: "string",
+          description: "Optional comma-separated sections: metadata,accounts,availability,rollups,monitor_rules,coa_data,data_summary,all.",
+        },
+        include_accounts: {
+          type: "boolean",
+          description: "Include chart layout rows. Defaults true for a specific chart or when account filters are supplied.",
+        },
+        include_coa_data: {
+          type: "boolean",
+          description: "Include COAData values when coa_data_id is supplied.",
+        },
+        limit: {
+          type: "integer",
+          minimum: 1,
+          maximum: 25,
+          description: "Maximum chart detail items to return.",
+        },
+        cursor: {
+          type: "string",
+          description: "Cursor returned by a previous get_chart_of_accounts response.",
+        },
+      },
+    },
+  },
+  {
+    name: "set_chart_of_accounts",
+    title: "Set Realinsight Chart Of Accounts",
+    cli: "ri-agent set-chart-of-accounts --request-json JSON --approved",
+    route: "POST /agent/chart-of-accounts/set",
+    scope: CHART_OF_ACCOUNTS_WRITE_SCOPE,
+    readOnlyHint: false,
+    idempotentHint: false,
+    description: "Create or patch a chart of accounts after explicit user approval. Supports metadata updates, availability, rollup chart mappings, monitor rule sets, add/update/replace/remove/move account rows, and dry_run validation. Call get_chart_of_accounts first for expected_conflict_token on updates. Core blocks remove_account and high-risk account mapping/type edits when existing data or servicing/financial usage would make the change unsafe.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        profile: {
+          type: "string",
+          description: "Optional local ri-agent auth profile name. Uses the active profile when omitted.",
+        },
+        coa_id: {
+          type: "string",
+          description: "Existing Chart of Accounts id. Omit to create a new chart.",
+        },
+        chart: {
+          type: "object",
+          additionalProperties: true,
+          description: "Top-level chart metadata: chart_code, chart_name, chart_description, parent_folder_id, master_feature_code, periods_per_year, periods_are_months, has_adjustments_default, is_ad_hoc, availability, roll_up_to_charts, monitor_rule_sets.",
+        },
+        operations: {
+          type: "array",
+          items: {
+            type: "object",
+            additionalProperties: true,
+            properties: {
+              op: {
+                type: "string",
+                enum: [
+                  "set_metadata",
+                  "set_availability",
+                  "set_rollup_charts",
+                  "set_roll_up_to_charts",
+                  "set_monitor_rule_sets",
+                  "add_account",
+                  "update_account",
+                  "replace_account",
+                  "remove_account",
+                  "delete_account",
+                  "move_account",
+                ],
+                description: "Patch operation to apply.",
+              },
+              item_id: {
+                type: "string",
+                description: "Target account item id for update, replace, remove, or move.",
+              },
+              account_number: {
+                type: "string",
+                description: "Alternative account selector using AccountId or AccountId-AccountSubId.",
+              },
+              chart_order: {
+                type: "number",
+                description: "New display/order value for move_account.",
+              },
+              account: {
+                type: "object",
+                additionalProperties: true,
+                description: "Account row payload. Common fields: item_id, item_code, item_type, chart_order, account_number, account_id, account_sub_id, item_name, item_description, field_type, account_type, formula, format, roll_up_to_items, external_xref, external_gl_xref, monitor_rule_set_items, process/system/payment mappings.",
+              },
+              chart: {
+                type: "object",
+                additionalProperties: true,
+                description: "Metadata payload for set_metadata or section-level operations.",
+              },
+            },
+            required: ["op"],
+          },
+          description: "Patch operations applied in order. Use add_account for bulk account creation by sending many operations.",
+        },
+        expected_conflict_token: {
+          type: "string",
+          description: "Latest conflict_token from get_chart_of_accounts. Required for updates.",
+        },
+        dry_run: {
+          type: "boolean",
+          description: "Validate and return a normalized preview without saving. Does not require approved=true.",
+        },
+        change_reason: {
+          type: "string",
+          description: "Reason to store with the ConfigAuditLog entry.",
+        },
+        reverses_operation_id: {
+          type: "string",
+          description: "Optional ConfigAuditLog operation id that this save is intentionally backing out.",
+        },
+        correlation_id: {
+          type: "string",
+          description: "Optional caller correlation id.",
+        },
+        source_reference: {
+          type: "string",
+          description: "Optional caller source reference.",
+        },
+        audit_detail: audit_detail_property(),
+        approved: {
+          type: "boolean",
+          description: "Must be true only after the user explicitly approves saving this chart of accounts.",
+        },
+        confirm_update: {
+          type: "boolean",
+          description: "Alias for approved=true after explicit user approval.",
+        },
+        confirm_save: {
+          type: "boolean",
+          description: "Alias for approved=true after explicit user approval.",
+        },
+      },
     },
   },
   {
@@ -1408,12 +1697,48 @@ const ALL_AGENT_TOOLS = [
     },
   },
   {
+    name: "search_model_form_folders",
+    title: "Search Realinsight Model Form Folders",
+    cli: "ri-agent search-model-form-folders [--parent-folder-id WORKBOOKPROCESS]",
+    route: "GET /agent/model-forms/folders/search",
+    scope: MODEL_FORMS_READ_SCOPE,
+    description: "Search model form folders by parent folder. Use this when the user asks to place a model form in a specific folder. Omitted parent_folder_id searches the model form root.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        profile: {
+          type: "string",
+          description: "Optional local ri-agent auth profile name. Uses the active profile when omitted.",
+        },
+        parent_folder_id: {
+          type: "string",
+          description: "Optional parent workbook process folder id. Use WORKBOOKPROCESS or ROOT for the root folder.",
+        },
+        include_inactive: {
+          type: "boolean",
+          description: "Include inactive model form folders when the current user has Configuration access.",
+        },
+        limit: {
+          type: "integer",
+          minimum: 1,
+          maximum: 200,
+          description: "Maximum model form folders to return.",
+        },
+        cursor: {
+          type: "string",
+          description: "Cursor returned by a previous search_model_form_folders response.",
+        },
+      },
+    },
+  },
+  {
     name: "get_model_form",
     title: "Get Realinsight Model Form",
     cli: "ri-agent get-model-form MODEL_FORM_ID [--sections template,map_tree,used_fields]",
     route: "GET /agent/model-forms/configurations/{model_form_id}",
     scope: MODEL_FORMS_READ_SCOPE,
-    description: "Read one compact model/form overview and optionally request focused sections such as template, map_tree, map_definition, node, item, or used_fields. Start with the overview for root dataset, template, map counts, assignment, and conflict token, then request only the map/template detail needed. Use map_definition only before create/update map planning because it can be larger.",
+    description: "Read one compact model/form overview and optionally request focused sections such as template, map_tree, map_definition, node, item, or used_fields. Start with the overview for root dataset, template, map counts, assignment, and conflict token, then request only the map/template detail needed. Use sections=item or map_definition for full COA_REF/COA_ACT/COA_BUD/COA_SERV_BAL layout fields such as account/value/adjustment/total columns. Use map_definition only before create/update map planning because it can be larger.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
@@ -1452,7 +1777,7 @@ const ALL_AGENT_TOOLS = [
     cli: "ri-agent validate-create-model-form --request-json JSON",
     route: "POST /agent/model-forms/configurations/validate-create",
     scope: MODEL_FORMS_WRITE_SCOPE,
-    description: "Validate a model/form create or derivative copy without writing. Use source_model_form_id plus the source expected_conflict_token from get_model_form when copying an existing model form. For scratch creates, provide root_feature_code and optional map derived from get_model_form map_definition shape.",
+    description: "Validate a model/form create or derivative copy without writing. Use source_model_form_id plus the source expected_conflict_token from get_model_form when copying an existing model form. For scratch creates, provide root_feature_code and optional map derived from get_model_form map_definition shape. If parent_folder_id is omitted, create_model_form will save under agent/{current user name}.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
@@ -1468,7 +1793,7 @@ const ALL_AGENT_TOOLS = [
     scope: MODEL_FORMS_WRITE_SCOPE,
     readOnlyHint: false,
     idempotentHint: false,
-    description: "Create a model/form or derivative copy after explicit user approval. Prefer source_model_form_id when extending an existing model, then download/upload the template and update the map only if needed. Core validates Configuration/Admin access and derives ConfigAuditLog changes server-side. Default audit_detail is summary; request changes or full only when audit/reversal work needs it. After success, summarize the new model form name, source/copy context, root feature, major map/template details, warnings, and a model_form_id or link only when useful.",
+    description: "Create a model/form or derivative copy after explicit user approval. If parent_folder_id is omitted, Core creates/uses agent/{current user name}; pass WORKBOOKPROCESS or ROOT only when the user explicitly asks for root, or use search_model_form_folders for a specific folder. Prefer source_model_form_id when extending an existing model, then download/upload the template and update the map only if needed. Core validates Configuration/Admin access and derives ConfigAuditLog changes server-side. Default audit_detail is summary; request changes or full only when audit/reversal work needs it. After success, summarize the new model form name, source/copy context, root feature, major map/template details, warnings, and a model_form_id or link only when useful.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
@@ -1516,13 +1841,9 @@ const ALL_AGENT_TOOLS = [
           description: "Optional generated file-name template. Preserve the existing value from get_model_form when unchanged.",
         },
         map: {
-          type: "object",
-          description: "Optional full flat map replacement for bulk import/revert. Request get_model_form sections=map_definition first, preserve unchanged nodes/items, and use temporary ids for new nodes/items. Do not send with map_patch.",
+          ...model_form_map_schema("Optional full flat map replacement for bulk import/revert. Request get_model_form sections=map_definition first, preserve unchanged nodes/items, and use temporary ids for new nodes/items. Read the model-form skill reference for detailed node/item fields and usage/relationship semantics before writing. Do not send with map_patch."),
         },
-        map_patch: {
-          type: "object",
-          description: "Optional focused map patch. Prefer this for small add/update/remove node/item edits. update_node and update_item merge only supplied fields; replace_node replaces the full node contents. Operations are add_node, update_node, replace_node, remove_node, add_item, update_item, and remove_item. Do not send with map.",
-        },
+        map_patch: model_form_map_patch_schema(),
         expected_conflict_token: {
           type: "string",
           description: "Latest conflict_token from get_model_form. Required for updates.",
@@ -1585,13 +1906,9 @@ const ALL_AGENT_TOOLS = [
           description: "Optional generated file-name template. Preserve the existing value from get_model_form when unchanged.",
         },
         map: {
-          type: "object",
-          description: "Optional full flat map replacement for bulk import/revert. Request get_model_form sections=map_definition first, preserve unchanged nodes/items, and use temporary ids for new nodes/items. Do not send with map_patch.",
+          ...model_form_map_schema("Optional full flat map replacement for bulk import/revert. Request get_model_form sections=map_definition first, preserve unchanged nodes/items, and use temporary ids for new nodes/items. Read the model-form skill reference for detailed node/item fields and usage/relationship semantics before writing. Do not send with map_patch."),
         },
-        map_patch: {
-          type: "object",
-          description: "Optional focused map patch. Prefer this for small add/update/remove node/item edits. update_node and update_item merge only supplied fields; replace_node replaces the full node contents. Operations are add_node, update_node, replace_node, remove_node, add_item, update_item, and remove_item. Do not send with map.",
-        },
+        map_patch: model_form_map_patch_schema(),
         expected_conflict_token: {
           type: "string",
           description: "Latest conflict_token from get_model_form. Required for updates.",
@@ -1773,7 +2090,7 @@ const ALL_AGENT_TOOLS = [
     cli: "ri-agent validate-create-report --request-json JSON",
     route: "POST /agent/reports/configurations/validate-create",
     scope: REPORT_WRITE_SCOPE,
-    description: "Validate and normalize a LIST report create request without writing. Choose the report grain with one master_feature_code first, then use search_features/get_entity_structure/get_fields to add only related datasets and valid fields under the same top-level feature family.",
+    description: "Validate and normalize a LIST report create request without writing. Choose the report grain first; use get_tool_reference topic=reports for payload shape and topic=report_computed_fields for column order, computed formulas, or aggregate behavior. If parent_folder_id is omitted, create_report will save under agent/{current user name}.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
@@ -1788,7 +2105,7 @@ const ALL_AGENT_TOOLS = [
         },
         parent_folder_id: {
           type: "string",
-          description: "Target report folder id. Use REPORT for the root folder.",
+          description: "Target report folder id. Omit to let create_report use agent/{current user name}; use REPORT or ROOT only when the user explicitly asks for root.",
         },
         report_name: {
           type: "string",
@@ -1805,7 +2122,7 @@ const ALL_AGENT_TOOLS = [
         list: {
           type: "object",
           additionalProperties: true,
-          description: "LIST report configuration. Include master_feature_code for the report grain, then data_sets, columns, sorts, criteria, prompts, team_role_criteria, and aggregate_group_by as needed. Every data_set.feature_code must belong to the same top-level feature family as master_feature_code.",
+          description: "LIST report configuration object. Use get_tool_reference topic=reports format=schema for shape and topic=report_computed_fields for column order, computed formulas, or aggregate behavior. Every data_set.feature_code must belong to the same top-level feature family as master_feature_code.",
         },
         change_reason: {
           type: "string",
@@ -1829,7 +2146,7 @@ const ALL_AGENT_TOOLS = [
     cli: "ri-agent validate-update-report REPORT_ID --request-json JSON",
     route: "POST /agent/reports/configurations/{report_id}/validate-update",
     scope: REPORT_WRITE_SCOPE,
-    description: "Validate and normalize a LIST report update request without writing. Call get_report first and pass its latest conflict_token as expected_conflict_token. Use get_fields for dataset feature codes before adding or changing columns, filters, sorts, or prompts.",
+    description: "Validate and normalize a LIST report update request without writing. Call get_report first and pass its latest conflict_token as expected_conflict_token. Use get_fields for dataset feature codes before adding or changing columns, filters, sorts, prompts, column order, or computed formulas.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
@@ -1848,7 +2165,7 @@ const ALL_AGENT_TOOLS = [
         },
         parent_folder_id: {
           type: "string",
-          description: "Target report folder id. Use REPORT for the root folder.",
+          description: "Target report folder id. Use REPORT or ROOT for the root folder and preserve the current value when unchanged.",
         },
         report_name: {
           type: "string",
@@ -1865,7 +2182,7 @@ const ALL_AGENT_TOOLS = [
         list: {
           type: "object",
           additionalProperties: true,
-          description: "Full normalized LIST report configuration to save. Preserve the intended report grain in list.master_feature_code; every data_set.feature_code must belong to the same top-level feature family.",
+          description: "Normalized LIST report configuration object. Use get_tool_reference topic=reports format=schema for shape and topic=report_computed_fields for column order, computed formulas, or aggregate behavior.",
         },
         expected_conflict_token: {
           type: "string",
@@ -1922,7 +2239,7 @@ const ALL_AGENT_TOOLS = [
     scope: REPORT_WRITE_SCOPE,
     readOnlyHint: false,
     idempotentHint: false,
-    description: "Create a LIST report definition after explicit user approval. Run validate_create_report first, review normalized_preview/errors with the user, then call this with approved=true. Core validates again, persists the definition, and derives ConfigAuditLog changes server-side. Default audit_detail is summary; request changes or full only when audit/reversal work needs it. After success, summarize the report name, master feature, meaningful saved sections, warnings, and an open link or report_id only when useful for the user to jump back to it.",
+    description: "Create a LIST report definition after explicit user approval. If parent_folder_id is omitted, Core creates/uses agent/{current user name}; pass REPORT or ROOT only when the user explicitly asks for root, or use search_report_folders for a specific folder. Run validate_create_report first, review normalized_preview/errors with the user, then call this with approved=true. Core validates again, persists the definition, and derives ConfigAuditLog changes server-side. Default audit_detail is summary; request changes or full only when audit/reversal work needs it. After success, summarize the report name, master feature, meaningful saved sections, warnings, and an open link or report_id only when useful for the user to jump back to it.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
@@ -1937,7 +2254,7 @@ const ALL_AGENT_TOOLS = [
         },
         parent_folder_id: {
           type: "string",
-          description: "Target report folder id. Use REPORT for the root folder.",
+          description: "Target report folder id. Omit to let create_report use agent/{current user name}; use REPORT or ROOT only when the user explicitly asks for root.",
         },
         report_name: {
           type: "string",
@@ -1954,7 +2271,7 @@ const ALL_AGENT_TOOLS = [
         list: {
           type: "object",
           additionalProperties: true,
-          description: "Full LIST report configuration. Use one master_feature_code for the report grain and only related datasets under the same top-level feature family.",
+          description: "LIST report configuration object. Use get_tool_reference topic=reports format=schema for shape and topic=report_computed_fields for column order, computed formulas, or aggregate behavior.",
         },
         change_reason: {
           type: "string",
@@ -2012,7 +2329,7 @@ const ALL_AGENT_TOOLS = [
         },
         parent_folder_id: {
           type: "string",
-          description: "Target report folder id. Use REPORT for the root folder.",
+          description: "Target report folder id. Use REPORT or ROOT for the root folder and preserve the current value when unchanged.",
         },
         report_name: {
           type: "string",
@@ -2029,7 +2346,7 @@ const ALL_AGENT_TOOLS = [
         list: {
           type: "object",
           additionalProperties: true,
-          description: "Full normalized LIST report configuration to save. Preserve the intended report grain in list.master_feature_code; every data_set.feature_code must belong to the same top-level feature family.",
+          description: "Normalized LIST report configuration object. Use get_tool_reference topic=reports format=schema for shape and topic=report_computed_fields for column order, computed formulas, or aggregate behavior.",
         },
         expected_conflict_token: {
           type: "string",
@@ -2123,119 +2440,52 @@ const ALL_AGENT_TOOLS = [
       required: ["report_id", "expected_conflict_token", "approved"],
     },
   },
-  {
-    name: "get_pipeline",
-    title: "Get Realinsight Pipeline Status",
-    cli: "ri-agent get-pipeline PIPELINE_ID",
-    route: "GET /agent/pipelines/{id}",
-    scope: PIPELINE_READ_SCOPE,
-    description: "Read compact status for an allowlisted Realinsight pipeline.",
-    inputSchema: {
-      type: "object",
-      additionalProperties: false,
-      properties: {
-        profile: {
-          type: "string",
-          description: "Optional local ri-agent auth profile name. Uses the active profile when omitted.",
-        },
-        pipeline_id: {
-          type: "string",
-          description: "Pipeline instance id returned by queue_pipeline or another Realinsight workflow.",
-        },
-      },
-      required: ["pipeline_id"],
-    },
-  },
-  {
-    name: "queue_pipeline",
-    title: "Queue Realinsight Pipeline",
-    cli: "ri-agent queue-pipeline PIPELINE_TYPE --doc-id DOC_ID --approved [--property-entity-id CRE_ID] [--start-page N] [--end-page N]",
-    route: "POST /agent/pipelines/queue",
-    scope: PIPELINE_QUEUE_SCOPE,
-    readOnlyHint: false,
-    idempotentHint: false,
-    description: "Queue an allowlisted Realinsight document pipeline after explicit user approval. This is a side effect and requires an existing DocumentTracking id plus property/page context where applicable. After success, summarize the pipeline type, document/property/page context, and initial status without showing the raw pipeline id unless the user asks for it.",
-    inputSchema: {
-      type: "object",
-      additionalProperties: false,
-      properties: {
-        profile: {
-          type: "string",
-          description: "Optional local ri-agent auth profile name. Uses the active profile when omitted.",
-        },
-        pipeline_type: {
-          type: "string",
-          enum: ["doc_extract", "rent_roll_extract", "financial_extraction", "entity_extraction", "op_stmt_spread"],
-          description: "Allowlisted pipeline type to queue.",
-        },
-        doc_id: {
-          type: "string",
-          description: "DocumentTracking id already stored in Realinsight. Direct local file upload is planned separately.",
-        },
-        property_entity_id: {
-          type: "string",
-          description: "CREMaster/property entity id required for rent_roll_extract, financial_extraction, and op_stmt_spread.",
-        },
-        start_page: {
-          type: "integer",
-          minimum: 1,
-          description: "First document page to run for page-scoped pipelines. Required except for doc_extract.",
-        },
-        end_page: {
-          type: "integer",
-          minimum: 0,
-          description: "Last document page to run. Use 0 to continue through the end of the document.",
-        },
-        thread_id: {
-          type: "string",
-          description: "Optional Realinsight message thread id to associate with the pipeline.",
-        },
-        approved: {
-          type: "boolean",
-          description: "Must be true only after the user explicitly approves queueing this side-effecting pipeline.",
-        },
-        root_entity_id: {
-          type: "string",
-          description: "Optional root entity id for entity_extraction context.",
-        },
-        root_feature_code: {
-          type: "string",
-          description: "Optional root feature code for entity_extraction context.",
-        },
-        root_label: {
-          type: "string",
-          description: "Optional user-facing root label for entity_extraction context.",
-        },
-        master_entity_id: {
-          type: "string",
-          description: "Optional master entity id for entity_extraction context.",
-        },
-        master_feature_code: {
-          type: "string",
-          description: "Optional master feature code for entity_extraction context.",
-        },
-        parent_entity_id: {
-          type: "string",
-          description: "Optional parent entity id for entity_extraction context.",
-        },
-        parent_feature_code: {
-          type: "string",
-          description: "Optional parent feature code for entity_extraction context.",
-        },
-        as_of_date: {
-          type: "string",
-          description: "Optional as-of date for entity_extraction context.",
-        },
-      },
-      required: ["pipeline_type", "doc_id", "approved"],
-    },
-  },
 ];
 
 export const AGENT_TOOLS = ALL_AGENT_TOOLS.filter((tool) => (
-  (PIPELINE_TOOLS_ENABLED || !PIPELINE_TOOL_NAMES.has(tool.name))
-  && (WRITE_TOOLS_ENABLED || !WRITE_TOOL_NAMES.has(tool.name))
+  WRITE_TOOLS_ENABLED || !WRITE_TOOL_NAMES.has(tool.name)
 ));
+
+function model_form_map_schema(description) {
+  return {
+    type: "object",
+    additionalProperties: true,
+    description,
+  };
+}
+
+function model_form_map_patch_schema() {
+  return {
+    type: "object",
+    additionalProperties: true,
+    description: "Optional focused map patch for small edits. Prefer this for add/update/remove node/item operations. update_node and update_item merge supplied fields, including nested COA layout fields; replace_node replaces full node contents. Read the model-form skill reference for detailed node/item fields and usage/relationship semantics before writing. Do not send with map.",
+    properties: {
+      operations: {
+        type: "array",
+        description: "Ordered map patch operations.",
+        items: {
+          type: "object",
+          additionalProperties: true,
+          properties: {
+            op: {
+              type: "string",
+              enum: ["add_node", "update_node", "replace_node", "remove_node", "add_item", "update_item", "remove_item"],
+              description: "Patch operation.",
+            },
+            node_id: { type: "string", description: "Target node id for node/item operations. Use root for the root map." },
+            map_item_id: { type: "string", description: "Target map item id for update_item/remove_item." },
+            parent_node_id: { type: "string", description: "Parent node id for add_node when node.parent_node_id is omitted." },
+            remove_children: { type: "boolean", description: "For remove_node, set true to remove a full subtree." },
+            node: { type: "object", additionalProperties: true },
+            item: { type: "object", additionalProperties: true },
+          },
+          required: ["op"],
+        },
+      },
+    },
+    required: ["operations"],
+  };
+}
 
 function model_form_create_properties(write) {
   const props = {
@@ -2261,7 +2511,7 @@ function model_form_create_properties(write) {
     },
     parent_folder_id: {
       type: "string",
-      description: "Target workbook process folder id. Use WORKBOOKPROCESS for the root folder.",
+      description: "Target workbook process folder id. Omit to let create_model_form use agent/{current user name}; use WORKBOOKPROCESS or ROOT only when the user explicitly asks for root.",
     },
     global_assignment: {
       type: "boolean",
@@ -2280,8 +2530,7 @@ function model_form_create_properties(write) {
       description: "Optional template metadata description.",
     },
     map: {
-      type: "object",
-      description: "Optional full flat map request. Use get_model_form sections=map_definition for the shape; new node/item ids may be temporary strings.",
+      ...model_form_map_schema("Optional full flat map request. Use get_model_form sections=map_definition for the current shape; new node/item ids may be temporary strings. Read the model-form skill reference for detailed node/item fields and usage/relationship semantics before writing."),
     },
     expected_conflict_token: {
       type: "string",

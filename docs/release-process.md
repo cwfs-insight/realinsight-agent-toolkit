@@ -15,12 +15,13 @@ This repository is the public distribution workspace. The Realinsight release pi
 | `plugins/claude/realinsight-connector/skills/` | Realinsight release pipeline | Managed copy from exported public skills. |
 | `plugins/claude/realinsight-connector/.claude-plugin/plugin.json` | This repo with release version updates | Do not overwrite descriptive metadata unless explicitly requested. |
 | `plugins/claude/realinsight-connector/.mcp.json` | This repo with release version updates | Update package version and default environment only. |
-| `.claude-plugin/marketplace.json` | This repo with release version updates | Public Claude marketplace metadata. Keep production-only. |
+| `.claude-plugin/marketplace.json` | This repo with release version updates | Public Claude marketplace metadata. Keep production first, with clearly named dev and QA entries when official. |
 | `extensions/claude-desktop/realinsight-connector/src/` | Realinsight release pipeline | Managed, overwrite allowed. |
 | `extensions/claude-desktop/realinsight-connector/skills/` | Realinsight release pipeline | Managed copy from exported public skills. |
 | `extensions/claude-desktop/realinsight-connector/manifest.json` | This repo with generated tool list updates | Preserve display/auth metadata unless explicitly requested. |
+| `providers/` | This repo, generated from checked-in plugin and skill sources | Checked-in Codex, Claude, and Cursor provider roots. Rebuild with `npm run build:providers`; do not hand-edit copied provider skills. |
 | `examples/mcp/` | This repo with release version updates | Generated examples may update version and environment URLs. |
-| `docs/`, `README.md`, `catalogs/`, `SECURITY.md`, `CONTRIBUTING.md`, `CHANGELOG.md`, `LICENSE` | This repo | Never overwrite from generated export. |
+| `docs/`, `README.md`, `SECURITY.md`, `CONTRIBUTING.md`, `CHANGELOG.md`, `LICENSE` | This repo | Never overwrite from generated export. |
 
 ## Export Rules
 
@@ -36,15 +37,17 @@ The exporter should be allowlist-driven:
 
 ## Environment Manifests
 
-The public default remains production:
+The checked-in public default remains production:
 
-- `.agents/plugins/marketplace.json` must expose only `realinsight-connector`.
-- The production Codex plugin uses `RI_AGENT_PROFILE=realinsight-prod`.
-- `.claude-plugin/marketplace.json` must expose only the production `realinsight-connector`.
-- The production Claude plugin uses `RI_AGENT_PROFILE=realinsight-prod`.
-- The production Claude Desktop manifest defaults to `realinsight-prod`.
+- `.agents/plugins/marketplace.json` exposes the production `realinsight-connector`.
+- The production Codex plugin points at the hosted production Streamable HTTP MCP endpoint.
+- `.claude-plugin/marketplace.json` exposes the production `realinsight-connector` first, plus clearly named official dev and QA entries.
+- The production Claude plugin points at the hosted production Streamable HTTP MCP endpoint.
+- The production Claude Desktop manifest defaults to the production API URL and `realinsight-prod`.
 
-Dev and QA manifests are opt-in/internal surfaces. The exporter may render them when a release explicitly requests an environment bundle, but it must not replace the public marketplace default or commit private environment URLs into public default manifests.
+Dev and QA Codex and Claude marketplaces are official checked-in provider distributions under `providers/codex/*` and `providers/claude/*`. They use distinct names, versions, marketplace roots, and MCP server ids. They must not silently replace the checked-in production default.
+
+Cursor provider plugins are checked in under `providers/cursor/plugin`, `providers/cursor/dev/plugin`, and `providers/cursor/qa/plugin`. They use the same hosted MCP endpoints and copied skill files as the Codex and Claude providers.
 
 When rendering an environment-specific local MCP bundle, set:
 

@@ -6,9 +6,9 @@ This is the public distribution repo for Realinsight agent integrations. Keep ed
 
 - Treat `docs/release-process.md` and `RELEASE_MANIFEST.json` as the contract for generated content.
 - The Realinsight source repo/exporter owns managed runtime, skills, and bundle copies. Do not hand-edit generated files unless the user asks for a local patch.
-- Repo-owned docs, install guides, catalog metadata, security files, license, changelog, and release-process files should not be overwritten by exports.
-- Keep the public marketplace production-only. `.agents/plugins/marketplace.json` should expose the production `realinsight-connector`; dev and QA manifests are opt-in/internal.
-- Keep the public Claude marketplace production-only. `.claude-plugin/marketplace.json` should expose the production `realinsight-connector`; dev and QA Claude plugins are opt-in/internal.
+- Repo-owned docs, install guides, provider metadata, security files, license, changelog, and release-process files should not be overwritten by exports.
+- Keep checked-in public marketplaces production-first. `.agents/plugins/marketplace.json` and `.claude-plugin/marketplace.json` expose the production `realinsight-connector` by default.
+- Dev and QA Codex, Claude, and Cursor installs are official checked-in provider distributions under `providers/`; keep them clearly labeled and environment-isolated.
 - Preserve environment isolation with `RI_AGENT_BASE_URL`, `RI_AGENT_PROFILE`, and `REALINSIGHT_AGENT_CONFIG`.
 
 ## Structure Notes
@@ -18,6 +18,7 @@ This is the public distribution repo for Realinsight agent integrations. Keep ed
 - `plugins/codex/realinsight-connector/` contains the Codex plugin bundle.
 - `plugins/claude/realinsight-connector/` contains the Claude plugin bundle.
 - `extensions/claude-desktop/realinsight-connector/` contains the Claude Desktop MCPB source.
+- `providers/codex/`, `providers/claude/`, and `providers/cursor/` contain checked-in provider roots for prod, dev, and QA.
 - `examples/mcp/` contains host-neutral MCP config examples.
 - `docs/install/` contains host-specific install guides.
 
