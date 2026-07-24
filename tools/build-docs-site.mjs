@@ -37,8 +37,13 @@ async function validate_site_sources() {
   const required = [
     "index.html",
     ".nojekyll",
+    "favicon.ico",
     "assets/site.css",
     "assets/site.js",
+    "assets/brand/realinsight-agent-favicon.svg",
+    "assets/brand/realinsight-agent-icon-180.png",
+    "assets/brand/realinsight-logo-primary.svg",
+    "assets/brand/realinsight-logo-white.svg",
     "install-data.json",
     "agent-install.md",
     "llms.txt",

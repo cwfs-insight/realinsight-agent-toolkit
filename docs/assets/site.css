@@ -5,8 +5,8 @@
   --paper: #f5f7f4;
   --surface: #ffffff;
   --line: #d9dfdc;
-  --blue: #145da0;
-  --blue-dark: #0d4477;
+  --blue: #3498db;
+  --blue-dark: #1878b8;
   --green: #13a36d;
   --green-soft: #dff5eb;
   --sand: #eee9df;
@@ -54,22 +54,23 @@ footer {
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   font-weight: 760;
   text-decoration: none;
   letter-spacing: -0.02em;
 }
 
-.brand-mark {
-  width: 35px;
-  height: 35px;
-  display: grid;
-  place-items: center;
-  border-radius: 9px;
-  background: var(--ink);
-  color: white;
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
+.brand img {
+  width: clamp(156px, 18vw, 202px);
+  height: auto;
+}
+
+.brand-product {
+  padding-left: 14px;
+  border-left: 1px solid rgba(16, 35, 63, 0.2);
+  color: var(--ink);
+  font-size: 0.88rem;
+  white-space: nowrap;
 }
 
 nav {
@@ -130,35 +131,6 @@ h1 {
   font-size: 1.18rem;
 }
 
-.recommendation {
-  width: fit-content;
-  margin-top: 34px;
-  padding: 14px 18px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  border: 1px solid rgba(19, 163, 109, 0.28);
-  border-radius: 12px;
-  background: rgba(223, 245, 235, 0.65);
-}
-
-.recommendation div {
-  display: grid;
-}
-
-.recommendation span {
-  color: var(--ink-soft);
-  font-size: 0.82rem;
-}
-
-.signal {
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  background: var(--green);
-  box-shadow: 0 0 0 6px rgba(19, 163, 109, 0.12);
-}
-
 .hero-panel {
   position: relative;
   aspect-ratio: 1;
@@ -191,6 +163,12 @@ h1 {
   background: var(--ink);
   color: white;
   box-shadow: var(--shadow);
+}
+
+.endpoint-logo {
+  width: min(202px, 86%);
+  height: auto;
+  margin-bottom: 8px;
 }
 
 .endpoint-card span,
@@ -234,15 +212,9 @@ h1 {
   letter-spacing: -0.045em;
 }
 
-.section-heading > p {
-  max-width: 460px;
-  margin: 0;
-  color: var(--ink-soft);
-}
-
 .selector-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
 }
 
@@ -457,13 +429,36 @@ pre {
 
 footer {
   min-height: 84px;
+  margin-bottom: 24px;
+  padding: 0 28px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 30px;
-  border-top: 1px solid var(--line);
-  color: var(--ink-soft);
+  border-radius: 16px;
+  background: var(--ink);
+  color: #b9c7d6;
   font-size: 0.82rem;
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: white;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.footer-brand img {
+  width: 150px;
+  height: auto;
+}
+
+.footer-brand span {
+  padding-left: 14px;
+  border-left: 1px solid rgba(255, 255, 255, 0.24);
+  white-space: nowrap;
 }
 
 .noscript {
@@ -521,18 +516,23 @@ footer {
     font-size: 3.2rem;
   }
 
-  .recommendation {
-    width: 100%;
-  }
-
   .install-output {
     padding: 24px 18px;
   }
 
   footer {
-    align-items: start;
+    padding: 22px;
+    align-items: flex-start;
     flex-direction: column;
     justify-content: center;
+  }
+
+  .brand img {
+    width: 142px;
+  }
+
+  .brand-product {
+    display: none;
   }
 }
 

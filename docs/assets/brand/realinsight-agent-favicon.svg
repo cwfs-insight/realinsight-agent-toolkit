@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <title>Realinsight Agent Toolkit</title>
+  <rect width="256" height="256" rx="38" fill="#3498db"/>
+  <g fill="#fff">
+    <rect x="46" y="125" width="41" height="96"/>
+    <rect x="46" y="82" width="41" height="32"/>
+    <path d="M87 72h41c20 0 32 9 32 27v1c0 15-11 26-31 26H98v36h22l40 59h48l-46-66c24-9 40-28 40-58v-1c0-18-5-32-16-43-12-12-30-19-54-19H46v38h41z"/>
+  </g>
+  <circle cx="205" cy="52" r="39" fill="#10233f"/>
+  <path fill="#6fe0b3" d="m205 17 8 26 26 9-26 8-8 27-8-27-27-8 27-9z"/>
+  <circle cx="170" cy="88" r="7" fill="#fff"/>
+</svg>
