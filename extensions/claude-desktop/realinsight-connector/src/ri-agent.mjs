@@ -4,7 +4,7 @@ import { parse_args } from "./args.mjs";
 import { print_tools } from "./agent-tools.mjs";
 import { login, list_profiles, logout, status } from "./auth.mjs";
 import { get_children, get_latest_children } from "./child-tools.mjs";
-import { get_chart_of_accounts, set_chart_of_accounts } from "./chart-of-accounts-tools.mjs";
+import { get_chart_of_accounts, get_coa_data, set_chart_of_accounts } from "./chart-of-accounts-tools.mjs";
 import { doctor } from "./doctor.mjs";
 import { search_entities } from "./entity-tools.mjs";
 import { format_error_message, HttpJsonError } from "./http.mjs";
@@ -212,6 +212,11 @@ async function main() {
 
   if (command === "get-chart-of-accounts" || command === "get_chart_of_accounts" || command === "get-coa" || command === "get_coa") {
     await get_chart_of_accounts(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "get-coa-data" || command === "get_coa_data") {
+    await get_coa_data(parsed.positionals.slice(1), parsed.options);
     return;
   }
 
@@ -537,6 +542,11 @@ async function run_chart_of_accounts_command(positionals, options) {
     return;
   }
 
+  if (command === "data" || command === "get-data" || command === "get_coa_data") {
+    await get_coa_data(positionals.slice(1), options);
+    return;
+  }
+
   if (command === "set" || command === "set-chart-of-accounts" || command === "set_chart_of_accounts") {
     assert_write_tools_enabled();
     await set_chart_of_accounts(positionals.slice(1), options);
@@ -775,10 +785,11 @@ function print_chart_of_accounts_help() {
   console.log(`Realinsight Agent Toolkit chart of accounts commands
 
 Usage:
-  ri-agent chart-of-accounts get [COA_ID] [--coa-data-id ID] [--search-text TEXT] [--item-types ACCT,LABEL,COMPUTE] [--account-types REV,EXP]
+  ri-agent chart-of-accounts get [COA_ID] [--search-text TEXT] [--item-types ACCT,LABEL,COMPUTE] [--account-types REV,EXP]
+  ri-agent chart-of-accounts get-data COA_DATA_ID [--projection summary|values] [--cursor CURSOR] [--limit N]
 ${write_help}
 
-Use get with coa_data_id when an accounts record field returns a raw COAData id.
+Use get-data when an accounts record field returns a raw COAData id. It returns a compact summary or bounded flat values rather than the persisted nested object.
 Use set with dry_run=true before saving metadata, availability, rollup, external mapping, add/update/remove/move account operations.
 Required OAuth scopes: authenticated Realinsight context${WRITE_TOOLS_ENABLED ? `, ${CHART_OF_ACCOUNTS_WRITE_SCOPE} for writes` : ""}
 `);

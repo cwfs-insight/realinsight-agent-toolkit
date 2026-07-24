@@ -8,7 +8,7 @@ import {
   agent_switch_profile,
 } from "./auth-tools.mjs";
 import { agent_get_children, agent_get_latest_children } from "./child-tools.mjs";
-import { agent_get_chart_of_accounts, agent_set_chart_of_accounts } from "./chart-of-accounts-tools.mjs";
+import { agent_get_chart_of_accounts, agent_get_coa_data, agent_set_chart_of_accounts } from "./chart-of-accounts-tools.mjs";
 import { agent_search_entities } from "./entity-tools.mjs";
 import { JsonRpcError } from "./json-rpc.mjs";
 import {
@@ -140,6 +140,9 @@ export async function call_agent_tool(name, args) {
       break;
     case "get_chart_of_accounts":
       payload = await agent_get_chart_of_accounts(args);
+      break;
+    case "get_coa_data":
+      payload = await agent_get_coa_data(args);
       break;
     case "set_chart_of_accounts":
       payload = await agent_set_chart_of_accounts(args);

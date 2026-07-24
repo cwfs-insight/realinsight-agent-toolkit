@@ -2,7 +2,17 @@
   "mcpServers": {
     "realinsight-agent-toolkit": {
       "type": "http",
-      "url": "https://www.realinsight.cloud/api/v1/mcp"
+      "url": "https://www.realinsight.cloud/api/v1/mcp",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@realinsight/agent-toolkit@0.2.1",
+        "mcp"
+      ],
+      "env": {
+        "RI_AGENT_BASE_URL": "https://www.realinsight.cloud/api/v1",
+        "RI_AGENT_MAX_TOOL_RESULT_BYTES": "240000"
+      }
     }
   }
 }

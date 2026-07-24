@@ -1,0 +1,4575 @@
+{
+  "schema_version": 1,
+  "payloads": {
+    "chart_of_accounts_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "chart_code": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "chart_name": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "chart_description": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "parent_folder_id": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "master_feature_code": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "periods_per_year": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "int32"
+        },
+        "periods_are_months": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "has_adjustments_default": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "is_ad_hoc": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "availability": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "feature_code": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "template": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "type": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "sub_type": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              }
+            }
+          }
+        },
+        "roll_up_to_charts": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "ChartId": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              }
+            }
+          }
+        },
+        "monitor_rule_sets": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "RuleSetId": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "RuleSetName": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "Active": {
+                "type": "boolean"
+              },
+              "BudgetVarianceComparisonTiming": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "chart_of_accounts_operation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "type": [
+            "null",
+            "string"
+          ],
+          "enum": [
+            "set_metadata",
+            "set_availability",
+            "set_rollup_charts",
+            "set_roll_up_to_charts",
+            "set_monitor_rule_sets",
+            "add_account",
+            "update_account",
+            "replace_account",
+            "remove_account",
+            "delete_account",
+            "move_account"
+          ],
+          "description": "Patch operation to apply."
+        },
+        "item_id": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "account_number": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "chart_order": {
+          "type": [
+            "null",
+            "number"
+          ],
+          "format": "decimal"
+        },
+        "account": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "item_id": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "item_code": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "item_type": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "chart_order": {
+                  "type": [
+                    "null",
+                    "number"
+                  ],
+                  "format": "decimal"
+                },
+                "account_number": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "account_id": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "account_sub_id": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "item_name": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "item_description": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "field_type": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "account_type": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "account_type_id": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "formula": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "process_code": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "process_designation": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "loan_payment_account_code": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "payment_history_field_mapping": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "payment_history_field_mapping_disbursements": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "payment_history_field_mapping_deposits": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "payment_history_field_mapping_beg_balance": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "has_budget_total_row": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "has_activity_detail": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "exclude_from_annualization": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "is_suspense_account": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "is_occupancy_percentage": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "is_debt_service": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "is_insurance_claim_account": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "is_expense_label": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "is_cap_ex_label": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "is_payable_label": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "is_revenue_label": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "is_statistical_label": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "is_misc_label": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "is_receivable_label": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "lower_tranche_range": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "format": "int32"
+                },
+                "upper_tranche_range": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "format": "int32"
+                },
+                "payment_application_order": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "format": "int32"
+                },
+                "related_expense_type": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "receivable_acct": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "disbursement_acct": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "periodic_payment_amount_acct": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "max_balance_acct": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "min_disbursement_acct": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "format": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "DecimalPrecision": {
+                          "type": "integer",
+                          "format": "int32"
+                        },
+                        "LabelAlign": {
+                          "type": [
+                            "null",
+                            "string"
+                          ]
+                        },
+                        "isLabelBold": {
+                          "type": "boolean"
+                        },
+                        "isLabelUnderline": {
+                          "type": "boolean"
+                        },
+                        "isValueBold": {
+                          "type": "boolean"
+                        },
+                        "hideIfFollowedByLabel": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "roll_up_to_items": {
+                  "type": [
+                    "array",
+                    "null"
+                  ],
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "ChartId": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "ItemId": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "ChangeSign": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                },
+                "external_xref": {
+                  "type": [
+                    "array",
+                    "null"
+                  ],
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "XrefCode": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "XrefValue": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      }
+                    }
+                  }
+                },
+                "external_gl_xref": {
+                  "type": [
+                    "array",
+                    "null"
+                  ],
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "ExternalGlSystemRef": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "AccountCode": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "SubAccount": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "EntryType": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "ChangeSign": {
+                        "type": "boolean"
+                      },
+                      "OffsetAccountCode": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "OffsetSubAccountCode": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      }
+                    }
+                  }
+                },
+                "monitor_rule_set_items": {
+                  "type": [
+                    "array",
+                    "null"
+                  ],
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "RuleSetId": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "ItemId": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "InfoPositiveActive": {
+                        "type": "boolean"
+                      },
+                      "InfoPositiveVarianceAmount": {
+                        "type": "number",
+                        "format": "double"
+                      },
+                      "InfoPositiveVariancePct": {
+                        "type": "number",
+                        "format": "double"
+                      },
+                      "InfoNegativeActive": {
+                        "type": "boolean"
+                      },
+                      "InfoNegativeVarianceAmount": {
+                        "type": "number",
+                        "format": "double"
+                      },
+                      "InfoNegativeVariancePct": {
+                        "type": "number",
+                        "format": "double"
+                      },
+                      "WarnPositiveActive": {
+                        "type": "boolean"
+                      },
+                      "WarnPositiveVarianceAmount": {
+                        "type": "number",
+                        "format": "double"
+                      },
+                      "WarnPositiveVariancePct": {
+                        "type": "number",
+                        "format": "double"
+                      },
+                      "WarnNegativeActive": {
+                        "type": "boolean"
+                      },
+                      "WarnNegativeVarianceAmount": {
+                        "type": "number",
+                        "format": "double"
+                      },
+                      "WarnNegativeVariancePct": {
+                        "type": "number",
+                        "format": "double"
+                      },
+                      "CritPositiveActive": {
+                        "type": "boolean"
+                      },
+                      "CritPositiveVarianceAmount": {
+                        "type": "number",
+                        "format": "double"
+                      },
+                      "CritPositiveVariancePct": {
+                        "type": "number",
+                        "format": "double"
+                      },
+                      "CritNegativeActive": {
+                        "type": "boolean"
+                      },
+                      "CritNegativeVarianceAmount": {
+                        "type": "number",
+                        "format": "double"
+                      },
+                      "CritNegativeVariancePct": {
+                        "type": "number",
+                        "format": "double"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "chart": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "chart_code": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "chart_name": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "chart_description": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "parent_folder_id": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "master_feature_code": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "periods_per_year": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "format": "int32"
+                },
+                "periods_are_months": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "has_adjustments_default": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "is_ad_hoc": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "availability": {
+                  "type": [
+                    "array",
+                    "null"
+                  ],
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "feature_code": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "template": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "type": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "sub_type": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      }
+                    }
+                  }
+                },
+                "roll_up_to_charts": {
+                  "type": [
+                    "array",
+                    "null"
+                  ],
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "ChartId": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      }
+                    }
+                  }
+                },
+                "monitor_rule_sets": {
+                  "type": [
+                    "array",
+                    "null"
+                  ],
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "RuleSetId": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "RuleSetName": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "Active": {
+                        "type": "boolean"
+                      },
+                      "BudgetVarianceComparisonTiming": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "availability": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "feature_code": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "template": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "type": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "sub_type": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              }
+            }
+          }
+        },
+        "roll_up_to_charts": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "ChartId": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              }
+            }
+          }
+        },
+        "monitor_rule_sets": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "RuleSetId": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "RuleSetName": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "Active": {
+                "type": "boolean"
+              },
+              "BudgetVarianceComparisonTiming": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "op"
+      ]
+    },
+    "model_form_map": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "map_name": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "map_description": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "root_feature_code": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "sheet": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "editable": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "nodes": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "node_id": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "parent_node_id": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "node_type": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "map_name": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "map_description": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "relationship": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "feature_code": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "sheet": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "editable": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "reference_map_item_id": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "reference_map_schema_code": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "periodic_action": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "periodic_as_of_map_item_id": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "periodic_as_of_date": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "periodic_prior_to_embed_map_id": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "stub_missing": {
+                "type": "boolean"
+              },
+              "stub_new_entities": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "start_relative_to_embed_map_id": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "relative_start_direction": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "multi_entity_direction": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "paste_action": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "sheet_name_map_item_id": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "can_insert": {
+                "type": "boolean"
+              },
+              "can_delete": {
+                "type": "boolean"
+              },
+              "multi_entity_shift_rows_columns": {
+                "type": "boolean"
+              },
+              "process_order": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "hide_sheet_on_complete": {
+                "type": "boolean"
+              },
+              "multi_entity_top": {
+                "type": "boolean"
+              },
+              "multi_entity_top_records": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "map_items": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "map_item_id": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "map_order": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "item_type": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "dictionary_type": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "schema_code": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "usage": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "cell": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "use_for_sheet_name": {
+                      "type": "boolean"
+                    },
+                    "output_type": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "clear_values_from_template": {
+                      "type": "boolean"
+                    },
+                    "is_stub_out_key_data": {
+                      "type": "boolean"
+                    },
+                    "override_chart_id": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "coa_budget_years": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "coa_budget_start_years": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "coa_budget_start_relative_to_node_id": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "coa_budget_number_of_years_relative_to_node_id": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "start_year_method": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "number_of_years_method": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "coa_budget_years_direction": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "has_coa_budget_detail": {
+                      "type": "boolean"
+                    },
+                    "has_coa_budget_schedules": {
+                      "type": "boolean"
+                    },
+                    "has_coa_budget_annual_totals": {
+                      "type": "boolean"
+                    },
+                    "has_coa_budget_annual_notes": {
+                      "type": "boolean"
+                    },
+                    "coa_budget_detail_lines": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "coa_budget_schedule_sheet": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "coa_budget_schedule_acct_number_column": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "coa_budget_layout": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "feature_code": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "sheet_name": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "hide_sheet_on_complete": {
+                              "type": [
+                                "boolean",
+                                "null"
+                              ]
+                            },
+                            "feature_code_name_header_cell": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "coa_name_cell": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "year_cell": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "format_code": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "first_acct_row": {
+                              "type": [
+                                "integer",
+                                "null"
+                              ],
+                              "format": "int32"
+                            },
+                            "header_row": {
+                              "type": [
+                                "integer",
+                                "null"
+                              ],
+                              "format": "int32"
+                            },
+                            "coa_account_column": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "coa_label_column": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "coa_value_column": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "coa_total_column": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "coa_notes_column": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "external_xref": {
+                              "type": [
+                                "array",
+                                "null"
+                              ],
+                              "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                  "xref_code": {
+                                    "type": [
+                                      "null",
+                                      "string"
+                                    ]
+                                  },
+                                  "xref_value_column": {
+                                    "type": [
+                                      "null",
+                                      "string"
+                                    ]
+                                  }
+                                }
+                              }
+                            },
+                            "year_skip_columns": {
+                              "type": [
+                                "integer",
+                                "null"
+                              ],
+                              "format": "int32"
+                            },
+                            "repeat_coa_labels_for_each_year": {
+                              "type": [
+                                "boolean",
+                                "null"
+                              ]
+                            },
+                            "repeat_coa_labels_for_each_entity": {
+                              "type": [
+                                "boolean",
+                                "null"
+                              ]
+                            },
+                            "repeat_header_labels_for_each_entity": {
+                              "type": [
+                                "boolean",
+                                "null"
+                              ]
+                            },
+                            "suppress_notes": {
+                              "type": [
+                                "boolean",
+                                "null"
+                              ]
+                            },
+                            "suppress_header_labels": {
+                              "type": [
+                                "boolean",
+                                "null"
+                              ]
+                            },
+                            "include_actuals": {
+                              "type": [
+                                "boolean",
+                                "null"
+                              ]
+                            },
+                            "include_variance": {
+                              "type": [
+                                "boolean",
+                                "null"
+                              ]
+                            },
+                            "do_current_actuals_replace_budget": {
+                              "type": [
+                                "boolean",
+                                "null"
+                              ]
+                            },
+                            "number_of_years_of_prior_actuals": {
+                              "type": [
+                                "integer",
+                                "null"
+                              ],
+                              "format": "int32"
+                            },
+                            "include_detail_lines": {
+                              "type": [
+                                "boolean",
+                                "null"
+                              ]
+                            },
+                            "header_fields": {
+                              "type": [
+                                "array",
+                                "null"
+                              ],
+                              "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                  "feature_code": {
+                                    "type": [
+                                      "null",
+                                      "string"
+                                    ]
+                                  },
+                                  "schema_code": {
+                                    "type": [
+                                      "null",
+                                      "string"
+                                    ]
+                                  },
+                                  "join_thru_feature_code": {
+                                    "type": [
+                                      "null",
+                                      "string"
+                                    ]
+                                  },
+                                  "join_thru_schema_code": {
+                                    "type": [
+                                      "null",
+                                      "string"
+                                    ]
+                                  },
+                                  "suppress_label_load": {
+                                    "type": [
+                                      "boolean",
+                                      "null"
+                                    ]
+                                  },
+                                  "label_column": {
+                                    "type": [
+                                      "null",
+                                      "string"
+                                    ]
+                                  },
+                                  "label_row": {
+                                    "type": [
+                                      "integer",
+                                      "null"
+                                    ],
+                                    "format": "int32"
+                                  },
+                                  "value_column": {
+                                    "type": [
+                                      "null",
+                                      "string"
+                                    ]
+                                  },
+                                  "value_row": {
+                                    "type": [
+                                      "integer",
+                                      "null"
+                                    ],
+                                    "format": "int32"
+                                  },
+                                  "field_usage": {
+                                    "type": [
+                                      "null",
+                                      "string"
+                                    ]
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "has_coa_actual_schedule": {
+                      "type": "boolean"
+                    },
+                    "coa_actual_schedule_sheet": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "coa_actual_schedule_acct_number_column": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "coa_actuals_layout": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "feature_code": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "sheet_name": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "hide_sheet_on_complete": {
+                              "type": [
+                                "boolean",
+                                "null"
+                              ]
+                            },
+                            "feature_code_name_header_cell": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "coa_name_cell": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "first_acct_row": {
+                              "type": [
+                                "integer",
+                                "null"
+                              ],
+                              "format": "int32"
+                            },
+                            "header_row": {
+                              "type": [
+                                "integer",
+                                "null"
+                              ],
+                              "format": "int32"
+                            },
+                            "coa_account_column": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "coa_label_column": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "coa_value_column": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "coa_adjustment_column": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "coa_total_column": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "coa_notes_column": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "external_xref": {
+                              "type": [
+                                "array",
+                                "null"
+                              ],
+                              "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                  "xref_code": {
+                                    "type": [
+                                      "null",
+                                      "string"
+                                    ]
+                                  },
+                                  "xref_value_column": {
+                                    "type": [
+                                      "null",
+                                      "string"
+                                    ]
+                                  }
+                                }
+                              }
+                            },
+                            "multi_statement_skip_columns": {
+                              "type": [
+                                "integer",
+                                "null"
+                              ],
+                              "format": "int32"
+                            },
+                            "repeat_coa_labels_if_multi": {
+                              "type": [
+                                "boolean",
+                                "null"
+                              ]
+                            },
+                            "repeat_header_labels_if_multi": {
+                              "type": [
+                                "boolean",
+                                "null"
+                              ]
+                            },
+                            "suppress_notes": {
+                              "type": [
+                                "boolean",
+                                "null"
+                              ]
+                            },
+                            "hide_adjustment_columns_if_no_adjustments": {
+                              "type": [
+                                "boolean",
+                                "null"
+                              ]
+                            },
+                            "suppress_header_labels": {
+                              "type": [
+                                "boolean",
+                                "null"
+                              ]
+                            },
+                            "include_budget": {
+                              "type": [
+                                "boolean",
+                                "null"
+                              ]
+                            },
+                            "include_variance": {
+                              "type": [
+                                "boolean",
+                                "null"
+                              ]
+                            },
+                            "annualize": {
+                              "type": [
+                                "boolean",
+                                "null"
+                              ]
+                            },
+                            "trailing_twelve_months": {
+                              "type": [
+                                "boolean",
+                                "null"
+                              ]
+                            },
+                            "header_fields": {
+                              "type": [
+                                "array",
+                                "null"
+                              ],
+                              "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                  "feature_code": {
+                                    "type": [
+                                      "null",
+                                      "string"
+                                    ]
+                                  },
+                                  "schema_code": {
+                                    "type": [
+                                      "null",
+                                      "string"
+                                    ]
+                                  },
+                                  "join_thru_feature_code": {
+                                    "type": [
+                                      "null",
+                                      "string"
+                                    ]
+                                  },
+                                  "join_thru_schema_code": {
+                                    "type": [
+                                      "null",
+                                      "string"
+                                    ]
+                                  },
+                                  "suppress_label_load": {
+                                    "type": [
+                                      "boolean",
+                                      "null"
+                                    ]
+                                  },
+                                  "label_column": {
+                                    "type": [
+                                      "null",
+                                      "string"
+                                    ]
+                                  },
+                                  "label_row": {
+                                    "type": [
+                                      "integer",
+                                      "null"
+                                    ],
+                                    "format": "int32"
+                                  },
+                                  "value_column": {
+                                    "type": [
+                                      "null",
+                                      "string"
+                                    ]
+                                  },
+                                  "value_row": {
+                                    "type": [
+                                      "integer",
+                                      "null"
+                                    ],
+                                    "format": "int32"
+                                  },
+                                  "field_usage": {
+                                    "type": [
+                                      "null",
+                                      "string"
+                                    ]
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "has_coa_schedule_offset": {
+                      "type": "boolean"
+                    },
+                    "coa_schedule_offset_rows": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "coa_schedule_offset_columns": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "coa_servicing_balance_layout": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "coa_name_cell": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "loan_number_cell": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "header_row": {
+                              "type": [
+                                "integer",
+                                "null"
+                              ],
+                              "format": "int32"
+                            },
+                            "first_acct_row": {
+                              "type": [
+                                "integer",
+                                "null"
+                              ],
+                              "format": "int32"
+                            },
+                            "label_column": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "account_column": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "value_column": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "pdf_field_mappings": {
+                      "type": [
+                        "array",
+                        "null"
+                      ],
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "form_value": {
+                            "type": [
+                              "null",
+                              "string"
+                            ]
+                          },
+                          "dictionary_value_code": {
+                            "type": [
+                              "null",
+                              "string"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "sort": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "map_item_id": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "sort_order": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "sort_direction": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    }
+                  }
+                }
+              },
+              "filter": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "map_item_id": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "criteria_order": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "open_parenthesis": {
+                      "type": "boolean"
+                    },
+                    "close_parenthesis": {
+                      "type": "boolean"
+                    },
+                    "and_or": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "operator_code": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "match_value": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "model_form_map_patch": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "operations": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "op": {
+                "type": [
+                  "null",
+                  "string"
+                ],
+                "enum": [
+                  "add_node",
+                  "update_node",
+                  "replace_node",
+                  "remove_node",
+                  "add_item",
+                  "update_item",
+                  "remove_item"
+                ],
+                "description": "Patch operation."
+              },
+              "node_id": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "map_item_id": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "parent_node_id": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "remove_children": {
+                "type": "boolean"
+              },
+              "node": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "node_id": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "parent_node_id": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "node_type": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "map_name": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "map_description": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "relationship": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "feature_code": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "sheet": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "editable": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ]
+                      },
+                      "reference_map_item_id": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "reference_map_schema_code": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "periodic_action": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "periodic_as_of_map_item_id": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "periodic_as_of_date": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "periodic_prior_to_embed_map_id": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "stub_missing": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ]
+                      },
+                      "stub_new_entities": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "format": "int32"
+                      },
+                      "start_relative_to_embed_map_id": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "relative_start_direction": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "multi_entity_direction": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "paste_action": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "sheet_name_map_item_id": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "can_insert": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ]
+                      },
+                      "can_delete": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ]
+                      },
+                      "multi_entity_shift_rows_columns": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ]
+                      },
+                      "process_order": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "format": "int32"
+                      },
+                      "hide_sheet_on_complete": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ]
+                      },
+                      "multi_entity_top": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ]
+                      },
+                      "multi_entity_top_records": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "format": "int32"
+                      },
+                      "map_items": {
+                        "type": [
+                          "array",
+                          "null"
+                        ],
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "map_item_id": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "map_order": {
+                              "type": [
+                                "integer",
+                                "null"
+                              ],
+                              "format": "int32"
+                            },
+                            "item_type": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "dictionary_type": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "schema_code": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "usage": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "cell": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "use_for_sheet_name": {
+                              "type": [
+                                "boolean",
+                                "null"
+                              ]
+                            },
+                            "output_type": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "clear_values_from_template": {
+                              "type": [
+                                "boolean",
+                                "null"
+                              ]
+                            },
+                            "is_stub_out_key_data": {
+                              "type": [
+                                "boolean",
+                                "null"
+                              ]
+                            },
+                            "override_chart_id": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "coa_budget_years": {
+                              "type": [
+                                "integer",
+                                "null"
+                              ],
+                              "format": "int32"
+                            },
+                            "coa_budget_start_years": {
+                              "type": [
+                                "integer",
+                                "null"
+                              ],
+                              "format": "int32"
+                            },
+                            "coa_budget_start_relative_to_node_id": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "coa_budget_number_of_years_relative_to_node_id": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "start_year_method": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "number_of_years_method": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "coa_budget_years_direction": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "has_coa_budget_detail": {
+                              "type": [
+                                "boolean",
+                                "null"
+                              ]
+                            },
+                            "has_coa_budget_schedules": {
+                              "type": [
+                                "boolean",
+                                "null"
+                              ]
+                            },
+                            "has_coa_budget_annual_totals": {
+                              "type": [
+                                "boolean",
+                                "null"
+                              ]
+                            },
+                            "has_coa_budget_annual_notes": {
+                              "type": [
+                                "boolean",
+                                "null"
+                              ]
+                            },
+                            "coa_budget_detail_lines": {
+                              "type": [
+                                "integer",
+                                "null"
+                              ],
+                              "format": "int32"
+                            },
+                            "coa_budget_schedule_sheet": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "coa_budget_schedule_acct_number_column": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "coa_budget_layout": {
+                              "oneOf": [
+                                {
+                                  "type": "null"
+                                },
+                                {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "feature_code": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "sheet_name": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "hide_sheet_on_complete": {
+                                      "type": [
+                                        "boolean",
+                                        "null"
+                                      ]
+                                    },
+                                    "feature_code_name_header_cell": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "coa_name_cell": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "year_cell": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "format_code": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "first_acct_row": {
+                                      "type": [
+                                        "integer",
+                                        "null"
+                                      ],
+                                      "format": "int32"
+                                    },
+                                    "header_row": {
+                                      "type": [
+                                        "integer",
+                                        "null"
+                                      ],
+                                      "format": "int32"
+                                    },
+                                    "coa_account_column": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "coa_label_column": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "coa_value_column": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "coa_total_column": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "coa_notes_column": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "external_xref": {
+                                      "type": [
+                                        "array",
+                                        "null"
+                                      ],
+                                      "items": {
+                                        "type": "object",
+                                        "additionalProperties": false,
+                                        "properties": {
+                                          "xref_code": {
+                                            "type": [
+                                              "null",
+                                              "string"
+                                            ]
+                                          },
+                                          "xref_value_column": {
+                                            "type": [
+                                              "null",
+                                              "string"
+                                            ]
+                                          }
+                                        }
+                                      }
+                                    },
+                                    "year_skip_columns": {
+                                      "type": [
+                                        "integer",
+                                        "null"
+                                      ],
+                                      "format": "int32"
+                                    },
+                                    "repeat_coa_labels_for_each_year": {
+                                      "type": [
+                                        "boolean",
+                                        "null"
+                                      ]
+                                    },
+                                    "repeat_coa_labels_for_each_entity": {
+                                      "type": [
+                                        "boolean",
+                                        "null"
+                                      ]
+                                    },
+                                    "repeat_header_labels_for_each_entity": {
+                                      "type": [
+                                        "boolean",
+                                        "null"
+                                      ]
+                                    },
+                                    "suppress_notes": {
+                                      "type": [
+                                        "boolean",
+                                        "null"
+                                      ]
+                                    },
+                                    "suppress_header_labels": {
+                                      "type": [
+                                        "boolean",
+                                        "null"
+                                      ]
+                                    },
+                                    "include_actuals": {
+                                      "type": [
+                                        "boolean",
+                                        "null"
+                                      ]
+                                    },
+                                    "include_variance": {
+                                      "type": [
+                                        "boolean",
+                                        "null"
+                                      ]
+                                    },
+                                    "do_current_actuals_replace_budget": {
+                                      "type": [
+                                        "boolean",
+                                        "null"
+                                      ]
+                                    },
+                                    "number_of_years_of_prior_actuals": {
+                                      "type": [
+                                        "integer",
+                                        "null"
+                                      ],
+                                      "format": "int32"
+                                    },
+                                    "include_detail_lines": {
+                                      "type": [
+                                        "boolean",
+                                        "null"
+                                      ]
+                                    },
+                                    "header_fields": {
+                                      "type": [
+                                        "array",
+                                        "null"
+                                      ],
+                                      "items": {
+                                        "type": "object",
+                                        "additionalProperties": false,
+                                        "properties": {
+                                          "feature_code": {
+                                            "type": [
+                                              "null",
+                                              "string"
+                                            ]
+                                          },
+                                          "schema_code": {
+                                            "type": [
+                                              "null",
+                                              "string"
+                                            ]
+                                          },
+                                          "join_thru_feature_code": {
+                                            "type": [
+                                              "null",
+                                              "string"
+                                            ]
+                                          },
+                                          "join_thru_schema_code": {
+                                            "type": [
+                                              "null",
+                                              "string"
+                                            ]
+                                          },
+                                          "suppress_label_load": {
+                                            "type": [
+                                              "boolean",
+                                              "null"
+                                            ]
+                                          },
+                                          "label_column": {
+                                            "type": [
+                                              "null",
+                                              "string"
+                                            ]
+                                          },
+                                          "label_row": {
+                                            "type": [
+                                              "integer",
+                                              "null"
+                                            ],
+                                            "format": "int32"
+                                          },
+                                          "value_column": {
+                                            "type": [
+                                              "null",
+                                              "string"
+                                            ]
+                                          },
+                                          "value_row": {
+                                            "type": [
+                                              "integer",
+                                              "null"
+                                            ],
+                                            "format": "int32"
+                                          },
+                                          "field_usage": {
+                                            "type": [
+                                              "null",
+                                              "string"
+                                            ]
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              ]
+                            },
+                            "has_coa_actual_schedule": {
+                              "type": [
+                                "boolean",
+                                "null"
+                              ]
+                            },
+                            "coa_actual_schedule_sheet": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "coa_actual_schedule_acct_number_column": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "coa_actuals_layout": {
+                              "oneOf": [
+                                {
+                                  "type": "null"
+                                },
+                                {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "feature_code": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "sheet_name": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "hide_sheet_on_complete": {
+                                      "type": [
+                                        "boolean",
+                                        "null"
+                                      ]
+                                    },
+                                    "feature_code_name_header_cell": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "coa_name_cell": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "first_acct_row": {
+                                      "type": [
+                                        "integer",
+                                        "null"
+                                      ],
+                                      "format": "int32"
+                                    },
+                                    "header_row": {
+                                      "type": [
+                                        "integer",
+                                        "null"
+                                      ],
+                                      "format": "int32"
+                                    },
+                                    "coa_account_column": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "coa_label_column": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "coa_value_column": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "coa_adjustment_column": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "coa_total_column": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "coa_notes_column": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "external_xref": {
+                                      "type": [
+                                        "array",
+                                        "null"
+                                      ],
+                                      "items": {
+                                        "type": "object",
+                                        "additionalProperties": false,
+                                        "properties": {
+                                          "xref_code": {
+                                            "type": [
+                                              "null",
+                                              "string"
+                                            ]
+                                          },
+                                          "xref_value_column": {
+                                            "type": [
+                                              "null",
+                                              "string"
+                                            ]
+                                          }
+                                        }
+                                      }
+                                    },
+                                    "multi_statement_skip_columns": {
+                                      "type": [
+                                        "integer",
+                                        "null"
+                                      ],
+                                      "format": "int32"
+                                    },
+                                    "repeat_coa_labels_if_multi": {
+                                      "type": [
+                                        "boolean",
+                                        "null"
+                                      ]
+                                    },
+                                    "repeat_header_labels_if_multi": {
+                                      "type": [
+                                        "boolean",
+                                        "null"
+                                      ]
+                                    },
+                                    "suppress_notes": {
+                                      "type": [
+                                        "boolean",
+                                        "null"
+                                      ]
+                                    },
+                                    "hide_adjustment_columns_if_no_adjustments": {
+                                      "type": [
+                                        "boolean",
+                                        "null"
+                                      ]
+                                    },
+                                    "suppress_header_labels": {
+                                      "type": [
+                                        "boolean",
+                                        "null"
+                                      ]
+                                    },
+                                    "include_budget": {
+                                      "type": [
+                                        "boolean",
+                                        "null"
+                                      ]
+                                    },
+                                    "include_variance": {
+                                      "type": [
+                                        "boolean",
+                                        "null"
+                                      ]
+                                    },
+                                    "annualize": {
+                                      "type": [
+                                        "boolean",
+                                        "null"
+                                      ]
+                                    },
+                                    "trailing_twelve_months": {
+                                      "type": [
+                                        "boolean",
+                                        "null"
+                                      ]
+                                    },
+                                    "header_fields": {
+                                      "type": [
+                                        "array",
+                                        "null"
+                                      ],
+                                      "items": {
+                                        "type": "object",
+                                        "additionalProperties": false,
+                                        "properties": {
+                                          "feature_code": {
+                                            "type": [
+                                              "null",
+                                              "string"
+                                            ]
+                                          },
+                                          "schema_code": {
+                                            "type": [
+                                              "null",
+                                              "string"
+                                            ]
+                                          },
+                                          "join_thru_feature_code": {
+                                            "type": [
+                                              "null",
+                                              "string"
+                                            ]
+                                          },
+                                          "join_thru_schema_code": {
+                                            "type": [
+                                              "null",
+                                              "string"
+                                            ]
+                                          },
+                                          "suppress_label_load": {
+                                            "type": [
+                                              "boolean",
+                                              "null"
+                                            ]
+                                          },
+                                          "label_column": {
+                                            "type": [
+                                              "null",
+                                              "string"
+                                            ]
+                                          },
+                                          "label_row": {
+                                            "type": [
+                                              "integer",
+                                              "null"
+                                            ],
+                                            "format": "int32"
+                                          },
+                                          "value_column": {
+                                            "type": [
+                                              "null",
+                                              "string"
+                                            ]
+                                          },
+                                          "value_row": {
+                                            "type": [
+                                              "integer",
+                                              "null"
+                                            ],
+                                            "format": "int32"
+                                          },
+                                          "field_usage": {
+                                            "type": [
+                                              "null",
+                                              "string"
+                                            ]
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              ]
+                            },
+                            "has_coa_schedule_offset": {
+                              "type": [
+                                "boolean",
+                                "null"
+                              ]
+                            },
+                            "coa_schedule_offset_rows": {
+                              "type": [
+                                "integer",
+                                "null"
+                              ],
+                              "format": "int32"
+                            },
+                            "coa_schedule_offset_columns": {
+                              "type": [
+                                "integer",
+                                "null"
+                              ],
+                              "format": "int32"
+                            },
+                            "coa_servicing_balance_layout": {
+                              "oneOf": [
+                                {
+                                  "type": "null"
+                                },
+                                {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "coa_name_cell": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "loan_number_cell": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "header_row": {
+                                      "type": [
+                                        "integer",
+                                        "null"
+                                      ],
+                                      "format": "int32"
+                                    },
+                                    "first_acct_row": {
+                                      "type": [
+                                        "integer",
+                                        "null"
+                                      ],
+                                      "format": "int32"
+                                    },
+                                    "label_column": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "account_column": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "value_column": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    }
+                                  }
+                                }
+                              ]
+                            },
+                            "pdf_field_mappings": {
+                              "type": [
+                                "array",
+                                "null"
+                              ],
+                              "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                  "form_value": {
+                                    "type": [
+                                      "null",
+                                      "string"
+                                    ]
+                                  },
+                                  "dictionary_value_code": {
+                                    "type": [
+                                      "null",
+                                      "string"
+                                    ]
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "sort": {
+                        "type": [
+                          "array",
+                          "null"
+                        ],
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "map_item_id": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "sort_order": {
+                              "type": "integer",
+                              "format": "int32"
+                            },
+                            "sort_direction": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      "filter": {
+                        "type": [
+                          "array",
+                          "null"
+                        ],
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "map_item_id": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "criteria_order": {
+                              "type": "integer",
+                              "format": "int32"
+                            },
+                            "open_parenthesis": {
+                              "type": "boolean"
+                            },
+                            "close_parenthesis": {
+                              "type": "boolean"
+                            },
+                            "and_or": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "operator_code": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "match_value": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              "item": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "map_item_id": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "map_order": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "format": "int32"
+                      },
+                      "item_type": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "dictionary_type": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "schema_code": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "usage": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "cell": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "use_for_sheet_name": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ]
+                      },
+                      "output_type": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "clear_values_from_template": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ]
+                      },
+                      "is_stub_out_key_data": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ]
+                      },
+                      "override_chart_id": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "coa_budget_years": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "format": "int32"
+                      },
+                      "coa_budget_start_years": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "format": "int32"
+                      },
+                      "coa_budget_start_relative_to_node_id": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "coa_budget_number_of_years_relative_to_node_id": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "start_year_method": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "number_of_years_method": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "coa_budget_years_direction": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "has_coa_budget_detail": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ]
+                      },
+                      "has_coa_budget_schedules": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ]
+                      },
+                      "has_coa_budget_annual_totals": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ]
+                      },
+                      "has_coa_budget_annual_notes": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ]
+                      },
+                      "coa_budget_detail_lines": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "format": "int32"
+                      },
+                      "coa_budget_schedule_sheet": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "coa_budget_schedule_acct_number_column": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "coa_budget_layout": {
+                        "oneOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                              "feature_code": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "sheet_name": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "hide_sheet_on_complete": {
+                                "type": [
+                                  "boolean",
+                                  "null"
+                                ]
+                              },
+                              "feature_code_name_header_cell": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "coa_name_cell": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "year_cell": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "format_code": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "first_acct_row": {
+                                "type": [
+                                  "integer",
+                                  "null"
+                                ],
+                                "format": "int32"
+                              },
+                              "header_row": {
+                                "type": [
+                                  "integer",
+                                  "null"
+                                ],
+                                "format": "int32"
+                              },
+                              "coa_account_column": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "coa_label_column": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "coa_value_column": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "coa_total_column": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "coa_notes_column": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "external_xref": {
+                                "type": [
+                                  "array",
+                                  "null"
+                                ],
+                                "items": {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "xref_code": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "xref_value_column": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    }
+                                  }
+                                }
+                              },
+                              "year_skip_columns": {
+                                "type": [
+                                  "integer",
+                                  "null"
+                                ],
+                                "format": "int32"
+                              },
+                              "repeat_coa_labels_for_each_year": {
+                                "type": [
+                                  "boolean",
+                                  "null"
+                                ]
+                              },
+                              "repeat_coa_labels_for_each_entity": {
+                                "type": [
+                                  "boolean",
+                                  "null"
+                                ]
+                              },
+                              "repeat_header_labels_for_each_entity": {
+                                "type": [
+                                  "boolean",
+                                  "null"
+                                ]
+                              },
+                              "suppress_notes": {
+                                "type": [
+                                  "boolean",
+                                  "null"
+                                ]
+                              },
+                              "suppress_header_labels": {
+                                "type": [
+                                  "boolean",
+                                  "null"
+                                ]
+                              },
+                              "include_actuals": {
+                                "type": [
+                                  "boolean",
+                                  "null"
+                                ]
+                              },
+                              "include_variance": {
+                                "type": [
+                                  "boolean",
+                                  "null"
+                                ]
+                              },
+                              "do_current_actuals_replace_budget": {
+                                "type": [
+                                  "boolean",
+                                  "null"
+                                ]
+                              },
+                              "number_of_years_of_prior_actuals": {
+                                "type": [
+                                  "integer",
+                                  "null"
+                                ],
+                                "format": "int32"
+                              },
+                              "include_detail_lines": {
+                                "type": [
+                                  "boolean",
+                                  "null"
+                                ]
+                              },
+                              "header_fields": {
+                                "type": [
+                                  "array",
+                                  "null"
+                                ],
+                                "items": {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "feature_code": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "schema_code": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "join_thru_feature_code": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "join_thru_schema_code": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "suppress_label_load": {
+                                      "type": [
+                                        "boolean",
+                                        "null"
+                                      ]
+                                    },
+                                    "label_column": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "label_row": {
+                                      "type": [
+                                        "integer",
+                                        "null"
+                                      ],
+                                      "format": "int32"
+                                    },
+                                    "value_column": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "value_row": {
+                                      "type": [
+                                        "integer",
+                                        "null"
+                                      ],
+                                      "format": "int32"
+                                    },
+                                    "field_usage": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "has_coa_actual_schedule": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ]
+                      },
+                      "coa_actual_schedule_sheet": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "coa_actual_schedule_acct_number_column": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "coa_actuals_layout": {
+                        "oneOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                              "feature_code": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "sheet_name": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "hide_sheet_on_complete": {
+                                "type": [
+                                  "boolean",
+                                  "null"
+                                ]
+                              },
+                              "feature_code_name_header_cell": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "coa_name_cell": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "first_acct_row": {
+                                "type": [
+                                  "integer",
+                                  "null"
+                                ],
+                                "format": "int32"
+                              },
+                              "header_row": {
+                                "type": [
+                                  "integer",
+                                  "null"
+                                ],
+                                "format": "int32"
+                              },
+                              "coa_account_column": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "coa_label_column": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "coa_value_column": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "coa_adjustment_column": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "coa_total_column": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "coa_notes_column": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "external_xref": {
+                                "type": [
+                                  "array",
+                                  "null"
+                                ],
+                                "items": {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "xref_code": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "xref_value_column": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    }
+                                  }
+                                }
+                              },
+                              "multi_statement_skip_columns": {
+                                "type": [
+                                  "integer",
+                                  "null"
+                                ],
+                                "format": "int32"
+                              },
+                              "repeat_coa_labels_if_multi": {
+                                "type": [
+                                  "boolean",
+                                  "null"
+                                ]
+                              },
+                              "repeat_header_labels_if_multi": {
+                                "type": [
+                                  "boolean",
+                                  "null"
+                                ]
+                              },
+                              "suppress_notes": {
+                                "type": [
+                                  "boolean",
+                                  "null"
+                                ]
+                              },
+                              "hide_adjustment_columns_if_no_adjustments": {
+                                "type": [
+                                  "boolean",
+                                  "null"
+                                ]
+                              },
+                              "suppress_header_labels": {
+                                "type": [
+                                  "boolean",
+                                  "null"
+                                ]
+                              },
+                              "include_budget": {
+                                "type": [
+                                  "boolean",
+                                  "null"
+                                ]
+                              },
+                              "include_variance": {
+                                "type": [
+                                  "boolean",
+                                  "null"
+                                ]
+                              },
+                              "annualize": {
+                                "type": [
+                                  "boolean",
+                                  "null"
+                                ]
+                              },
+                              "trailing_twelve_months": {
+                                "type": [
+                                  "boolean",
+                                  "null"
+                                ]
+                              },
+                              "header_fields": {
+                                "type": [
+                                  "array",
+                                  "null"
+                                ],
+                                "items": {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "feature_code": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "schema_code": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "join_thru_feature_code": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "join_thru_schema_code": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "suppress_label_load": {
+                                      "type": [
+                                        "boolean",
+                                        "null"
+                                      ]
+                                    },
+                                    "label_column": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "label_row": {
+                                      "type": [
+                                        "integer",
+                                        "null"
+                                      ],
+                                      "format": "int32"
+                                    },
+                                    "value_column": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    },
+                                    "value_row": {
+                                      "type": [
+                                        "integer",
+                                        "null"
+                                      ],
+                                      "format": "int32"
+                                    },
+                                    "field_usage": {
+                                      "type": [
+                                        "null",
+                                        "string"
+                                      ]
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "has_coa_schedule_offset": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ]
+                      },
+                      "coa_schedule_offset_rows": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "format": "int32"
+                      },
+                      "coa_schedule_offset_columns": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "format": "int32"
+                      },
+                      "coa_servicing_balance_layout": {
+                        "oneOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                              "coa_name_cell": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "loan_number_cell": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "header_row": {
+                                "type": [
+                                  "integer",
+                                  "null"
+                                ],
+                                "format": "int32"
+                              },
+                              "first_acct_row": {
+                                "type": [
+                                  "integer",
+                                  "null"
+                                ],
+                                "format": "int32"
+                              },
+                              "label_column": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "account_column": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "value_column": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "pdf_field_mappings": {
+                        "type": [
+                          "array",
+                          "null"
+                        ],
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "form_value": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "dictionary_value_code": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "required": [
+              "op"
+            ]
+          }
+        }
+      },
+      "required": [
+        "operations"
+      ]
+    },
+    "report_list": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "report_list_id": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "master_feature_code": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "default_currency_code": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "use_currency_code": {
+          "type": "boolean"
+        },
+        "report_header": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "sub_header": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "template_type": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "template_id": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "report_sheet": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "first_data_header_cell": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "first_data_cell": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "data_direction": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "suppress_header_load": {
+          "type": "boolean"
+        },
+        "suppress_report_headers": {
+          "type": "boolean"
+        },
+        "report_header_cell": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "report_sub_header_cell": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "default_currency_cell": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "prompts": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "prompt_id": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "prompt_code": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "prompt_name": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "data_type": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "based_on_column_id": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "default_value": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              }
+            }
+          }
+        },
+        "data_sets": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "data_set_id": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "data_set_name": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "data_set_type": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "feature_code": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "periodic_option": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "periodic_as_of_date": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "join_option": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "join_criteria": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "column_id": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "criteria_order": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "open_parenthesis": {
+                      "type": "boolean"
+                    },
+                    "close_parenthesis": {
+                      "type": "boolean"
+                    },
+                    "and_or": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "operator_code": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "match_value": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "match_value_code": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "filter_post_agg": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              },
+              "periodic_prior_to_data_set_id": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "coa_id": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              }
+            }
+          }
+        },
+        "columns": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "column_id": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "data_set_id": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "column_order": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "include_on_report": {
+                "type": "boolean"
+              },
+              "is_visible": {
+                "type": "boolean"
+              },
+              "column_type": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "schema_code": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "column_name": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "column_prompt_id": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "format_code": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "has_sub_total": {
+                "type": "boolean"
+              },
+              "sub_total_type": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "wrap_text": {
+                "type": "boolean"
+              },
+              "column_width": {
+                "type": "number",
+                "format": "double"
+              },
+              "suppress_repeating_values": {
+                "type": "boolean"
+              },
+              "computed_column_type": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "computed_column_data_type": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "computed_column_formula": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "real_view_id": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "compute_post_agg": {
+                "type": "boolean"
+              },
+              "computed_column_strats": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "strat_order": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "low_value": {
+                      "type": "number",
+                      "format": "double"
+                    },
+                    "high_value": {
+                      "type": "number",
+                      "format": "double"
+                    },
+                    "is_min": {
+                      "type": "boolean"
+                    },
+                    "is_max": {
+                      "type": "boolean"
+                    },
+                    "strat_description": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    }
+                  }
+                }
+              },
+              "is_sticky_column": {
+                "type": "boolean"
+              },
+              "output_unique_id": {
+                "type": "boolean"
+              },
+              "aggregate_options": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "exclude": {
+                        "type": "boolean"
+                      },
+                      "unique": {
+                        "type": "boolean"
+                      },
+                      "order": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "delimiter": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "exclude_space": {
+                        "type": "boolean"
+                      },
+                      "numeric_method": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "date_method": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "boolean_method": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      }
+                    }
+                  }
+                ]
+              },
+              "use_currency_code": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "sorts": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "column_id": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "sort_order": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "sort_direction": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "group_break": {
+                "type": "boolean"
+              },
+              "outline_group": {
+                "type": "boolean"
+              },
+              "sort_post_agg": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "criteria": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "column_id": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "criteria_order": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "open_parenthesis": {
+                "type": "boolean"
+              },
+              "close_parenthesis": {
+                "type": "boolean"
+              },
+              "and_or": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "operator_code": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "match_value": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "match_value_code": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "filter_post_agg": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "team_role_criteria": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enable_team_criteria": {
+                  "type": "boolean"
+                },
+                "filter_any_user_team": {
+                  "type": "boolean"
+                },
+                "filter_any_user_team_targets": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "team_role_criteria": {
+                  "type": [
+                    "array",
+                    "null"
+                  ],
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "filter_targets": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "team_id": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "role_id": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "is_aggregate_report": {
+          "type": "boolean"
+        },
+        "aggregate_group_by": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "column_id": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "order": {
+                "type": "integer",
+                "format": "int32"
+              }
+            }
+          }
+        }
+      }
+    },
+    "record_values": {
+      "type": "object",
+      "additionalProperties": {},
+      "x-runtime-defined-values": true,
+      "description": "Field-name keys discovered from search_fields or get_fields. Values may be any JSON value accepted by that runtime field contract."
+    }
+  }
+}

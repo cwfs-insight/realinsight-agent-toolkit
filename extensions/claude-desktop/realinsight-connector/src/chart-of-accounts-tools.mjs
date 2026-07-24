@@ -15,7 +15,6 @@ const CHART_OF_ACCOUNTS_GET_FIELDS = [
   "coa_ids",
   "chart_code",
   "chart_name",
-  "coa_data_id",
   "search_text",
   "item_ids",
   "account_numbers",
@@ -24,7 +23,6 @@ const CHART_OF_ACCOUNTS_GET_FIELDS = [
   "account_types",
   "sections",
   "include_accounts",
-  "include_coa_data",
   "limit",
   "cursor",
 ];
@@ -49,7 +47,6 @@ export async function get_chart_of_accounts(positionals, options) {
     coa_ids: option_values(options, "coa-ids", option_values(options, "coa_ids", undefined)),
     chart_code: option_value(options, "chart-code", option_value(options, "chart_code", undefined)),
     chart_name: option_value(options, "chart-name", option_value(options, "chart_name", undefined)),
-    coa_data_id: option_value(options, "coa-data-id", option_value(options, "coa_data_id", undefined)),
     search_text: option_value(options, "search-text", option_value(options, "search_text", undefined)),
     item_ids: option_values(options, "item-ids", option_values(options, "item_ids", undefined)),
     account_numbers: option_values(options, "account-numbers", option_values(options, "account_numbers", undefined)),
@@ -58,7 +55,22 @@ export async function get_chart_of_accounts(positionals, options) {
     account_types: option_values(options, "account-types", option_values(options, "account_types", undefined)),
     sections: option_value(options, "sections", undefined),
     include_accounts: option_bool_if_present(options, "include-accounts") ?? option_bool_if_present(options, "include_accounts"),
-    include_coa_data: option_bool_if_present(options, "include-coa-data") ?? option_bool_if_present(options, "include_coa_data"),
+    limit: option_value(options, "limit", undefined),
+    cursor: option_value(options, "cursor", undefined),
+  });
+
+  print_payload(payload);
+}
+
+export async function get_coa_data(positionals, options) {
+  const payload = await agent_get_coa_data({
+    profile: option_value(options, "profile", undefined),
+    coa_data_id: option_value(options, "coa-data-id", option_value(options, "coa_data_id", positionals[0])),
+    projection: option_value(options, "projection", "values"),
+    sources: option_values(options, "sources", undefined),
+    item_ids: option_values(options, "item-ids", option_values(options, "item_ids", undefined)),
+    years: option_values(options, "years", undefined)?.map(Number),
+    periods: option_values(options, "periods", undefined)?.map(Number),
     limit: option_value(options, "limit", undefined),
     cursor: option_value(options, "cursor", undefined),
   });
@@ -90,6 +102,24 @@ export async function agent_get_chart_of_accounts(input) {
   const { profile } = await load_fresh_profile_by_name(optional_string(input, "profile"));
 
   return await post_agent_read_json(profile, "/agent/chart-of-accounts/get", request);
+}
+
+export async function agent_get_coa_data(input) {
+  if (!is_plain_object(input)) throw new JsonRpcError(-32602, "get_coa_data requires an object.");
+  const coa_data_id = optional_string(input, "coa_data_id");
+  if (!coa_data_id) throw new JsonRpcError(-32602, "get_coa_data requires coa_data_id.");
+  const { profile } = await load_fresh_profile_by_name(optional_string(input, "profile"));
+
+  return await post_agent_read_json(profile, "/agent/chart-of-accounts/data/get", remove_undefined({
+    coa_data_id,
+    projection: optional_string(input, "projection") || "values",
+    sources: optional_string_array(input, "sources"),
+    item_ids: optional_string_array(input, "item_ids"),
+    years: optional_integer_array(input, "years"),
+    periods: optional_integer_array(input, "periods"),
+    limit: optional_integer(input, "limit"),
+    cursor: optional_string(input, "cursor"),
+  }));
 }
 
 export async function agent_set_chart_of_accounts(input) {
@@ -145,9 +175,18 @@ function resolve_chart_of_accounts_get_request(input) {
   request.account_types = optional_string_array(request, "account_types");
   request.limit = optional_integer(request, "limit");
   request.include_accounts = optional_boolean(request, "include_accounts");
-  request.include_coa_data = optional_boolean(request, "include_coa_data");
 
   return remove_undefined(request);
+}
+
+function optional_integer_array(input, name) {
+  if (input[name] === undefined || input[name] === null) return undefined;
+  if (!Array.isArray(input[name])) throw new JsonRpcError(-32602, `${name} must be an array of integers.`);
+  const values = input[name].map(Number);
+  if (values.some((value) => !Number.isInteger(value))) {
+    throw new JsonRpcError(-32602, `${name} must be an array of integers.`);
+  }
+  return values;
 }
 
 function resolve_chart_of_accounts_set_request(input) {

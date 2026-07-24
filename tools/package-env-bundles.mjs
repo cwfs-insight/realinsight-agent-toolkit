@@ -307,7 +307,7 @@ function normalize_base_url(value) {
 
 async function read_package_version() {
   const package_json = await read_json(path.join(REPO_ROOT, "packages/agent-toolkit/package.json"));
-  return package_json.version || "0.2.0";
+  return package_json.version || "0.2.1";
 }
 
 async function render_codex_bundle({ env, runtime, package_version, dest_root, options }) {

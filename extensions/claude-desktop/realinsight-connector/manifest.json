@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "realinsight-connector",
   "display_name": "Realinsight Connector",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Use Realinsight commercial real estate data and analytics from Claude Desktop.",
   "long_description": "Connect Claude Desktop to Realinsight through a local MCP server. The extension opens a browser-based Realinsight login, supports SSO/MFA through the normal Realinsight flow, and exposes read-only schema, entity, record, dashboard, analytic, and workbench tools by default.",
   "author": {
@@ -79,19 +79,19 @@
     },
     {
       "name": "search_features",
-      "description": "Find Realinsight feature/entity types from business language. Use this when you need the system feature code for a concept before searching records, child datasets, report fields, or model-form root datasets."
+      "description": "Find Realinsight feature/entity types from business language. Use this when you need the system feature code for a concept before searching records, child datasets, report fields, or model-form root datasets. Make separate bounded calls for alternative feature concepts."
     },
     {
       "name": "search_fields",
-      "description": "Find runtime fields by label or business wording, across all features or within one feature. Use this before record hydration, report columns/filters/sorts, update planning, or interpreting model-map field references."
+      "description": "Find runtime fields by label or business wording, across all features or within one feature. Use this before record hydration, report columns/filters/sorts, update planning, or interpreting model-map field references. Make separate bounded calls for alternative field concepts."
     },
     {
       "name": "get_fields",
-      "description": "List runtime fields for one feature with pagination. Use this when you already know the feature_code and need exact field names, schema codes, display labels, data types, or postable/read-only status."
+      "description": "List runtime fields for one feature with pagination. Use this when you already know the feature_code and need exact field names, schema codes, descriptions, data types, allowed value codes, or postable/read-only status."
     },
     {
       "name": "search_entities",
-      "description": "Find concrete Realinsight entity ids using generic top-toolbar style search or explicit searchable fields. Prefer this for named loan/deal/property/tenant/borrower questions before using get_records, relationship traversal, or child tools."
+      "description": "Find concrete Realinsight entity ids using generic top-toolbar style search or explicit searchable fields. Use one candidate or clue per call, make separate bounded calls for alternatives, and prefer exact field-targeted search once the field and expected value are known."
     },
     {
       "name": "get_children",
@@ -103,7 +103,7 @@
     },
     {
       "name": "get_records",
-      "description": "Hydrate one or more Realinsight entity ids with key fields or explicitly requested record fields. Values may include display_value plus expansion hints for dictionary/reference/user/document fields."
+      "description": "Hydrate one or more Realinsight entity ids into one compact table with shared columns plus row values keyed by field_name. Rows may include display_values, expanded_values, and unset_fields."
     },
     {
       "name": "set_record",
@@ -163,11 +163,15 @@
     },
     {
       "name": "get_chart_of_accounts",
-      "description": "Read or search chart-of-accounts data in the authenticated Realinsight context. Use this for account layouts, labels, COMPUTE rows, account types, availability, rollup mappings, external GL mappings, system-code mappings, or to resolve a raw COAData id returned by an accounts field in get_records. Results wrap the existing AccountsDTO as chart; account rows are in chart.Layout."
+      "description": "Read or search chart-of-accounts configuration in the authenticated Realinsight context. Use this for account layouts, labels, COMPUTE rows, account types, availability, rollup mappings, external GL mappings, and system-code mappings. Results wrap the existing AccountsDTO as chart; account rows are in chart.Layout."
+    },
+    {
+      "name": "get_coa_data",
+      "description": "Read one accounts-field COAData instance as compact metadata/counts or a bounded flat page of values. Use filters and next_cursor instead of loading the persisted nested object."
     },
     {
       "name": "set_chart_of_accounts",
-      "description": "Create or patch a chart of accounts after explicit user approval. Supports metadata updates, availability, rollup chart mappings, monitor rule sets, add/update/replace/remove/move account rows, and dry_run validation. Call get_chart_of_accounts first for expected_conflict_token on updates. Core blocks remove_account and high-risk account mapping/type edits when existing data or servicing/financial usage would make the change unsafe."
+      "description": "Create or patch a chart of accounts after explicit user approval. Supports metadata updates, availability, rollup chart mappings, monitor rule sets, add/update/replace/remove/move account rows, generated item ids, temporary item-id stub replacement, and dry_run validation. Call get_chart_of_accounts first for expected_conflict_token on updates. Core blocks remove_account and high-risk account mapping/type edits when existing data or servicing/financial usage would make the change unsafe."
     },
     {
       "name": "search_model_forms",

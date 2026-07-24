@@ -18,7 +18,7 @@ export async function get_records(positionals, options) {
     field_profile: option_value(options, "field-profile", option_value(options, "field_profile", undefined)),
     field_names: option_values(options, "field-names", option_values(options, "fields", undefined)),
     schema_codes: option_values(options, "schema-codes", option_values(options, "schema_codes", undefined)),
-    expand_values: option_values(options, "expand-values", option_values(options, "expand_values", undefined)),
+    accounts_projection: option_value(options, "accounts-projection", option_value(options, "accounts_projection", undefined)),
     as_of_date: option_value(options, "as-of-date", option_value(options, "as_of_date", undefined)),
     target_currency_id: option_value(options, "target-currency-id", option_value(options, "target_currency_id", undefined)),
   });
@@ -45,7 +45,7 @@ export async function agent_get_records(input) {
   const entity_ids = optional_string_array(input, "entity_ids") || [];
   const field_names = optional_string_array(input, "field_names");
   const schema_codes = optional_string_array(input, "schema_codes");
-  const expand_values = optional_string_array(input, "expand_values");
+  const accounts_projection = optional_string(input, "accounts_projection");
   const field_profile = optional_string(input, "field_profile");
 
   if (entity_ids.length === 0) {
@@ -64,7 +64,7 @@ export async function agent_get_records(input) {
     field_profile,
     field_names,
     schema_codes,
-    expand_values,
+    accounts_projection,
     as_of_date: optional_string(input, "as_of_date"),
     target_currency_id: optional_string(input, "target_currency_id"),
   });
@@ -117,6 +117,18 @@ function print_set_record_payload(payload, options) {
 function print_records_table(payload) {
   const items = payload.items || [];
 
+  if (payload?.columns && payload?.items) {
+    print_compact_records_table(payload, payload);
+    return;
+  }
+
+  const table = items[0];
+
+  if (table?.columns && table?.rows) {
+    print_compact_records_table(payload, table);
+    return;
+  }
+
   if (items.length === 0) {
     console.log("No records found.");
     return;
@@ -139,6 +151,46 @@ function print_records_table(payload) {
 
   if (payload.provenance?.required_scope) details.push(`scope=${payload.provenance.required_scope}`);
   if (payload.warnings?.length) details.push(`warnings=${payload.warnings.length}`);
+
+  if (details.length > 0) {
+    console.log(`# ${details.join(" ")}`);
+  }
+}
+
+function print_compact_records_table(payload, table) {
+  const columns = table.columns || [];
+  const rows = table.rows || table.items || [];
+  const field_names = columns
+    .map((column) => column.field_name)
+    .filter(Boolean);
+
+  if (rows.length === 0) {
+    console.log("No records found.");
+    return;
+  }
+
+  console.log(["entity_id", "feature_code", ...field_names].join("\t"));
+
+  for (const row of rows) {
+    const display_values = row.display_values || {};
+    const values = row.values || {};
+
+    console.log([
+      row.entity_id || "",
+      row.feature_code || table.feature_code || "",
+      ...field_names.map((field_name) => format_table_value(
+        Object.prototype.hasOwnProperty.call(display_values, field_name)
+          ? display_values[field_name]
+          : values[field_name],
+      )),
+    ].join("\t"));
+  }
+
+  const details = [];
+
+  if (payload.provenance?.required_scope) details.push(`scope=${payload.provenance.required_scope}`);
+  if (payload.warnings?.length) details.push(`warnings=${payload.warnings.length}`);
+  details.push(`rows=${rows.length}`);
 
   if (details.length > 0) {
     console.log(`# ${details.join(" ")}`);

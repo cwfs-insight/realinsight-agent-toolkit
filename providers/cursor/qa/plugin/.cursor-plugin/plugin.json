@@ -1,7 +1,7 @@
 {
   "name": "realinsight-connector-qa",
   "description": "Cursor plugin for authenticated Realinsight schema, entity, record, dashboard, analytic, and workbench tools.",
-  "version": "0.2.0-qa",
+  "version": "0.2.1-qa",
   "author": {
     "name": "Realinsight",
     "url": "https://www.realinsight.com"

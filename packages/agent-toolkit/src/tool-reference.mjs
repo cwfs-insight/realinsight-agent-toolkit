@@ -16,6 +16,7 @@ const TOPICS = new Map([
       "search_report_folders",
       "get_report",
       "get_chart_of_accounts",
+      "get_coa_data",
       "search_model_forms",
       "search_model_form_folders",
       "get_model_form",
@@ -322,14 +323,15 @@ const TOPICS = new Map([
   }],
   ["chart_of_accounts", {
     topic: "chart_of_accounts",
-    purpose: "Inspect or change chart-of-accounts metadata, layout rows, labels, computes, account type filters, availability, rollups, external/system mappings, and COAData values from accounts fields.",
+    purpose: "Inspect or change chart configuration and read bounded COAData values from accounts fields.",
     primary_tools: [
       "get_chart_of_accounts",
+      "get_coa_data",
       "set_chart_of_accounts",
       "get_records",
     ],
     workflow: [
-      "When a record has an accounts field, call get_records with expand_values=['accounts'] or pass the raw value to get_chart_of_accounts as coa_data_id.",
+      "Accounts fields return a COAData id. Use get_records accounts_projection='summary' only for compact counts, or pass the id to get_coa_data for bounded flat values.",
       "Use get_chart_of_accounts with item_types ACCT/LABEL/COMPUTE or account_types REV/EXP/CAP/MISC/PAY/REC/STAT to inspect the layout.",
       "Read results wrap the existing AccountsDTO as chart; use chart._id, chart.ChartName, and chart.Layout.",
       "Before writes, call get_chart_of_accounts for the latest conflict_token.",
@@ -342,7 +344,6 @@ const TOPICS = new Map([
         "coa_ids",
         "chart_code",
         "chart_name",
-        "coa_data_id",
         "search_text",
         "item_ids",
         "account_numbers",
@@ -381,7 +382,8 @@ const TOPICS = new Map([
     primary_tools: ["search_features", "search_entities", "get_entity_structure", "get_children", "get_latest_children", "get_records"],
     workflow: [
       "Use search_features when business terms need feature codes.",
-      "Use search_entities to find concrete ids.",
+      "Use one coherent concept, candidate, identifier, or field label per search query. Run a small bounded set of independent searches in parallel for alternatives or distinct clues.",
+      "Use search_entities to find concrete ids. Prefer exact field-targeted search when the field and expected value are known; use generic search for discovery.",
       "Use get_entity_structure for parent/master/children/reference/periodic traversal.",
       "Use get_records with explicit schema_codes or field_names for final values.",
     ],

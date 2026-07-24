@@ -10,7 +10,7 @@
       "displayName": "Realinsight Connector QA",
       "source": "./plugins/claude/realinsight-connector-qa",
       "description": "Connect Claude to Realinsight tools and skills.",
-      "version": "0.2.0-qa",
+      "version": "0.2.1-qa",
       "author": {
         "name": "Realinsight"
       },

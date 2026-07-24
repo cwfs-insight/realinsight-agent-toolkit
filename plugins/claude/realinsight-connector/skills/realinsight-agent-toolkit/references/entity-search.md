@@ -19,6 +19,9 @@ Use this when the agent needs to find Realinsight entities before reading record
 
 ## Rules
 
+- Pass one actual candidate name, identifier, address, or field value per query. A multiword proper name is one candidate; do not combine alternative names or unrelated clues.
+- When alternatives or distinct clues are useful, make a small bounded set of independent searches in parallel and compare the candidate ids.
+- Once field discovery identifies the searchable field and expected value, prefer an exact field-targeted search. Use generic or fuzzy search for discovery.
 - Broad generic search is useful for user-entered names, but it is not a substitute for feature and field discovery when the task is analytical.
 - Keep limits small for exploratory searches. Increase only when the user asks for a larger result set.
 - Preserve result provenance and note truncation in the final answer.

@@ -1,5 +1,11 @@
+import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+
+const AGENT_TOOL_PAYLOAD_SCHEMAS = JSON.parse(fs.readFileSync(
+  new URL("./generated/agent-tool-payload-schemas.json", import.meta.url),
+  "utf8",
+)).payloads;
 
 export const DEFAULT_BASE_URL = "https://www.realinsight.cloud/api/v1";
 export const DEFAULT_CLIENT_ID = "realinsight-agent-toolkit";
@@ -66,28 +72,29 @@ export const MCP_SUPPORTED_PROTOCOL_VERSIONS = [
 export const MCP_SERVER_INFO = {
   name: "realinsight-agent-toolkit",
   title: "Realinsight Agent Toolkit",
-  version: "0.2.0",
+  version: "0.2.1",
 };
 export const MCP_INSTRUCTIONS = [
   "Realinsight is a commercial real estate asset management and servicing platform.",
   "All Realinsight tool calls run through Core API using the authenticated Realinsight user and customer context.",
   "For harnesses that implement tool search, search by tool family first instead of loading every tool: schema features fields; entity search records structure children; analytics dashboard workbench CSV; report configuration folders; model form configuration folders template map; chart of accounts configuration COAData; tool reference schema. Common always-useful entry tools are get_tool_reference, search_features, search_fields, get_fields, search_entities, get_records, get_entity_structure, search_reports, search_report_folders, get_report, search_model_forms, search_model_form_folders, get_model_form, and get_chart_of_accounts.",
-  "If the Realinsight Agent Toolkit skill is unavailable, call get_tool_reference for compact workflow/schema guidance instead of relying on large inline tool schemas.",
+  "Each callable tool includes its complete input schema. If the Realinsight Agent Toolkit skill is unavailable, call get_tool_reference for compact workflow guidance and cross-tool sequencing.",
   "Choose the tool family from the shape of the user's question. For a named loan, deal, property, tenant, borrower, or other specific record, use schema/entity/record tools first. For broad portfolio, system, dashboard, saved-list, or operational-table questions, inspect curated dashboard/workbench/cache tools when they match the request.",
   "Do not default to dashboard/workbench tools only because a question is broad business data; use them when the user mentions an existing page/list/analytic/workbench, when tool evidence points to one, or when a curated cached table is the best source for a portfolio/system-wide population.",
   "Use search_features when business terms need mapping to Realinsight feature/entity types such as loan, deal, lease, property, rent roll, or operating statement.",
   "Use search_fields or get_fields to identify exact schema codes and field names before requesting record values, child rows, report columns, filters, sorts, or model-map field meaning.",
-  "Use search_entities to find concrete Realinsight entity ids. Use generic search for named records and explicit schema_codes or feature_code plus field_names when you know the searchable fields.",
-  "Use get_records after search_entities to hydrate entity ids with key fields or explicit field values.",
+  "Keep each search query to one coherent concept, name, identifier, or field label. Multiword phrases are fine when they form one concept; do not concatenate alternatives or independent clues. Issue a small bounded set of independent searches in parallel when comparing alternatives or distinct clues.",
+  "Use search_entities to find concrete Realinsight entity ids. Use generic search for discovery, and prefer exact schema_codes or feature_code plus field_names when the searchable field and expected value are known.",
+  "Use get_records after search_entities to hydrate entity ids into a compact table with shared columns and one row per record.",
   "Use get_children after finding a parent entity when the user asks for payment history, rent-roll rows, collateral, owners, or another child dataset.",
   "Use get_latest_children when you need one latest child per parent, then hydrate returned child_entity_id values with get_records.",
-  "Record values can include display_value and expansion hints. Prefer display_value for user-facing answers and value for exact ids/codes. For accounts fields, pass expand_values=['accounts'] to get_records or call get_chart_of_accounts with the returned COAData id.",
+  "Record table rows can include display_values, expanded_values, and unset_fields. Prefer display_values for user-facing answers and values for exact ids/codes. Accounts fields return their COAData id by default; request accounts_projection='summary' for compact metadata or call get_coa_data for bounded flat values.",
   "Use get_entity_structure for parent, master, child, reference, or periodic relationship traversal when the user asks how entities are connected.",
   "Use list_dashboard_pages/get_dashboard_page for dashboard pages, analytics, portfolio pages, curated visual/report tiles, or broad questions where an existing curated analytic is likely the best source.",
   "Use list_workbenches/get_workbench_data for existing workbench lists, saved lists, queues, cached operational tables, or broad questions where an operational list is likely the best source.",
   "Use search_reports/get_report when the user asks to inspect, create, edit, copy, or delete report definitions. Reports are best for extracting/listing data: choose the report grain with master_feature_code first, then add related datasets and fields. Use search_report_folders when the user asks to place a report in a specific folder.",
   "Use search_model_forms/get_model_form when the user asks about model/form templates, Excel/PDF outputs, workbook maps, generated files, posting, or repeating template layout. Models are best for transforming or presenting data through a template and map. Use search_model_form_folders when the user asks to place a model form in a specific folder.",
-  "Use get_chart_of_accounts when the user asks about Chart of Accounts setup, account labels/computes, rollup mappings, external GL mappings, system-code mappings, availability, or when an accounts record field returns a COAData id.",
+  "Use get_chart_of_accounts for Chart of Accounts setup, account labels/computes, rollup mappings, external GL mappings, system-code mappings, and availability. Use get_coa_data when an accounts record field returns a COAData id and values are needed.",
   "Model form maps are nested in storage but returned as flat node ids through get_model_form sections; inspect only the needed map nodes/items. Prefer map_patch for small add/update/remove node/item edits, and reserve full map replacement for bulk import/revert. Markers are repeating-block/layout anchors, not entity fields. Read the model-form skill reference for map usage and embedded relationship semantics before writing.",
   "For model form writes, read the latest model form first, preserve unchanged metadata/map values, validate create/update requests when changing metadata or map structure, then write only after explicit approval. Use source_model_form_id to create a derivative copy from an existing model form. If parent_folder_id is omitted on create, Core saves under agent/{current user name}; pass WORKBOOKPROCESS or ROOT only when the user explicitly asks for root.",
   "Use download_model_form_template with output_path when working locally so workbook bytes stay out of chat. In hosted flows, use the returned signed download_url outside model context. Modify the Excel file, call stage_model_form_template_file to get a signed multipart upload_url and staged_file_id, upload the file outside the tool call, then use upload_model_form_template with staged_file_id, expected_conflict_token, and approved=true.",
@@ -419,14 +426,14 @@ const ALL_AGENT_TOOLS = [
     cli: "ri-agent search-features QUERY",
     route: "GET /agent/schema/features/search",
     scope: SCHEMA_READ_SCOPE,
-    description: "Find Realinsight feature/entity types from business language. Use this when you need the system feature code for a concept before searching records, child datasets, report fields, or model-form root datasets.",
+    description: "Find Realinsight feature/entity types from business language. Use this when you need the system feature code for a concept before searching records, child datasets, report fields, or model-form root datasets. Make separate bounded calls for alternative feature concepts.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
       properties: {
         query: {
           type: "string",
-          description: "Natural-language search text such as loan, deal, lease, property, rent roll, or operating statement.",
+          description: "One coherent feature concept such as loan, deal, lease, property, rent roll, or operating statement. A multiword phrase is fine when it names one concept; do not concatenate alternatives.",
         },
         profile: {
           type: "string",
@@ -436,7 +443,7 @@ const ALL_AGENT_TOOLS = [
           type: "integer",
           minimum: 1,
           maximum: 100,
-          description: "Maximum feature results to return.",
+          description: "Maximum feature results to return. Defaults to 10.",
         },
         type: {
           type: "string",
@@ -457,14 +464,14 @@ const ALL_AGENT_TOOLS = [
     cli: "ri-agent search-fields QUERY [--feature-code CODE]",
     route: "GET /agent/schema/fields/search",
     scope: SCHEMA_READ_SCOPE,
-    description: "Find runtime fields by label or business wording, across all features or within one feature. Use this before record hydration, report columns/filters/sorts, update planning, or interpreting model-map field references.",
+    description: "Find runtime fields by label or business wording, across all features or within one feature. Use this before record hydration, report columns/filters/sorts, update planning, or interpreting model-map field references. Make separate bounded calls for alternative field concepts.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
       properties: {
         query: {
           type: "string",
-          description: "Natural-language search text or field text such as balance, maturity date, tenant name, or property type.",
+          description: "One coherent field label, metric, or schema fragment such as balance, maturity date, tenant name, or property type. Do not concatenate alternative fields into one query.",
         },
         profile: {
           type: "string",
@@ -478,7 +485,7 @@ const ALL_AGENT_TOOLS = [
           type: "integer",
           minimum: 1,
           maximum: 100,
-          description: "Maximum field results to return.",
+          description: "Maximum field results to return. Defaults to 10.",
         },
         include_computed: {
           type: "boolean",
@@ -506,7 +513,7 @@ const ALL_AGENT_TOOLS = [
     cli: "ri-agent get-fields FEATURE_CODE",
     route: "GET /agent/schema/features/{feature_code}/fields",
     scope: SCHEMA_READ_SCOPE,
-    description: "List runtime fields for one feature with pagination. Use this when you already know the feature_code and need exact field names, schema codes, display labels, data types, or postable/read-only status.",
+    description: "List runtime fields for one feature with pagination. Use this when you already know the feature_code and need exact field names, schema codes, descriptions, data types, allowed value codes, or postable/read-only status.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
@@ -559,14 +566,14 @@ const ALL_AGENT_TOOLS = [
     cli: "ri-agent search-entities QUERY [--schema-code FEATURE.FIELD|--schema-codes A.B,C.D|--feature-code FEATURE --field-names FieldA,FieldB]",
     route: "GET /agent/entities/search",
     scope: ENTITY_SEARCH_SCOPE,
-    description: "Find concrete Realinsight entity ids using generic top-toolbar style search or explicit searchable fields. Prefer this for named loan/deal/property/tenant/borrower questions before using get_records, relationship traversal, or child tools.",
+    description: "Find concrete Realinsight entity ids using generic top-toolbar style search or explicit searchable fields. Use one candidate or clue per call, make separate bounded calls for alternatives, and prefer exact field-targeted search once the field and expected value are known.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
       properties: {
         query: {
           type: "string",
-          description: "Entity search text such as a property name, loan number, deal name, tenant name, or exact external identifier.",
+          description: "One actual candidate property name, loan number, deal name, tenant name, address, external identifier, or field value. Multiword proper names are fine; do not combine alternative candidates or unrelated clues.",
         },
         profile: {
           type: "string",
@@ -602,11 +609,11 @@ const ALL_AGENT_TOOLS = [
           type: "integer",
           minimum: 1,
           maximum: 100,
-          description: "Maximum entity results to return.",
+          description: "Maximum entity results to return. Defaults to 10.",
         },
         exact: {
           type: "boolean",
-          description: "Use exact normalized matching instead of fuzzy autocomplete matching.",
+          description: "Prefer exact normalized matching when the target field and expected value are known; use fuzzy matching for generic discovery.",
         },
       },
       required: ["query"],
@@ -835,7 +842,7 @@ const ALL_AGENT_TOOLS = [
     cli: "ri-agent get-records --feature-code FEATURE --entity-ids ID1,ID2 [--fields FieldA,FieldB|--schema-codes FEATURE.FieldA,FEATURE.FieldB]",
     route: "POST /agent/records/get",
     scope: RECORD_READ_SCOPE,
-    description: "Hydrate one or more Realinsight entity ids with key fields or explicitly requested record fields. Values may include display_value plus expansion hints for dictionary/reference/user/document fields.",
+    description: "Hydrate one or more Realinsight entity ids into one compact table with shared columns plus row values keyed by field_name. Rows may include display_values, expanded_values, and unset_fields.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
@@ -878,13 +885,10 @@ const ALL_AGENT_TOOLS = [
           maxItems: 100,
           description: "Explicit schema codes in FeatureCode.FieldName format. Each schema code must match feature_code. Keep this list narrow for large populations.",
         },
-        expand_values: {
-          type: "array",
-          items: {
-            type: "string",
-            enum: ["accounts", "account", "all"],
-          },
-          description: "Optional value expansion. Use accounts to resolve accounts field raw COAData ids into chart layout and COA data values.",
+        accounts_projection: {
+          type: "string",
+          enum: ["reference", "summary"],
+          description: "Accounts-field projection. reference is the default and returns the COAData id; summary adds only compact metadata and counts.",
         },
         as_of_date: {
           type: "string",
@@ -920,9 +924,10 @@ const ALL_AGENT_TOOLS = [
           description: "Realinsight entity id for the record to update.",
         },
         record: {
-          type: "object",
-          additionalProperties: true,
-          description: "Object whose keys are field names and whose values are the new field values.",
+          ...generated_payload_schema(
+            "record_values",
+            "Object whose keys are exact updateable field names discovered with search_fields or get_fields and whose values follow those runtime field contracts.",
+          ),
         },
         update_fields: {
           type: "array",
@@ -1443,10 +1448,10 @@ const ALL_AGENT_TOOLS = [
   {
     name: "get_chart_of_accounts",
     title: "Get Realinsight Chart Of Accounts",
-    cli: "ri-agent get-chart-of-accounts [COA_ID|--coa-data-id ID|--search-text TEXT]",
+    cli: "ri-agent get-chart-of-accounts [COA_ID|--search-text TEXT]",
     route: "POST /agent/chart-of-accounts/get",
     scope: "",
-    description: "Read or search chart-of-accounts data in the authenticated Realinsight context. Use this for account layouts, labels, COMPUTE rows, account types, availability, rollup mappings, external GL mappings, system-code mappings, or to resolve a raw COAData id returned by an accounts field in get_records. Results wrap the existing AccountsDTO as chart; account rows are in chart.Layout.",
+    description: "Read or search chart-of-accounts configuration in the authenticated Realinsight context. Use this for account layouts, labels, COMPUTE rows, account types, availability, rollup mappings, external GL mappings, and system-code mappings. Results wrap the existing AccountsDTO as chart; account rows are in chart.Layout.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
@@ -1471,10 +1476,6 @@ const ALL_AGENT_TOOLS = [
         chart_name: {
           type: "string",
           description: "Exact chart name lookup.",
-        },
-        coa_data_id: {
-          type: "string",
-          description: "COAData id from an accounts record field. The response includes the linked chart and compact COAData values.",
         },
         search_text: {
           type: "string",
@@ -1513,15 +1514,11 @@ const ALL_AGENT_TOOLS = [
         },
         sections: {
           type: "string",
-          description: "Optional comma-separated sections: metadata,accounts,availability,rollups,monitor_rules,coa_data,data_summary,all.",
+          description: "Optional comma-separated sections: metadata,accounts,availability,rollups,monitor_rules,all.",
         },
         include_accounts: {
           type: "boolean",
           description: "Include chart layout rows. Defaults true for a specific chart or when account filters are supplied.",
-        },
-        include_coa_data: {
-          type: "boolean",
-          description: "Include COAData values when coa_data_id is supplied.",
         },
         limit: {
           type: "integer",
@@ -1537,6 +1534,30 @@ const ALL_AGENT_TOOLS = [
     },
   },
   {
+    name: "get_coa_data",
+    title: "Get Realinsight COA Data",
+    cli: "ri-agent get-coa-data COA_DATA_ID [--projection summary|values] [--limit 100]",
+    route: "POST /agent/chart-of-accounts/data/get",
+    scope: "",
+    description: "Read one accounts-field COAData instance as compact metadata/counts or a bounded flat page of values. Use filters and next_cursor instead of loading the persisted nested object.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        profile: { type: "string", description: "Optional local ri-agent auth profile name." },
+        coa_data_id: { type: "string", description: "COAData id stored in an accounts field." },
+        projection: { type: "string", enum: ["summary", "values"], description: "summary returns only metadata/counts; values returns one bounded flat page." },
+        sources: { type: "array", items: { type: "string", enum: ["single_item", "annual_item", "general_ledger"] } },
+        item_ids: { type: "array", items: { type: "string" } },
+        years: { type: "array", items: { type: "integer" } },
+        periods: { type: "array", items: { type: "integer" } },
+        limit: { type: "integer", minimum: 1, maximum: 500 },
+        cursor: { type: "string", description: "Cursor from the previous get_coa_data page." },
+      },
+      required: ["coa_data_id"],
+    },
+  },
+  {
     name: "set_chart_of_accounts",
     title: "Set Realinsight Chart Of Accounts",
     cli: "ri-agent set-chart-of-accounts --request-json JSON --approved",
@@ -1544,7 +1565,7 @@ const ALL_AGENT_TOOLS = [
     scope: CHART_OF_ACCOUNTS_WRITE_SCOPE,
     readOnlyHint: false,
     idempotentHint: false,
-    description: "Create or patch a chart of accounts after explicit user approval. Supports metadata updates, availability, rollup chart mappings, monitor rule sets, add/update/replace/remove/move account rows, and dry_run validation. Call get_chart_of_accounts first for expected_conflict_token on updates. Core blocks remove_account and high-risk account mapping/type edits when existing data or servicing/financial usage would make the change unsafe.",
+    description: "Create or patch a chart of accounts after explicit user approval. Supports metadata updates, availability, rollup chart mappings, monitor rule sets, add/update/replace/remove/move account rows, generated item ids, temporary item-id stub replacement, and dry_run validation. Call get_chart_of_accounts first for expected_conflict_token on updates. Core blocks remove_account and high-risk account mapping/type edits when existing data or servicing/financial usage would make the change unsafe.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
@@ -1558,57 +1579,18 @@ const ALL_AGENT_TOOLS = [
           description: "Existing Chart of Accounts id. Omit to create a new chart.",
         },
         chart: {
-          type: "object",
-          additionalProperties: true,
-          description: "Top-level chart metadata: chart_code, chart_name, chart_description, parent_folder_id, master_feature_code, periods_per_year, periods_are_months, has_adjustments_default, is_ad_hoc, availability, roll_up_to_charts, monitor_rule_sets.",
+          ...generated_payload_schema(
+            "chart_of_accounts_metadata",
+            "Typed top-level chart metadata. Omit properties that are not changing.",
+          ),
         },
         operations: {
           type: "array",
           items: {
-            type: "object",
-            additionalProperties: true,
-            properties: {
-              op: {
-                type: "string",
-                enum: [
-                  "set_metadata",
-                  "set_availability",
-                  "set_rollup_charts",
-                  "set_roll_up_to_charts",
-                  "set_monitor_rule_sets",
-                  "add_account",
-                  "update_account",
-                  "replace_account",
-                  "remove_account",
-                  "delete_account",
-                  "move_account",
-                ],
-                description: "Patch operation to apply.",
-              },
-              item_id: {
-                type: "string",
-                description: "Target account item id for update, replace, remove, or move.",
-              },
-              account_number: {
-                type: "string",
-                description: "Alternative account selector using AccountId or AccountId-AccountSubId.",
-              },
-              chart_order: {
-                type: "number",
-                description: "New display/order value for move_account.",
-              },
-              account: {
-                type: "object",
-                additionalProperties: true,
-                description: "Account row payload. Common fields: item_id, item_code, item_type, chart_order, account_number, account_id, account_sub_id, item_name, item_description, field_type, account_type, formula, format, roll_up_to_items, external_xref, external_gl_xref, monitor_rule_set_items, process/system/payment mappings.",
-              },
-              chart: {
-                type: "object",
-                additionalProperties: true,
-                description: "Metadata payload for set_metadata or section-level operations.",
-              },
-            },
-            required: ["op"],
+            ...generated_payload_schema(
+              "chart_of_accounts_operation",
+              "Typed Chart of Accounts patch operation.",
+            ),
           },
           description: "Patch operations applied in order. Use add_account for bulk account creation by sending many operations.",
         },
@@ -2120,9 +2102,10 @@ const ALL_AGENT_TOOLS = [
           description: "Whether other users can see the report.",
         },
         list: {
-          type: "object",
-          additionalProperties: true,
-          description: "LIST report configuration object. Use get_tool_reference topic=reports format=schema for shape and topic=report_computed_fields for column order, computed formulas, or aggregate behavior. Every data_set.feature_code must belong to the same top-level feature family as master_feature_code.",
+          ...generated_payload_schema(
+            "report_list",
+            "Typed LIST report configuration. Every data_set.feature_code must belong to the same top-level feature family as master_feature_code.",
+          ),
         },
         change_reason: {
           type: "string",
@@ -2180,9 +2163,10 @@ const ALL_AGENT_TOOLS = [
           description: "Whether other users can see the report.",
         },
         list: {
-          type: "object",
-          additionalProperties: true,
-          description: "Normalized LIST report configuration object. Use get_tool_reference topic=reports format=schema for shape and topic=report_computed_fields for column order, computed formulas, or aggregate behavior.",
+          ...generated_payload_schema(
+            "report_list",
+            "Typed normalized LIST report configuration.",
+          ),
         },
         expected_conflict_token: {
           type: "string",
@@ -2269,9 +2253,10 @@ const ALL_AGENT_TOOLS = [
           description: "Whether other users can see the report.",
         },
         list: {
-          type: "object",
-          additionalProperties: true,
-          description: "LIST report configuration object. Use get_tool_reference topic=reports format=schema for shape and topic=report_computed_fields for column order, computed formulas, or aggregate behavior.",
+          ...generated_payload_schema(
+            "report_list",
+            "Typed LIST report configuration.",
+          ),
         },
         change_reason: {
           type: "string",
@@ -2344,9 +2329,10 @@ const ALL_AGENT_TOOLS = [
           description: "Whether other users can see the report.",
         },
         list: {
-          type: "object",
-          additionalProperties: true,
-          description: "Normalized LIST report configuration object. Use get_tool_reference topic=reports format=schema for shape and topic=report_computed_fields for column order, computed formulas, or aggregate behavior.",
+          ...generated_payload_schema(
+            "report_list",
+            "Typed normalized LIST report configuration.",
+          ),
         },
         expected_conflict_token: {
           type: "string",
@@ -2447,44 +2433,27 @@ export const AGENT_TOOLS = ALL_AGENT_TOOLS.filter((tool) => (
 ));
 
 function model_form_map_schema(description) {
-  return {
-    type: "object",
-    additionalProperties: true,
-    description,
-  };
+  return generated_payload_schema("model_form_map", description);
 }
 
 function model_form_map_patch_schema() {
-  return {
-    type: "object",
-    additionalProperties: true,
-    description: "Optional focused map patch for small edits. Prefer this for add/update/remove node/item operations. update_node and update_item merge supplied fields, including nested COA layout fields; replace_node replaces full node contents. Read the model-form skill reference for detailed node/item fields and usage/relationship semantics before writing. Do not send with map.",
-    properties: {
-      operations: {
-        type: "array",
-        description: "Ordered map patch operations.",
-        items: {
-          type: "object",
-          additionalProperties: true,
-          properties: {
-            op: {
-              type: "string",
-              enum: ["add_node", "update_node", "replace_node", "remove_node", "add_item", "update_item", "remove_item"],
-              description: "Patch operation.",
-            },
-            node_id: { type: "string", description: "Target node id for node/item operations. Use root for the root map." },
-            map_item_id: { type: "string", description: "Target map item id for update_item/remove_item." },
-            parent_node_id: { type: "string", description: "Parent node id for add_node when node.parent_node_id is omitted." },
-            remove_children: { type: "boolean", description: "For remove_node, set true to remove a full subtree." },
-            node: { type: "object", additionalProperties: true },
-            item: { type: "object", additionalProperties: true },
-          },
-          required: ["op"],
-        },
-      },
-    },
-    required: ["operations"],
-  };
+  return generated_payload_schema(
+    "model_form_map_patch",
+    "Typed focused map patch for add/update/remove node/item operations. update_node and update_item merge supplied fields; replace_node replaces full node contents. Do not send with map.",
+  );
+}
+
+function generated_payload_schema(name, description) {
+  const source = AGENT_TOOL_PAYLOAD_SCHEMAS[name];
+  if (!source) {
+    throw new Error(`Missing generated agent tool payload schema: ${name}`);
+  }
+
+  const schema = structuredClone(source);
+  if (description) {
+    schema.description = description;
+  }
+  return schema;
 }
 
 function model_form_create_properties(write) {

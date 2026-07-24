@@ -40,7 +40,7 @@ Use the user's wording to choose the lightest useful tool family:
 - Broad portfolio or system questions: when the user asks across a population or a curated dashboard, workbench, saved list, queue, or operational table seems likely to match the question, consider cached dashboard/workbench tools. Use cached tables when they fit the business question, but do not assume every broad question requires a dashboard or workbench.
 - Report questions: use report configuration tools when the user wants to inspect, create, edit, copy, or delete a report definition. Reports are best for extracting/listing data; choose the master dataset/report grain first, then add related datasets and fields.
 - Model/form questions: use model-form tools when the user asks about Excel/PDF templates, workbook maps, generated outputs, posting back to Realinsight, assignments, or repeating layout. Models are best for transforming or presenting data through a template and map.
-- Chart of Accounts questions: use chart-of-accounts tools when the user asks about account structures, labels, computed accounts, account types, rollups, external mappings, availability, or accounts fields/COAData on records.
+- Chart of Accounts questions: use `get_chart_of_accounts` for account configuration/layout and `get_coa_data` for record-bound accounts values.
 - Runtime output questions: current report/model-form execution job tools are not exposed yet. Inspect definitions and cached outputs when available, and tell the user when an output must be run or refreshed in Realinsight.
 
 ## Tool Discovery For Large Harnesses
@@ -52,10 +52,14 @@ When the harness supports tool search, search by family instead of loading or re
 - Dashboard, analytic, workbench, and cached-table reads: search for `Realinsight analytics dashboard workbench CSV`; common tools are `list_dashboard_pages`, `get_dashboard_page`, `list_workbenches`, and CSV/data/entity extraction tools.
 - Report configuration: search for `Realinsight report configuration search folders get validate`; start with `search_reports`, `search_report_folders` when placing a report in a user-requested folder, and `get_report`, then validate/write tools only after approval.
 - Model form configuration: search for `Realinsight model form configuration folders template map`; start with `search_model_forms`, `search_model_form_folders` when placing a model in a user-requested folder, and `get_model_form`, then focused map/template tools only when needed.
-- Chart of Accounts configuration: search for `Realinsight chart of accounts configuration COAData`; start with `get_chart_of_accounts` in the authenticated Realinsight context, then call `set_chart_of_accounts` only after dry-run validation and approval.
+- Chart of Accounts and COA Data: search for `Realinsight chart of accounts configuration COAData`; use `get_chart_of_accounts` for configuration/layout, `get_coa_data` for a record-bound data id, and `set_chart_of_accounts` only after dry-run validation and approval.
 - Reference/schema fallback: search for `Realinsight tool reference schema` or call `get_tool_reference` when this skill or its reference files are unavailable.
 
-Keep these common entry tools visible or easy to discover: `get_tool_reference`, `search_features`, `search_fields`, `get_fields`, `search_entities`, `get_records`, `get_entity_structure`, `search_reports`, `search_report_folders`, `get_report`, `search_model_forms`, `search_model_form_folders`, `get_model_form`, and `get_chart_of_accounts`.
+Keep these common entry tools visible or easy to discover: `get_tool_reference`, `search_features`, `search_fields`, `get_fields`, `search_entities`, `get_records`, `get_entity_structure`, `search_reports`, `search_report_folders`, `get_report`, `search_model_forms`, `search_model_form_folders`, `get_model_form`, `get_chart_of_accounts`, and `get_coa_data`.
+
+Use the complete input schema attached to the selected callable tool instead of guessing payload fields from prose. Fixed report, model-form, and Chart of Accounts objects are fully typed. `set_record.record` is intentionally runtime-defined, so discover its exact field names and value contracts with `search_fields` or `get_fields` before calling it.
+
+This skill describes the broader Realinsight toolkit, so a tool named here may not be exposed in every agent harness. Confirm a tool is present in the current inventory or discoverable through tool search before planning around it. If it is still absent, treat it as unavailable for this agent session, use the nearest exposed capability when appropriate, or explain the limitation. Do not invent or attempt to call unavailable tools.
 
 ## Reference Selection
 
@@ -83,7 +87,7 @@ Reusable helper scripts are available under `scripts/` for common local file wor
 1. Check auth and available tools.
 2. Choose the path above before calling tools.
 3. For entity/record questions, discover feature and field codes before assuming schema details.
-4. Search for a small candidate entity set, then hydrate only key fields or explicit fields.
+4. Use one coherent concept, name, identifier, or field label per search query. Multiword phrases are fine when they form one concept; do not concatenate alternatives or independent clues. For alternatives or distinct clues, make a small bounded set of independent searches in parallel and compare results. Search for a small candidate entity set, prefer exact field targeting when the field and expected value are known, and use generic or fuzzy search for discovery. Then hydrate only key fields or explicit fields.
 5. Use relationship tools only when the next step needs parent, master, child, reference, or periodic context.
 6. For dashboard, analytic, workbench, or saved-list questions, prefer cached table tools over manual entity fan-out when the cached source matches the request.
 7. For report definition changes, read `references/report-configuration.md`, and also read `references/report-computed-fields.md` before editing column order, computed columns, formulas, aggregate settings, or post-aggregate behavior. Get the latest conflict token, validate before writing, and require explicit approval.
@@ -101,7 +105,7 @@ Reusable helper scripts are available under `scripts/` for common local file wor
 - Local auth helpers: `auth_status`, `list_profiles`, `connect_realinsight`, `switch_profile`, `disconnect_realinsight`, `request_realinsight_scopes`. Hosted HTTP MCP exposes hosted-only `disconnect`, which revokes the current hosted OAuth grant and then the host/user must reconnect Realinsight.
 - Schema discovery: `search_features`, `search_fields`, `get_fields`.
 - Entity search and relationships: `search_entities`, `get_children`, `get_latest_children`, `get_entity_structure`.
-- Records: `get_records`; gated writes with `set_record`.
+- Records: `get_records` returns a compact table with shared columns and row `values`/`display_values`; gated writes use `set_record`.
 - Dashboards, analytics, and workbenches: `list_dashboard_pages`, `get_dashboard_page`, `get_analytic_data`, `get_analytic_csv`, `extract_analytic_entities`, `list_workbenches`, `get_workbench_data`, `get_workbench_csv`, `extract_workbench_entities`.
 - Report configuration: `search_reports`, `search_report_folders`, `get_report`; gated validation/write tools with `validate_create_report`, `validate_update_report`, `validate_delete_report`, `create_report`, `update_report`, `delete_report`.
 - Chart of Accounts configuration: `get_chart_of_accounts` reads without a separate COA OAuth scope; gated writes with `set_chart_of_accounts` require `ri:chart_of_accounts.write`.

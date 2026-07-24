@@ -47,7 +47,7 @@ async function main() {
     base_url = `http://127.0.0.1:${address.port}`;
     await write_config(config_path);
 
-    const { AGENT_TOOLS, DEFAULT_SCOPE } = await import("../src/tool-definitions.mjs");
+    const { AGENT_TOOLS, DEFAULT_SCOPE, MCP_INSTRUCTIONS } = await import("../src/tool-definitions.mjs");
     const { call_agent_tool } = await import("../src/agent-tools.mjs");
     const { build_url } = await import("../src/http.mjs");
     const { enforce_tool_result_limit } = await import("../src/tool-result-limits.mjs");
@@ -55,6 +55,8 @@ async function main() {
     agent_tools = AGENT_TOOLS;
     assert_no_pipeline_surface(DEFAULT_SCOPE, agent_tools);
     assert_no_chart_of_accounts_read_scope(DEFAULT_SCOPE, agent_tools);
+    assert_complete_tool_input_schemas(agent_tools);
+    assert_search_query_guidance(MCP_INSTRUCTIONS, agent_tools);
 
     run_build_url_smoke(build_url);
     await run_doctor_smoke(config_path);
@@ -94,6 +96,99 @@ function assert_no_chart_of_accounts_read_scope(default_scope, tools) {
 
   const leaked_tool = tools.find((tool) => tool.scope === deprecated_scope);
   assert(!leaked_tool, `tool inventory still uses deprecated COA read scope: ${leaked_tool?.name || deprecated_scope}`);
+}
+
+function assert_complete_tool_input_schemas(tools) {
+  for (const tool of tools) {
+    assert(tool.inputSchema, `${tool.name} is missing inputSchema`);
+    assert_schema_node(tool.inputSchema, tool.name, true);
+  }
+
+  const by_name = new Map(tools.map((tool) => [tool.name, tool]));
+  assert(
+    by_name.get("set_record")?.inputSchema?.properties?.record?.["x-runtime-defined-values"] === true,
+    "set_record.record must explicitly identify its runtime field contract",
+  );
+  assert(
+    by_name.get("set_chart_of_accounts")?.inputSchema?.properties?.chart?.properties?.chart_name,
+    "set_chart_of_accounts.chart is missing generated metadata fields",
+  );
+  assert(
+    object_schema(by_name.get("set_chart_of_accounts")?.inputSchema?.properties?.operations?.items?.properties?.account)?.properties?.item_name,
+    "set_chart_of_accounts operations are missing generated account fields",
+  );
+  assert(
+    object_schema(by_name.get("validate_create_model_form")?.inputSchema?.properties?.map?.properties?.nodes?.items)?.properties?.map_items,
+    "model form map tools are missing generated node/item fields",
+  );
+  assert(
+    object_schema(by_name.get("validate_update_model_form")?.inputSchema?.properties?.map_patch?.properties?.operations?.items?.properties?.node)?.properties?.feature_code,
+    "model form patch tools are missing generated node fields",
+  );
+  assert(
+    by_name.get("validate_create_report")?.inputSchema?.properties?.list?.properties?.data_sets?.items?.properties?.feature_code,
+    "report tools are missing generated dataset fields",
+  );
+  assert(
+    by_name.get("validate_create_report")?.inputSchema?.properties?.list?.properties?.columns?.items?.properties?.schema_code,
+    "report tools are missing generated column fields",
+  );
+}
+
+function assert_search_query_guidance(instructions, tools) {
+  assert(instructions.includes("one coherent concept"), "MCP instructions are missing one-intent-per-query guidance");
+  assert(instructions.includes("independent searches in parallel"), "MCP instructions are missing parallel alternative-search guidance");
+
+  const by_name = new Map(tools.map((tool) => [tool.name, tool]));
+  for (const tool_name of ["search_features", "search_fields", "search_entities"]) {
+    const query_description = by_name.get(tool_name)?.inputSchema?.properties?.query?.description || "";
+    assert(query_description.includes("One coherent") || query_description.includes("One actual candidate"), `${tool_name}.query is missing one-intent guidance`);
+  }
+
+  assert(by_name.get("search_entities")?.description?.includes("exact field-targeted search"), "search_entities is missing exact-field preference guidance");
+}
+
+function object_schema(schema) {
+  if (schema?.properties) return schema;
+  return (schema?.oneOf || schema?.anyOf || []).find((candidate) => candidate?.properties);
+}
+
+function assert_schema_node(schema, path, allow_empty_object = false) {
+  assert(schema && typeof schema === "object" && !Array.isArray(schema), `${path} is not a JSON Schema object`);
+  assert(!schema.$ref, `${path} contains an unresolved schema reference`);
+
+  const types = Array.isArray(schema.type) ? schema.type : [schema.type];
+  if (types.includes("object") || schema.properties) {
+    const runtime_defined = schema["x-runtime-defined-values"] === true;
+    if (runtime_defined) {
+      assert(
+        schema.additionalProperties && schema.additionalProperties !== true,
+        `${path} runtime-defined values must carry an explicit value schema`,
+      );
+    }
+    else {
+      assert(schema.additionalProperties === false, `${path} must set additionalProperties=false`);
+      assert(
+        allow_empty_object || Object.keys(schema.properties || {}).length > 0,
+        `${path} is an opaque object with no properties`,
+      );
+    }
+
+    for (const [name, property] of Object.entries(schema.properties || {})) {
+      assert_schema_node(property, `${path}.${name}`);
+    }
+  }
+
+  if (types.includes("array")) {
+    assert(schema.items, `${path} array is missing items`);
+    assert_schema_node(schema.items, `${path}[]`);
+  }
+
+  for (const keyword of ["oneOf", "anyOf", "allOf"]) {
+    for (const [index, child] of (schema[keyword] || []).entries()) {
+      assert_schema_node(child, `${path}.${keyword}[${index}]`);
+    }
+  }
 }
 
 function run_build_url_smoke(build_url) {
@@ -194,6 +289,11 @@ async function run_tool_call_smoke(call_agent_tool, temp_dir) {
 
   const get_fields_result = await call_agent_tool("get_fields", { feature_code: "Loan" });
   assert(get_fields_result.items.some((field) => field.schema_code === "Loan.LoanNumber"), "get_fields did not return Loan.LoanNumber");
+  const loan_status_field = get_fields_result.items.find((field) => field.schema_code === "Loan.Status");
+  assert(loan_status_field?.description === "Current lifecycle status for the loan.", "get_fields did not retain the field description");
+  assert(loan_status_field?.value_type === "dictionary", "get_fields did not retain the field value type");
+  assert(loan_status_field?.values?.[0]?.code === "ACTIVE", "get_fields did not retain the allowed value code");
+  assert(loan_status_field?.values?.[0]?.description === "The loan is currently active.", "get_fields did not retain the allowed value description");
 
   const entity_result = await call_agent_tool("search_entities", { query: "Madison", feature_code: "Loan" });
   assert(entity_result.items[0].entity_id === "loan-1", "search_entities did not return loan-1");
@@ -215,6 +315,7 @@ async function run_tool_call_smoke(call_agent_tool, temp_dir) {
     feature_code: "Loan",
     entity_ids: ["loan-1"],
     schema_codes: ["Loan.LoanNumber"],
+    accounts_projection: "summary",
   });
   assert(record_result.items[0].values[0].value === "LN-001", "get_records did not return LN-001");
 
@@ -248,6 +349,15 @@ async function run_tool_call_smoke(call_agent_tool, temp_dir) {
   });
   assert(coa_result.items[0].chart._id === "coa-1", "get_chart_of_accounts did not return coa-1");
   assert(coa_result.items[0].chart.Layout[0].AccountType === "REV", "get_chart_of_accounts did not return revenue account");
+
+  const coa_data_result = await call_agent_tool("get_coa_data", {
+    coa_data_id: "coa-data-1",
+    projection: "values",
+    item_ids: ["coa-item-1"],
+    limit: 10,
+  });
+  assert(coa_data_result.items[0].summary.coa_data_id === "coa-data-1", "get_coa_data did not return coa-data-1");
+  assert(coa_data_result.items[0].values[0].entry.decimal === 125000, "get_coa_data did not return the flat value");
 
   const coa_dry_run_result = await call_agent_tool("set_chart_of_accounts", {
     coa_id: "coa-1",
@@ -395,7 +505,9 @@ async function run_mcp_smoke(config_path) {
   const exit_code = await wait_for_child(child);
   assert(exit_code === 0, `mcp exited with ${exit_code}: ${stderr}`);
   assert(responses.find((response) => response.id === 1)?.result?.serverInfo?.name === "realinsight-agent-toolkit", "mcp initialize failed");
-  assert(responses.find((response) => response.id === 2)?.result?.tools?.length === agent_tools.length, "mcp tools/list returned unexpected tool count");
+  const listed_tools = responses.find((response) => response.id === 2)?.result?.tools;
+  assert(listed_tools?.length === agent_tools.length, "mcp tools/list returned unexpected tool count");
+  assert_complete_tool_input_schemas(listed_tools);
 
   const call_response = responses.find((response) => response.id === 3);
   assert(call_response?.result?.structuredContent?.items?.[0]?.feature_code === "Loan", "mcp tools/call did not return Loan");
@@ -498,7 +610,7 @@ async function handle_request(request, response) {
 
   if (request.method === "GET" && url.pathname === "/agent/metadata") {
     write_json(response, 200, {
-      api_version: "0.2.0",
+      api_version: "0.1.0",
         tools: agent_tools.map((tool) => ({
           name: tool.name,
           route: tool.route,
@@ -550,6 +662,22 @@ async function handle_request(request, response) {
         field_name: "Balance",
         display: "Balance",
         field_type: "MONEY",
+      },
+      {
+        schema_code: "Loan.Status",
+        feature_code: "Loan",
+        field_name: "Status",
+        display: "Status",
+        description: "Current lifecycle status for the loan.",
+        field_type: "TEXT",
+        value_type: "dictionary",
+        values: [
+          {
+            code: "ACTIVE",
+            display: "Active",
+            description: "The loan is currently active.",
+          },
+        ],
       },
     ]));
     return;
@@ -614,6 +742,7 @@ async function handle_request(request, response) {
   }
 
   if (request.method === "POST" && url.pathname === "/agent/records/get") {
+    assert(body.accounts_projection === "summary", "get_records did not forward accounts_projection");
     write_json(response, 200, agent_result("get_records", "ri:record.read", [
       {
         entity_id: "loan-1",
@@ -862,6 +991,34 @@ async function handle_request(request, response) {
             display: "Revenue",
           },
         ],
+      },
+    ]));
+    return;
+  }
+
+  if (request.method === "POST" && url.pathname === "/agent/chart-of-accounts/data/get") {
+    assert(body.coa_data_id === "coa-data-1", "get_coa_data missing coa_data_id");
+    assert(body.item_ids[0] === "coa-item-1", "get_coa_data missing item filter");
+    write_json(response, 200, agent_result("get_coa_data", "", [
+      {
+        summary: {
+          coa_data_id: "coa-data-1",
+          chart_id: "coa-1",
+          value_count: 1,
+        },
+        values: [
+          {
+            source: "annual_item",
+            item_id: "coa-item-1",
+            year: 2025,
+            period: 1,
+            entry: { decimal: 125000 },
+          },
+        ],
+        is_truncated: false,
+        next_cursor: null,
+        limit: 10,
+        offset: 0,
       },
     ]));
     return;
