@@ -1,6 +1,6 @@
-# Local npx Auth UX
+# Local Node Auth UX
 
-The local `npx` path is still valuable for developers, pilots, and harnesses that only support stdio MCP.
+The local Node path is available for developers, pilots, and harnesses that only support stdio MCP. Run the checked-in source from a clone of this repository; the native toolkit package is not published to npm yet.
 
 ## Baseline Flow
 

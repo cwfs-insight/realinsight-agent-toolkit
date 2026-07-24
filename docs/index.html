@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Choose a harness, transport, and Realinsight environment to get safe, repository-backed Agent Toolkit installation directions.">
+    <meta name="theme-color" content="#10233f">
+    <title>Realinsight Agent Toolkit — Install Guide</title>
+    <link rel="stylesheet" href="./assets/site.css">
+    <script src="./assets/site.js" defer></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="./" aria-label="Realinsight Agent Toolkit home">
+        <span class="brand-mark" aria-hidden="true">RI</span>
+        <span>Agent Toolkit</span>
+      </a>
+      <nav aria-label="Documentation">
+        <a href="./agent-install.md">Agent guide</a>
+        <a href="./security.md">Security</a>
+        <a href="https://github.com/cwfs-insight/realinsight-agent-toolkit">GitHub</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Realinsight Agent Toolkit</p>
+          <h1>Connect your agent.<br>Keep the path clear.</h1>
+          <p class="lede">
+            Pick your agent harness, native app or CLI, connection type, and Realinsight environment.
+            This guide turns checked-in repository settings into one safe install path.
+          </p>
+          <div class="recommendation">
+            <span class="signal" aria-hidden="true"></span>
+            <div>
+              <strong>Recommended: Remote HTTP MCP</strong>
+              <span>Browser-based OAuth, no local runtime, production by default.</span>
+            </div>
+          </div>
+        </div>
+        <div class="hero-panel" aria-hidden="true">
+          <div class="orbit orbit-one"></div>
+          <div class="orbit orbit-two"></div>
+          <div class="endpoint-card">
+            <span>HTTPS · MCP</span>
+            <strong>Agent</strong>
+            <i></i>
+            <strong>Realinsight</strong>
+            <small>OAuth · scoped access</small>
+          </div>
+        </div>
+      </section>
+
+      <section class="installer" aria-labelledby="installer-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Install builder</p>
+          <h2 id="installer-title">Make four choices</h2>
+          </div>
+          <p>Every value comes from a checked-in provider manifest, MCP example, or install guide.</p>
+        </div>
+
+        <div class="selector-grid">
+          <label>
+            <span>1. Agent harness</span>
+            <select id="harness-select">
+              <option value="chatgpt">ChatGPT</option>
+              <option value="codex">Codex</option>
+              <option value="claude">Claude / Claude Code</option>
+              <option value="cursor">Cursor</option>
+              <option value="pi">Pi or another MCP harness</option>
+            </select>
+          </label>
+          <label>
+            <span>2. Install surface</span>
+            <select id="surface-select">
+              <option value="desktop">Native desktop app — recommended</option>
+              <option value="cli">CLI / terminal</option>
+            </select>
+          </label>
+          <label>
+            <span>3. Transport</span>
+            <select id="transport-select">
+              <option value="remote">Remote HTTP MCP — recommended</option>
+              <option value="local">Local Node stdio MCP — optional</option>
+            </select>
+          </label>
+          <label>
+            <span>4. Environment</span>
+            <select id="environment-select">
+              <option value="prod">Production — default</option>
+              <option value="qa">QA</option>
+              <option value="dev">Development</option>
+            </select>
+          </label>
+        </div>
+
+        <article class="install-output" id="install-output" aria-live="polite">
+          <div class="output-header">
+            <div>
+              <div class="badges">
+                <span id="output-harness">ChatGPT</span>
+                <span id="output-surface">Desktop app</span>
+                <span id="output-transport">Remote HTTP</span>
+                <span id="output-environment">Production</span>
+              </div>
+              <h3 id="output-title">Preparing your guide…</h3>
+              <p id="output-summary"></p>
+            </div>
+            <a id="source-link" class="source-link" href="./install-data.json">View source</a>
+          </div>
+
+          <ol id="output-steps" class="steps"></ol>
+
+          <div id="code-wrap" class="code-wrap">
+            <div class="code-toolbar">
+              <span id="code-label">Configuration</span>
+              <button id="copy-button" type="button">Copy</button>
+            </div>
+            <pre><code id="output-code"></code></pre>
+          </div>
+
+          <div id="output-note" class="note"></div>
+        </article>
+      </section>
+
+      <section class="principles" aria-labelledby="principles-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">What happens next</p>
+            <h2 id="principles-title">One connection, normal safeguards</h2>
+          </div>
+        </div>
+        <div class="principle-grid">
+          <article>
+            <span>01</span>
+            <h3>Connect</h3>
+            <p>The harness reaches the selected checked-in MCP endpoint or launches the local Node source.</p>
+          </article>
+          <article>
+            <span>02</span>
+            <h3>Authenticate</h3>
+            <p>Remote MCP uses OAuth. Local MCP stores an isolated profile outside the repository.</p>
+          </article>
+          <article>
+            <span>03</span>
+            <h3>Ask</h3>
+            <p>The toolkit uses the signed-in user’s Realinsight customer context, permissions, and scopes.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="agent-readable">
+        <div>
+          <p class="eyebrow">For agents and automation</p>
+          <h2>The same guide, structured for machines.</h2>
+          <p>
+            The site publishes a concise agent guide, a JSON install catalog, and an
+            <code>llms.txt</code> index. Human and agent instructions share the same endpoint inventory.
+          </p>
+        </div>
+        <div class="resource-list">
+          <a href="./agent-install.md"><span>Markdown</span> Agent install guide</a>
+          <a href="./install-data.json"><span>JSON</span> Install catalog</a>
+          <a href="./llms.txt"><span>Text</span> Agent index</a>
+          <a href="https://github.com/cwfs-insight/realinsight-agent-toolkit/blob/main/skills/realinsight-agent-toolkit/SKILL.md"><span>Skill</span> Toolkit workflow</a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>Realinsight Agent Toolkit</span>
+      <span>Native desktop first · CLI included · Production default</span>
+    </footer>
+
+    <noscript>
+      <p class="noscript">JavaScript is only used for the install selector. Read the <a href="./agent-install.md">complete install guide</a> instead.</p>
+    </noscript>
+  </body>
+</html>

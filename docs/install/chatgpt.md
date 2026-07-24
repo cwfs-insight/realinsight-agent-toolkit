@@ -1,16 +1,19 @@
 # ChatGPT Install
 
-The preferred ChatGPT path is a hosted Realinsight Connector backed by the Realinsight Streamable HTTP MCP endpoint.
+The supported repository-backed ChatGPT path is a remote Realinsight MCP connector. Local Node stdio MCP is not documented for ChatGPT.
 
-## Target Shape
+## Environment endpoints
 
-- MCP endpoint: `https://www.realinsight.cloud/api/v1/mcp` or a dedicated agent gateway URL.
-- Auth: OAuth authorization-code with S256 PKCE.
-- Data access: approved Realinsight APIs remain the trust boundary.
-- Tool behavior: stateless requests with explicit entity ids, cursors, page ids, or report ids.
+| Environment | MCP endpoint |
+| --- | --- |
+| Production (default) | `https://www.realinsight.cloud/api/v1/mcp` |
+| QA | `https://www.ri2-qa.com/api/v1/mcp` |
+| Development | `https://www.ri2-dev.com/api/v1/mcp` |
 
-## Local Package Is Not The Business-User Path
+In the ChatGPT workspace connector settings, add a custom MCP connector with the selected endpoint. Keep OAuth enabled and complete the normal Realinsight browser sign-in. Realinsight APIs remain the permission and customer-data trust boundary.
 
-The `@realinsight/agent-toolkit` package is still useful for local pilots, but ChatGPT users should not need to install Node, run `npx`, or manage local auth files.
+Verify the connection with a small `get_tool_reference` or schema request.
 
-Future official hosted connector work should be tracked outside the local package install guides. The generated packages in this repo are not marketplace submissions.
+## No local package path
+
+Do not use an unpublished native toolkit package command. When local Node stdio MCP is required, use a harness that can launch a local process from a clone of this repository.

@@ -1,0 +1,23 @@
+# Realinsight Agent Toolkit
+
+> Public installation and usage guidance for connecting agent harnesses to Realinsight through MCP.
+
+Default: remote Streamable HTTP MCP, production environment.
+Optional developer path: local Node stdio MCP from a clone.
+Unavailable: native npm/npx installation until the toolkit package is published.
+
+## Primary resources
+
+- Interactive install guide: ./
+- Agent-readable install guide: ./agent-install.md
+- Machine-readable install catalog: ./install-data.json
+- Environment reference: ./environments.md
+- Authentication reference: ./auth.md
+- Security reference: ./security.md
+
+## Repository resources
+
+- Public repository: https://github.com/cwfs-insight/realinsight-agent-toolkit
+- Toolkit skill: https://github.com/cwfs-insight/realinsight-agent-toolkit/blob/main/skills/realinsight-agent-toolkit/SKILL.md
+- MCP examples: https://github.com/cwfs-insight/realinsight-agent-toolkit/tree/main/examples/mcp
+- Provider distributions: https://github.com/cwfs-insight/realinsight-agent-toolkit/tree/main/providers

@@ -2,12 +2,24 @@
 
 GitHub Copilot in VS Code can use Realinsight through MCP server configuration.
 
-## Local Stdio
+## Remote HTTP MCP
 
-Use the production example as a starting point:
+Prefer the selected hosted endpoint so authentication stays in the connector flow:
 
 ```text
-examples/mcp/mcp.prod.json
+Production: https://www.realinsight.cloud/api/v1/mcp
+QA: https://www.ri2-qa.com/api/v1/mcp
+Development: https://www.ri2-dev.com/api/v1/mcp
+```
+
+## Local Node Stdio
+
+Use a source-based example from a clone:
+
+```text
+examples/mcp/mcp.prod-source.json
+examples/mcp/mcp.qa-source.json
+examples/mcp/mcp.dev-source.json
 ```
 
 For a Realinsight-provided pilot or custom environment, use:
@@ -21,10 +33,6 @@ The source-based stdio server launches:
 ```bash
 node /path/to/ri-agent-toolkit/packages/agent-toolkit/src/ri-agent.mjs mcp
 ```
-
-## Hosted MCP
-
-When the hosted Realinsight MCP endpoint is available, prefer it for business users so authentication can stay in the connector flow instead of a local CLI profile.
 
 ## Instruction Pairing
 

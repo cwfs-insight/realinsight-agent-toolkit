@@ -17,7 +17,8 @@ It packages the `ri-agent` CLI, local and hosted MCP connection examples, Codex,
 | Copilot, OpenCode, or other coding harness | Generated MCP package | Uses bundled Node source, hosted HTTP MCP, or `mcp-remote` depending on host support. |
 | Developer or pilot | Local Node source from this repo | Direct CLI, `doctor`, auth, and local MCP testing before npm publication. |
 
-Start with [docs/install/chooser.md](docs/install/chooser.md) for the full decision tree.
+Start with the [guided installation site](docs/index.html) or [docs/install/chooser.md](docs/install/chooser.md) for the full decision tree.
+Agents can read [docs/agent-install.md](docs/agent-install.md), [docs/install-data.json](docs/install-data.json), or [docs/llms.txt](docs/llms.txt).
 See [docs/environments.md](docs/environments.md) for dev, QA, production, and pilot environment packaging guidance.
 See [providers/](providers/) for checked-in provider marketplaces, and [docs/distribution-packages.md](docs/distribution-packages.md) for local-only generated package workflows.
 

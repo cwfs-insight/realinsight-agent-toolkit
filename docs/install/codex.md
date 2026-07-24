@@ -2,9 +2,29 @@
 
 Codex should use the Realinsight Connector plugin when possible.
 
-## Install From GitHub
+## Codex Desktop (primary)
 
-Add the repository marketplace, then install the plugin from Codex's plugin browser:
+In Codex Desktop's GitHub marketplace form, use:
+
+```text
+Repository: https://github.com/cwfs-insight/realinsight-agent-toolkit
+Reference: main
+Sparse paths: leave empty
+```
+
+Then open the plugin browser and install the connector for the selected environment:
+
+```text
+Production: realinsight-connector
+QA: realinsight-connector-qa
+Development: realinsight-connector-dev
+```
+
+Use the repository root. `Sparse paths` filters the checkout; it does not make a subdirectory the marketplace root.
+
+## Codex CLI
+
+Add the repository marketplace, start Codex, and open the plugin browser:
 
 ```bash
 codex plugin marketplace add cwfs-insight/realinsight-agent-toolkit --ref main
@@ -12,18 +32,7 @@ codex
 /plugins
 ```
 
-In the plugin browser, choose the Realinsight marketplace and install `realinsight-connector`.
-The checked-in root marketplace defaults to production for general users.
-
-In Codex Desktop's GitHub marketplace form, use the repository root and leave `Sparse paths` empty. The root marketplace includes clearly named prod, dev, and QA entries:
-
-```text
-realinsight-connector
-realinsight-connector-dev
-realinsight-connector-qa
-```
-
-`Sparse paths` filters the checkout; it does not make a subdirectory the marketplace root.
+Choose the same environment-specific connector name listed above. The checked-in root marketplace defaults to production.
 
 The rendered provider folders are kept in the repo for validation, local folder installs, and host layouts that can use a subdirectory as the actual marketplace root:
 

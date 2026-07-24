@@ -13,7 +13,7 @@ npm run ri-agent -- mcp
 For non-production environments, set a separate base URL and profile:
 
 ```bash
-RI_AGENT_BASE_URL=https://your-qa-realinsight-environment.example/api/v1 \
+RI_AGENT_BASE_URL=https://www.ri2-qa.com/api/v1 \
 RI_AGENT_PROFILE=realinsight-qa \
 npm run ri-agent -- mcp
 ```

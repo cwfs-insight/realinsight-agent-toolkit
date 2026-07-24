@@ -1,6 +1,14 @@
 # OpenCode Install
 
-OpenCode can use the Realinsight MCP server with a local stdio command or hosted MCP endpoint.
+OpenCode should use a hosted MCP endpoint when it supports authenticated remote MCP. Local Node stdio is the optional developer path.
+
+## Remote HTTP MCP
+
+```text
+Production: https://www.realinsight.cloud/api/v1/mcp
+QA: https://www.ri2-qa.com/api/v1/mcp
+Development: https://www.ri2-dev.com/api/v1/mcp
+```
 
 ## Local Stdio
 
@@ -12,7 +20,7 @@ node /path/to/ri-agent-toolkit/packages/agent-toolkit/src/ri-agent.mjs mcp
 
 with `RI_AGENT_BASE_URL` set to the target environment.
 
-For hosted MCP through a local stdio bridge, use the generated `mcp-remote` package for the target environment.
+For hosted MCP through a local stdio bridge, use an explicitly generated `mcp-remote` package for the target environment.
 
 ## Production Environment
 

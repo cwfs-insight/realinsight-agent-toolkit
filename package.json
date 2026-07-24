@@ -19,6 +19,7 @@
     "build:dist:dev": "node ./tools/build-dist.mjs --env dev",
     "build:dist:localhost": "node ./tools/build-dist.mjs --env localhost",
     "build:dist:qa": "node ./tools/build-dist.mjs --env qa",
+    "build:docs-site": "node ./tools/build-docs-site.mjs",
     "validate:dist": "node ./tools/validate-dist.mjs",
     "pack:dry-run": "npm --cache ./.npm-cache pack ./packages/agent-toolkit --dry-run",
     "inspect:mcp": "node ./tools/mcp-inspector.mjs",

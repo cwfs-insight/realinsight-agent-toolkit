@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "release_version": "0.2.1",
+  "repository": "https://github.com/cwfs-insight/realinsight-agent-toolkit",
+  "defaults": {
+    "harness": "chatgpt",
+    "surface": "desktop",
+    "transport": "remote",
+    "environment": "prod"
+  },
+  "environments": {
+    "prod": {
+      "label": "Production",
+      "base_url": "https://www.realinsight.cloud/api/v1",
+      "mcp_url": "https://www.realinsight.cloud/api/v1/mcp",
+      "profile": "realinsight-prod",
+      "profile_suffix": "prod",
+      "server_name": "realinsight-agent-toolkit",
+      "plugin_name": "realinsight-connector",
+      "remote_example": "examples/mcp/mcp.prod.json",
+      "local_example": "examples/mcp/mcp.prod-source.json",
+      "providers": {
+        "codex": "providers/codex/prod",
+        "claude": "providers/claude/prod",
+        "cursor": "providers/cursor/plugin"
+      }
+    },
+    "qa": {
+      "label": "QA",
+      "base_url": "https://www.ri2-qa.com/api/v1",
+      "mcp_url": "https://www.ri2-qa.com/api/v1/mcp",
+      "profile": "realinsight-qa",
+      "profile_suffix": "qa",
+      "server_name": "realinsight-agent-toolkit-qa",
+      "plugin_name": "realinsight-connector-qa",
+      "remote_example": "examples/mcp/mcp.qa.json",
+      "local_example": "examples/mcp/mcp.qa-source.json",
+      "providers": {
+        "codex": "providers/codex/qa",
+        "claude": "providers/claude/qa",
+        "cursor": "providers/cursor/qa/plugin"
+      },
+      "warning": "QA is for controlled testing. Keep its profile and credential file separate from production."
+    },
+    "dev": {
+      "label": "Development",
+      "base_url": "https://www.ri2-dev.com/api/v1",
+      "mcp_url": "https://www.ri2-dev.com/api/v1/mcp",
+      "profile": "realinsight-dev",
+      "profile_suffix": "dev",
+      "server_name": "realinsight-agent-toolkit-dev",
+      "plugin_name": "realinsight-connector-dev",
+      "remote_example": "providers/cursor/dev/plugin/mcp.json",
+      "local_example": "examples/mcp/mcp.dev-source.json",
+      "providers": {
+        "codex": "providers/codex/dev",
+        "claude": "providers/claude/dev",
+        "cursor": "providers/cursor/dev/plugin"
+      },
+      "warning": "Development is for Realinsight development and approved testing. Keep it isolated from QA and production."
+    }
+  },
+  "harnesses": {
+    "chatgpt": {
+      "label": "ChatGPT",
+      "remote_http": true,
+      "local_node": false,
+      "surfaces": ["desktop"],
+      "guide": "install/chatgpt.md"
+    },
+    "codex": {
+      "label": "Codex",
+      "remote_http": true,
+      "local_node": true,
+      "surfaces": ["desktop", "cli"],
+      "guide": "install/codex.md"
+    },
+    "claude": {
+      "label": "Claude / Claude Code",
+      "remote_http": true,
+      "local_node": true,
+      "surfaces": ["desktop", "cli"],
+      "guide": "install/claude.md"
+    },
+    "cursor": {
+      "label": "Cursor",
+      "remote_http": true,
+      "local_node": true,
+      "surfaces": ["desktop"],
+      "guide": "install/cursor.md"
+    },
+    "pi": {
+      "label": "Pi or another MCP harness",
+      "remote_http": true,
+      "local_node": true,
+      "surfaces": ["cli"],
+      "guide": "install/other-harnesses.md"
+    }
+  },
+  "guardrails": [
+    "Native desktop app instructions are the default when the harness provides a documented desktop path.",
+    "CLI instructions are explicit alternatives for Codex, Claude Code, and CLI-first MCP harnesses.",
+    "Remote HTTP MCP is the default installation path.",
+    "Production is the default environment.",
+    "Local Node MCP runs checked-in source from a clone.",
+    "The native Realinsight toolkit package is not yet available through npm or npx.",
+    "Non-production profiles and credential files must stay isolated.",
+    "Realinsight APIs enforce the signed-in user's customer context, permissions, and scopes."
+  ]
+}
