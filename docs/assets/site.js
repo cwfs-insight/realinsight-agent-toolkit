@@ -80,14 +80,7 @@ function render() {
 
 function remote_guide(harness_key, harness, environment, surface) {
   const plugin_name = environment.plugin_name;
-  const generic_config = JSON.stringify({
-    mcpServers: {
-      [environment.server_name]: {
-        type: "http",
-        url: environment.mcp_url,
-      },
-    },
-  }, null, 2);
+  const generic_config = render_copy_template("generic_remote_mcp", environment);
 
   if (harness_key === "chatgpt") {
     return {
@@ -99,7 +92,7 @@ function remote_guide(harness_key, harness, environment, surface) {
         "Complete the Realinsight browser sign-in, then make a small schema or tool-reference request to verify access.",
       ],
       codeLabel: "Remote MCP endpoint",
-      code: environment.mcp_url,
+      code: render_copy_template("chatgpt_remote_desktop", environment),
       note: environment.warning ?? "Production is the public default. Your Realinsight permissions and customer context still apply.",
       source: github_source(environment.remote_example),
     };
@@ -117,7 +110,7 @@ function remote_guide(harness_key, harness, environment, surface) {
           "Complete Realinsight OAuth, then verify with get_tool_reference or a small schema search.",
         ],
         codeLabel: "Codex Desktop marketplace fields",
-        code: `Repository: https://github.com/cwfs-insight/realinsight-agent-toolkit\nReference: main\nSparse paths: leave empty\nPlugin: ${plugin_name}`,
+        code: render_copy_template("codex_remote_desktop", environment),
         note: "The native desktop app is the primary Codex path. Production remains the default marketplace entry.",
         source: github_source("docs/install/codex.md"),
       };
@@ -132,7 +125,7 @@ function remote_guide(harness_key, harness, environment, surface) {
         "Complete the Realinsight OAuth prompt, then ask the agent for get_tool_reference or a small schema search.",
       ],
       codeLabel: "Terminal",
-      code: "codex plugin marketplace add cwfs-insight/realinsight-agent-toolkit --ref main\ncodex",
+      code: render_copy_template("codex_remote_cli", environment),
       note: "The CLI opens Codex after adding the marketplace; use /plugins to choose the selected environment plugin.",
       source: github_source(environment.providers.codex),
     };
@@ -150,7 +143,7 @@ function remote_guide(harness_key, harness, environment, surface) {
           "Verify with get_tool_reference or a small schema search.",
         ],
         codeLabel: "Claude Desktop remote MCP endpoint",
-        code: environment.mcp_url,
+        code: render_copy_template("claude_remote_desktop", environment),
         note: "The hosted connector is the primary Claude Desktop path. Choose Local Node only when a local MCPB extension is required.",
         source: github_source("docs/install/claude.md"),
       };
@@ -165,7 +158,7 @@ function remote_guide(harness_key, harness, environment, surface) {
         "Complete the Realinsight OAuth prompt, then verify with a tool-reference or schema request.",
       ],
       codeLabel: "Claude Code",
-      code: `/plugin marketplace add cwfs-insight/realinsight-agent-toolkit\n/plugin install ${plugin_name}@realinsight`,
+      code: render_copy_template("claude_remote_cli", environment),
       note: "For a Claude surface that accepts custom remote MCP connectors instead of plugins, use the selected endpoint directly.",
       source: github_source(environment.providers.claude),
     };
@@ -219,6 +212,11 @@ function local_guide(harness_key, harness, environment, environment_code, surfac
 
   if (harness_key === "codex") {
     const marketplace = `/absolute/path/to/realinsight-agent-toolkit/.tmp/plugin-packages/${environment_code}/node/codex/marketplace`;
+    const template_values = {
+      ...environment,
+      environment_code,
+      codex_marketplace: marketplace,
+    };
     if (surface === "desktop") {
       return {
         title: `Install a local Node plugin in Codex Desktop`,
@@ -230,7 +228,7 @@ function local_guide(harness_key, harness, environment, environment_code, surfac
           "Use auth_status or connect_realinsight to verify the isolated local profile.",
         ],
         codeLabel: "Build and local marketplace path",
-        code: `npm run package:plugins -- --env ${environment_code} --type codex --runtime node\n\nMarketplace folder:\n${marketplace}`,
+        code: render_copy_template("codex_local_desktop", template_values),
         note: "This bundles checked-in Node source for the desktop app. It does not install a native Realinsight npm/npx package.",
         source: github_source("tools/package-env-bundles.mjs"),
       };
@@ -246,7 +244,7 @@ function local_guide(harness_key, harness, environment, environment_code, surfac
         "Use auth_status or connect_realinsight to verify the isolated local profile before reading data.",
       ],
       codeLabel: "Terminal",
-      code: `npm run package:plugins -- --env ${environment_code} --type codex --runtime node\ncodex plugin marketplace add ${marketplace}\ncodex`,
+      code: render_copy_template("codex_local_cli", template_values),
       note: "This bundles local Node source. It does not install or invoke a native Realinsight npm/npx package.",
       source: github_source("tools/package-env-bundles.mjs"),
     };
@@ -265,7 +263,11 @@ function local_guide(harness_key, harness, environment, environment_code, surfac
           "Use connect_realinsight or auth_status in Claude to complete and verify local authentication.",
         ],
         codeLabel: "Terminal",
-        code: `npm run package:plugins -- --env ${environment_code} --type claude-mcpb --runtime node\nmcpb pack ${source}`,
+        code: render_copy_template("claude_local_desktop", {
+          ...environment,
+          environment_code,
+          claude_mcpb_source: source,
+        }),
         note: "The MCPB includes checked-in Node source and an isolated environment profile. It does not require a published toolkit package.",
         source: github_source("docs/claude-desktop-extension.md"),
       };
@@ -283,28 +285,16 @@ function local_guide(harness_key, harness, environment, environment_code, surfac
         "Use auth_status or connect_realinsight to verify the isolated local profile before reading data.",
       ],
       codeLabel: "Build, then run in Claude Code",
-      code: `npm run package:plugins -- --env ${environment_code} --type claude-plugin --runtime node\n/plugin marketplace add ${marketplace}\n/plugin install ${environment.plugin_name}@${marketplace_name}`,
+      code: render_copy_template("claude_local_cli", {
+        ...environment,
+        environment_code,
+        claude_marketplace: marketplace,
+        claude_marketplace_name: marketplace_name,
+      }),
       note: "This bundles local Node source. It does not install or invoke a native Realinsight npm/npx package.",
       source: github_source("tools/package-env-bundles.mjs"),
     };
   }
-
-  const config = {
-    mcpServers: {
-      [environment.server_name]: {
-        type: "stdio",
-        command: "node",
-        args: ["./src/ri-agent.mjs", "mcp"],
-        cwd: "/absolute/path/to/realinsight-agent-toolkit/packages/agent-toolkit",
-        env: {
-          RI_AGENT_BASE_URL: environment.base_url,
-          RI_AGENT_PROFILE: environment.profile,
-          REALINSIGHT_AGENT_CONFIG: `/absolute/path/to/.realinsight/agent-toolkit-${environment.profile_suffix}.json`,
-          RI_AGENT_MAX_TOOL_RESULT_BYTES: "240000",
-        },
-      },
-    },
-  };
 
   return {
     title: `Run local Node MCP for ${harness.label}`,
@@ -316,7 +306,7 @@ function local_guide(harness_key, harness, environment, environment_code, surfac
       "Call auth_status or doctor before reading data to confirm the selected profile and base URL.",
     ],
     codeLabel: "Local stdio MCP configuration",
-    code: JSON.stringify(config, null, 2),
+    code: render_copy_template("generic_local_stdio", environment),
     note: "Credential files stay outside the repository. Never commit tokens, local profiles, or .realinsight directories.",
     source: github_source(environment.local_example),
   };
@@ -340,6 +330,21 @@ function unsupported_surface_guide(harness, surface) {
 
 function github_source(path) {
   return `${catalog.repository}/blob/main/${path}`;
+}
+
+function render_copy_template(name, values) {
+  const template = catalog.copy_templates?.[name];
+  if (typeof template !== "string" || !template) {
+    throw new Error(`Install catalog is missing copy template: ${name}`);
+  }
+
+  return template.replace(/\{\{([a-z0-9_]+)\}\}/gi, (match, key) => {
+    const value = values[key];
+    if (value === undefined || value === null) {
+      throw new Error(`Copy template ${name} is missing value: ${key}`);
+    }
+    return String(value);
+  });
 }
 
 async function copy_code() {

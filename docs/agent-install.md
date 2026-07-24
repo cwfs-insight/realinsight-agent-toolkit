@@ -43,6 +43,18 @@ Change both the server name and URL for QA or development:
 - QA: `realinsight-agent-toolkit-qa` and `https://www.ri2-qa.com/api/v1/mcp`
 - Development: `realinsight-agent-toolkit-dev` and `https://www.ri2-dev.com/api/v1/mcp`
 
+### Remote OAuth flow
+
+Remote HTTP MCP authentication belongs to the agent harness, not the local `ri-agent` profile store:
+
+1. Add the selected MCP URL in the harness and keep OAuth enabled.
+2. Follow the browser prompt through the normal Realinsight login, SSO, and MFA flow.
+3. Confirm the intended Realinsight customer and requested access when prompted.
+4. Return to the harness. It owns the connector session and sends an audience-bound bearer token with MCP requests.
+5. Verify the connection with a small `get_tool_reference` or schema request.
+
+Realinsight validates the token on every request and continues to enforce the signed-in user's customer context, permissions, modules, assignments, and scopes. Remote connector credentials are not stored in the local toolkit profile file. See the [authentication reference](auth.md) and [hosted Streamable HTTP MCP requirements](http-streamable-mcp.md).
+
 ### Harness routing
 
 - ChatGPT native app: add a custom remote MCP connector with the selected MCP URL. Complete OAuth in ChatGPT. This repository does not document ChatGPT CLI or local Node paths.
@@ -88,16 +100,29 @@ Generic local MCP configuration:
 
 Replace absolute-path placeholders. For QA or development, replace the server name, base URL, profile, and credential filename together.
 
-For Codex or Claude Code, the repository can package an environment-specific local plugin that bundles this same Node source:
+### Codex local plugin
+
+Build an environment-specific local Codex marketplace:
 
 ```bash
 npm run package:plugins -- --env prod --type codex --runtime node
+```
+
+Replace `prod` with `qa` or `dev`. The generated Codex marketplace is written below `.tmp/plugin-packages/<environment>/node/codex/marketplace`; it is a local scratch artifact, not a published package.
+
+### Claude Code local plugin
+
+Build an environment-specific local Claude marketplace:
+
+```bash
 npm run package:plugins -- --env prod --type claude-plugin --runtime node
 ```
 
-Replace `prod` with `qa` or `dev`. Generated local marketplaces are written below `.tmp/plugin-packages/<environment>/node/`; they are local scratch artifacts, not published packages.
+Replace `prod` with `qa` or `dev`. The generated Claude marketplace is written below `.tmp/plugin-packages/<environment>/node/claude-plugin/marketplace`; it is a local scratch artifact, not a published package.
 
-For Claude Desktop, generate and pack an environment-specific local extension:
+### Claude Desktop local extension
+
+Generate and pack an environment-specific local extension:
 
 ```bash
 npm run package:plugins -- --env prod --type claude-mcpb --runtime node

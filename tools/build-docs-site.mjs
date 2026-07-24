@@ -61,6 +61,23 @@ async function validate_site_sources() {
   ) {
     throw new Error("Install catalog must default to the native desktop app, remote MCP, and production.");
   }
+  for (const template_name of [
+    "chatgpt_remote_desktop",
+    "codex_remote_desktop",
+    "codex_remote_cli",
+    "codex_local_desktop",
+    "codex_local_cli",
+    "claude_remote_desktop",
+    "claude_remote_cli",
+    "claude_local_desktop",
+    "claude_local_cli",
+    "generic_remote_mcp",
+    "generic_local_stdio",
+  ]) {
+    if (typeof catalog.copy_templates?.[template_name] !== "string" || !catalog.copy_templates[template_name]) {
+      throw new Error(`Install catalog is missing copy template: ${template_name}`);
+    }
+  }
   const package_manifest = JSON.parse(await fs.readFile(path.join(repo_root, "packages/agent-toolkit/package.json"), "utf8"));
   if (catalog.release_version !== package_manifest.version) {
     throw new Error("Install catalog release version does not match the exported toolkit package.");
@@ -104,6 +121,9 @@ async function validate_site_sources() {
       throw new Error(`Documentation site is missing required selector/output marker: ${marker}`);
     }
   }
+  if (!html.includes('href="./auth.md"')) {
+    throw new Error("Documentation site must link the hosted authentication guide.");
+  }
   for (const match of html.matchAll(/(?:href|src)="([^"]+)"/g)) {
     const link = match[1];
     if (/^(?:https?:|#)/.test(link)) {
@@ -113,7 +133,19 @@ async function validate_site_sources() {
     await fs.access(target);
   }
 
-  await exec_file(process.execPath, ["--check", path.join(docs_root, "assets/site.js")]);
+  const site_script_path = path.join(docs_root, "assets/site.js");
+  const site_script = await fs.readFile(site_script_path, "utf8");
+  for (const command of [
+    "codex plugin marketplace add",
+    "/plugin marketplace add",
+    "npm run package:plugins -- --env",
+  ]) {
+    if (site_script.includes(command)) {
+      throw new Error(`Copyable install command must come from install-data.json, not site.js: ${command}`);
+    }
+  }
+
+  await exec_file(process.execPath, ["--check", site_script_path]);
 }
 
 async function read_mcp_endpoint(relative) {

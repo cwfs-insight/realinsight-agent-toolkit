@@ -8,6 +8,19 @@
     "transport": "remote",
     "environment": "prod"
   },
+  "copy_templates": {
+    "chatgpt_remote_desktop": "{{mcp_url}}",
+    "codex_remote_desktop": "Repository: https://github.com/cwfs-insight/realinsight-agent-toolkit\nReference: main\nSparse paths: leave empty\nPlugin: {{plugin_name}}",
+    "codex_remote_cli": "codex plugin marketplace add cwfs-insight/realinsight-agent-toolkit --ref main\ncodex",
+    "codex_local_desktop": "npm run package:plugins -- --env {{environment_code}} --type codex --runtime node\n\nMarketplace folder:\n{{codex_marketplace}}",
+    "codex_local_cli": "npm run package:plugins -- --env {{environment_code}} --type codex --runtime node\ncodex plugin marketplace add {{codex_marketplace}}\ncodex",
+    "claude_remote_desktop": "{{mcp_url}}",
+    "claude_remote_cli": "/plugin marketplace add cwfs-insight/realinsight-agent-toolkit\n/plugin install {{plugin_name}}@realinsight",
+    "claude_local_desktop": "npm run package:plugins -- --env {{environment_code}} --type claude-mcpb --runtime node\nmcpb pack {{claude_mcpb_source}}",
+    "claude_local_cli": "npm run package:plugins -- --env {{environment_code}} --type claude-plugin --runtime node\n/plugin marketplace add {{claude_marketplace}}\n/plugin install {{plugin_name}}@{{claude_marketplace_name}}",
+    "generic_remote_mcp": "{\n  \"mcpServers\": {\n    \"{{server_name}}\": {\n      \"type\": \"http\",\n      \"url\": \"{{mcp_url}}\"\n    }\n  }\n}",
+    "generic_local_stdio": "{\n  \"mcpServers\": {\n    \"{{server_name}}\": {\n      \"type\": \"stdio\",\n      \"command\": \"node\",\n      \"args\": [\"./src/ri-agent.mjs\", \"mcp\"],\n      \"cwd\": \"/absolute/path/to/realinsight-agent-toolkit/packages/agent-toolkit\",\n      \"env\": {\n        \"RI_AGENT_BASE_URL\": \"{{base_url}}\",\n        \"RI_AGENT_PROFILE\": \"{{profile}}\",\n        \"REALINSIGHT_AGENT_CONFIG\": \"/absolute/path/to/.realinsight/agent-toolkit-{{profile_suffix}}.json\",\n        \"RI_AGENT_MAX_TOOL_RESULT_BYTES\": \"240000\"\n      }\n    }\n  }\n}"
+  },
   "environments": {
     "prod": {
       "label": "Production",
@@ -100,6 +113,7 @@
   "guardrails": [
     "Native desktop app instructions are the default when the harness provides a documented desktop path.",
     "CLI instructions are explicit alternatives for Codex, Claude Code, and CLI-first MCP harnesses.",
+    "Copyable command and configuration templates are machine-readable under copy_templates.",
     "Remote HTTP MCP is the default installation path.",
     "Production is the default environment.",
     "Local Node MCP runs checked-in source from a clone.",
