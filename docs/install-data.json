@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "release_version": "0.2.1",
+  "release_version": "0.2.2",
   "repository": "https://github.com/cwfs-insight/realinsight-agent-toolkit",
   "defaults": {
     "harness": "chatgpt",
@@ -78,35 +78,47 @@
       "label": "ChatGPT",
       "remote_http": true,
       "local_node": false,
-      "surfaces": ["desktop"],
+      "surfaces": [
+        "desktop"
+      ],
       "guide": "install/chatgpt.md"
     },
     "codex": {
       "label": "Codex",
       "remote_http": true,
       "local_node": true,
-      "surfaces": ["desktop", "cli"],
+      "surfaces": [
+        "desktop",
+        "cli"
+      ],
       "guide": "install/codex.md"
     },
     "claude": {
       "label": "Claude / Claude Code",
       "remote_http": true,
       "local_node": true,
-      "surfaces": ["desktop", "cli"],
+      "surfaces": [
+        "desktop",
+        "cli"
+      ],
       "guide": "install/claude.md"
     },
     "cursor": {
       "label": "Cursor",
       "remote_http": true,
       "local_node": true,
-      "surfaces": ["desktop"],
+      "surfaces": [
+        "desktop"
+      ],
       "guide": "install/cursor.md"
     },
     "pi": {
       "label": "Pi or another MCP harness",
       "remote_http": true,
       "local_node": true,
-      "surfaces": ["cli"],
+      "surfaces": [
+        "cli"
+      ],
       "guide": "install/other-harnesses.md"
     }
   },

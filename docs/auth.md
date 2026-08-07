@@ -17,7 +17,9 @@ Use this for nontechnical users when the harness supports hosted connectors.
 
 The harness owns the remote connector session. Remote credentials are not written to the local `ri-agent` profile store. The hosted MCP endpoint requires an audience-bound bearer token on every request, then applies the signed-in user's Realinsight customer context, permissions, modules, assignments, and scopes.
 
-If authorization expires or is revoked, reconnect Realinsight in the harness. Hosted MCP exposes `disconnect` for explicit grant revocation; the user may still need to reconnect the connector in the host afterward.
+Realinsight rotates public-client refresh tokens. A host must atomically persist the replacement returned by every successful refresh; replaying an older refresh token revokes that token family. Extending token lifetime is not a substitute for correct host persistence.
+
+If authorization expires or is revoked, reconnect Realinsight in the harness. Hosted MCP exposes `disconnect` for explicit grant revocation; the user may still need to reconnect the connector in the host afterward. Realinsight also provides `/oauth/connections` as a small browser Connection Manager for reviewing and disconnecting the signed-in user's grants in the current customer and signing in to another customer.
 
 See [Hosted Streamable HTTP MCP](http-streamable-mcp.md) for protected-resource metadata, PKCE, token audience, and bearer challenge requirements.
 

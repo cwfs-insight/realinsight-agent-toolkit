@@ -46,6 +46,7 @@ async function validate_site_sources() {
     "assets/brand/realinsight-logo-white.svg",
     "install-data.json",
     "agent-install.md",
+    "agent-plugins.md",
     "llms.txt",
   ];
   for (const relative of required) {

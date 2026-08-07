@@ -63,7 +63,9 @@ const WRITE_TOOL_NAMES = new Set([
   "upload_model_form_template",
 ]);
 export const MCP_PROTOCOL_VERSION = "2025-11-25";
+export const MCP_MODERN_PROTOCOL_VERSION = "2026-07-28";
 export const MCP_SUPPORTED_PROTOCOL_VERSIONS = [
+  MCP_MODERN_PROTOCOL_VERSION,
   "2025-11-25",
   "2025-06-18",
   "2025-03-26",
@@ -72,7 +74,7 @@ export const MCP_SUPPORTED_PROTOCOL_VERSIONS = [
 export const MCP_SERVER_INFO = {
   name: "realinsight-agent-toolkit",
   title: "Realinsight Agent Toolkit",
-  version: "0.2.1",
+  version: "0.2.2",
 };
 export const MCP_INSTRUCTIONS = [
   "Realinsight is a commercial real estate asset management and servicing platform.",
@@ -909,6 +911,7 @@ const ALL_AGENT_TOOLS = [
     route: "POST /agent/records/set",
     scope: RECORD_WRITE_SCOPE,
     readOnlyHint: false,
+    destructiveHint: true,
     idempotentHint: false,
     description: "Set updateable fields on one concrete Realinsight entity record after explicit user approval. Search and read the record first unless the user has already supplied the exact entity id, fields, and new values. After success, summarize the record using its friendly name/context, applied fields, skipped/warning fields, and provenance; avoid showing raw ids unless the user needs them.",
     inputSchema: {
@@ -1564,6 +1567,7 @@ const ALL_AGENT_TOOLS = [
     route: "POST /agent/chart-of-accounts/set",
     scope: CHART_OF_ACCOUNTS_WRITE_SCOPE,
     readOnlyHint: false,
+    destructiveHint: true,
     idempotentHint: false,
     description: "Create or patch a chart of accounts after explicit user approval. Supports metadata updates, availability, rollup chart mappings, monitor rule sets, add/update/replace/remove/move account rows, generated item ids, temporary item-id stub replacement, and dry_run validation. Call get_chart_of_accounts first for expected_conflict_token on updates. Core blocks remove_account and high-risk account mapping/type edits when existing data or servicing/financial usage would make the change unsafe.",
     inputSchema: {
@@ -1853,6 +1857,7 @@ const ALL_AGENT_TOOLS = [
     route: "POST /agent/model-forms/configurations/{model_form_id}",
     scope: MODEL_FORMS_WRITE_SCOPE,
     readOnlyHint: false,
+    destructiveHint: true,
     idempotentHint: false,
     description: "Update model/form metadata plus either focused map_patch edits or full flat map replacement after explicit user approval. Prefer map_patch for small node/item edits after reading the target node or item; update_node and update_item merge only supplied fields, while replace_node intentionally replaces a whole node. Use map only for bulk replacement/revert after requesting map_definition. Core validates folder access, checks Configuration/Admin module access, and derives ConfigAuditLog changes server-side. Default audit_detail is summary; request changes or full only when audit/reversal work needs it. After success, summarize changed metadata/map sections, model/form name, warnings, and an open link or model_form_id only when useful for the user to jump back to it.",
     inputSchema: {
@@ -2007,6 +2012,7 @@ const ALL_AGENT_TOOLS = [
     route: "POST /agent/model-forms/configurations/{model_form_id}/template-file",
     scope: MODEL_FORMS_WRITE_SCOPE,
     readOnlyHint: false,
+    destructiveHint: true,
     idempotentHint: false,
     description: "Finalize a replacement Excel template after explicit user approval. Prefer file_path in local stdio MCP/CLI usage, which creates a signed upload session, uploads the file outside chat context, and then sends staged_file_id. Hosted clients should pass staged_file_id after uploading to the signed upload_url from stage_model_form_template_file. Call get_model_form first for expected_conflict_token. Core validates Excel type, stores a new repository file, consumes the staged file, updates template metadata, and derives ConfigAuditLog changes server-side. Default audit_detail is summary; request changes or full only when audit/reversal work needs it. After success, summarize the model form name, file name, template change, warnings, and model_form_id only when useful.",
     inputSchema: {
@@ -2294,6 +2300,7 @@ const ALL_AGENT_TOOLS = [
     route: "POST /agent/reports/configurations/{report_id}",
     scope: REPORT_WRITE_SCOPE,
     readOnlyHint: false,
+    destructiveHint: true,
     idempotentHint: false,
     description: "Update a LIST report definition after explicit user approval. Call get_report first, pass the latest expected_conflict_token, run validate_update_report, then call this with approved=true. Core derives ConfigAuditLog changes server-side. Default audit_detail is summary; request changes or full only when audit/reversal work needs it. After success, summarize the report name, meaningful changed sections, warnings, and an open link or report_id only when useful for the user to jump back to it.",
     inputSchema: {

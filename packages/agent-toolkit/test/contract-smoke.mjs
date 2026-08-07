@@ -61,7 +61,7 @@ async function main() {
     run_build_url_smoke(build_url);
     await run_doctor_smoke(config_path);
     await run_tool_call_smoke(call_agent_tool, temp_dir);
-    await run_mcp_smoke(config_path);
+    await run_mcp_smoke(config_path, MCP_INSTRUCTIONS);
     run_result_limit_smoke(enforce_tool_result_limit);
 
     assert(requests.some((request) => request.path === "/agent/metadata"), "doctor did not request /agent/metadata");
@@ -451,7 +451,7 @@ async function run_tool_call_smoke(call_agent_tool, temp_dir) {
   assert(model_form_upload_result.items[0].model_form.template_file_name === "loan-model.xlsx", "upload_model_form_template did not consume staged file handle");
 }
 
-async function run_mcp_smoke(config_path) {
+async function run_mcp_smoke(config_path, mcp_instructions) {
   const child = spawn(NODE_BIN, ["./src/ri-agent.mjs", "mcp"], {
     cwd: TOOLKIT_ROOT,
     env: {
@@ -500,6 +500,50 @@ async function run_mcp_smoke(config_path) {
       arguments: { query: "loan" },
     },
   }) + "\n");
+  child.stdin.write(JSON.stringify({
+    jsonrpc: "2.0",
+    id: 4,
+    method: "server/discover",
+    params: {
+      _meta: {
+        "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+        "io.modelcontextprotocol/clientInfo": {
+          name: "contract-smoke",
+          version: "1.0.0",
+        },
+        "io.modelcontextprotocol/clientCapabilities": {},
+      },
+    },
+  }) + "\n");
+  child.stdin.write(JSON.stringify({
+    jsonrpc: "2.0",
+    id: 5,
+    method: "tools/list",
+    params: {
+      _meta: {
+        "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+        "io.modelcontextprotocol/clientCapabilities": {},
+      },
+    },
+  }) + "\n");
+  child.stdin.write(JSON.stringify({
+    jsonrpc: "2.0",
+    id: 6,
+    method: "initialize",
+    params: {
+      protocolVersion: "2026-07-28",
+      _meta: {
+        "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+        "io.modelcontextprotocol/clientCapabilities": {},
+      },
+    },
+  }) + "\n");
+  child.stdin.write(JSON.stringify({
+    jsonrpc: "2.0",
+    id: 7,
+    method: "initialize",
+    params: { protocolVersion: "2026-07-28" },
+  }) + "\n");
   child.stdin.end();
 
   const exit_code = await wait_for_child(child);
@@ -508,9 +552,41 @@ async function run_mcp_smoke(config_path) {
   const listed_tools = responses.find((response) => response.id === 2)?.result?.tools;
   assert(listed_tools?.length === agent_tools.length, "mcp tools/list returned unexpected tool count");
   assert_complete_tool_input_schemas(listed_tools);
+  assert(listed_tools.every((tool) => (
+    typeof tool.annotations?.readOnlyHint === "boolean"
+    && typeof tool.annotations?.destructiveHint === "boolean"
+    && typeof tool.annotations?.openWorldHint === "boolean"
+  )), "mcp tools/list omitted review annotations");
+  const destructive_tools = listed_tools
+    .filter((tool) => tool.annotations.destructiveHint)
+    .map((tool) => tool.name)
+    .sort();
+  const expected_destructive_tools = [
+    "delete_report",
+    "disconnect_realinsight",
+    "set_chart_of_accounts",
+    "set_record",
+    "update_model_form",
+    "update_report",
+    "upload_model_form_template",
+  ];
+  assert(
+    JSON.stringify(destructive_tools) === JSON.stringify(expected_destructive_tools),
+    `mcp destructive annotations drifted: ${destructive_tools.join(", ")}`,
+  );
 
   const call_response = responses.find((response) => response.id === 3);
   assert(call_response?.result?.structuredContent?.items?.[0]?.feature_code === "Loan", "mcp tools/call did not return Loan");
+  const discover_response = responses.find((response) => response.id === 4)?.result;
+  assert(discover_response?.supportedVersions?.includes("2026-07-28"), "mcp server/discover did not advertise 2026-07-28");
+  assert(discover_response?.instructions === mcp_instructions, "mcp server/discover instructions drifted from initialize instructions");
+  assert(discover_response?.resultType === "complete", "mcp server/discover resultType missing");
+  assert(discover_response?._meta?.["io.modelcontextprotocol/serverInfo"]?.name === "realinsight-agent-toolkit", "mcp server/discover serverInfo metadata missing");
+  const modern_tools_response = responses.find((response) => response.id === 5)?.result;
+  assert(modern_tools_response?.resultType === "complete", "modern tools/list resultType missing");
+  assert(modern_tools_response?.cacheScope === "private", "modern tools/list cache scope missing");
+  assert(responses.find((response) => response.id === 6)?.error?.code === -32601, "modern initialize should be removed");
+  assert(responses.find((response) => response.id === 7)?.result?.protocolVersion === "2025-11-25", "legacy initialize negotiated a modern version");
 }
 
 function run_result_limit_smoke(enforce_tool_result_limit) {

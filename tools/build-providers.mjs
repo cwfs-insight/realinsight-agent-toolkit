@@ -173,7 +173,7 @@ async function render_cursor_provider(env) {
   const server_name = env.suffix ? `realinsight-agent-toolkit-${env.suffix}` : "realinsight-agent-toolkit";
   const skill_root = path.join(root, "skills/realinsight-agent-toolkit");
   const source_manifest = await read_json(path.join(REPO_ROOT, "plugins/codex/realinsight-connector/.codex-plugin/plugin.json"));
-  const version = source_manifest.version || "0.2.1";
+  const version = source_manifest.version || "0.2.2";
   const description = cursor_description(source_manifest.description);
 
   await fs.mkdir(path.join(root, ".cursor-plugin"), { recursive: true });

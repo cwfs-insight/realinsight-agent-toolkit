@@ -12,6 +12,14 @@ Use this as the default business-user path.
 
 In Claude Desktop, add a custom remote MCP connector with the selected endpoint and complete the Realinsight OAuth prompt.
 
+## Anthropic Connectors Directory
+
+Public Claude distribution should submit the production remote MCP server to Anthropic's Connectors Directory. This is separate from the repository's Claude Code plugin marketplace and local MCPB package.
+
+Before submission, verify the production HTTPS endpoint from Claude.ai, Claude Desktop, and Claude Code; complete OAuth authorization-code login with Claude's HTTPS callbacks; confirm every tool's read-only/destructive annotations; and prepare a dedicated review account with sample data. The public listing also needs complete setup/auth documentation, at least three working prompt examples, a privacy policy, and a dedicated support channel.
+
+Directory review and approval are external release gates. Users can still add the URL as a custom remote connector before a public listing is approved.
+
 ## Claude Code CLI
 
 Use this for Claude Code or Claude surfaces that support plugin marketplaces. It installs the Realinsight skill and a hosted Streamable HTTP MCP configuration together.

@@ -9,7 +9,7 @@
       "name": "realinsight-connector",
       "source": "./plugins/claude/realinsight-connector",
       "description": "Connect Claude to Realinsight tools and skills.",
-      "version": "0.2.1",
+      "version": "0.2.2",
       "author": {
         "name": "Realinsight"
       },
@@ -28,7 +28,7 @@
       "displayName": "Realinsight Connector Dev",
       "source": "./providers/claude/dev/plugins/claude/realinsight-connector-dev",
       "description": "Connect Claude to Realinsight dev tools and skills.",
-      "version": "0.2.1-dev",
+      "version": "0.2.2-dev",
       "author": {
         "name": "Realinsight"
       },
@@ -48,7 +48,7 @@
       "displayName": "Realinsight Connector QA",
       "source": "./providers/claude/qa/plugins/claude/realinsight-connector-qa",
       "description": "Connect Claude to Realinsight QA tools and skills.",
-      "version": "0.2.1-qa",
+      "version": "0.2.2-qa",
       "author": {
         "name": "Realinsight"
       },

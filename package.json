@@ -1,6 +1,6 @@
 {
   "name": "realinsight-for-agents",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "private": true,
   "description": "Public distribution workspace for Realinsight agent connectors, MCP examples, skills, and the ri-agent toolkit package.",
   "type": "module",
@@ -10,10 +10,12 @@
   "scripts": {
     "ri-agent": "node ./packages/agent-toolkit/src/ri-agent.mjs",
     "test:contract": "node ./packages/agent-toolkit/test/contract-smoke.mjs",
+    "test:agent-plugin": "node ./tools/test-agent-plugin-validator.mjs",
     "package:plugins": "node ./tools/package-env-bundles.mjs",
     "package:plugins:dev": "node ./tools/package-env-bundles.mjs --env dev",
     "package:plugins:qa": "node ./tools/package-env-bundles.mjs --env qa",
     "build:providers": "node ./tools/build-providers.mjs",
+    "validate:agent-plugin": "node ./tools/validate-agent-plugin.mjs",
     "validate:providers": "node ./tools/validate-providers.mjs",
     "build:dist": "node ./tools/build-dist.mjs",
     "build:dist:dev": "node ./tools/build-dist.mjs --env dev",
@@ -31,6 +33,7 @@
     "inspect:mcp:remote": "node ./tools/mcp-inspector.mjs --transport remote"
   },
   "devDependencies": {
-    "@modelcontextprotocol/inspector": "^0.22.0"
+    "@modelcontextprotocol/inspector": "^0.22.0",
+    "yaml": "^2.8.1"
   }
 }

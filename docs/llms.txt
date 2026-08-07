@@ -14,6 +14,7 @@ Unavailable: native npm/npx installation until the toolkit package is published.
 - Environment reference: ./environments.md
 - Authentication reference: ./auth.md
 - Security reference: ./security.md
+- Agent Plugins package: ./agent-plugins.md
 
 ## Repository resources
 

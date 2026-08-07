@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { validate_agent_plugin } from "./validate-agent-plugin.mjs";
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const PROVIDERS_ROOT = path.join(REPO_ROOT, "providers");
@@ -34,7 +35,9 @@ main().catch((error) => {
 });
 
 async function main() {
+  await validate_portable_agent_plugin();
   await validate_root_codex_marketplace();
+  await validate_openai_submission();
 
   for (const [env, expected] of Object.entries(EXPECTED)) {
     await validate_codex_provider(env, expected);
@@ -50,6 +53,80 @@ async function main() {
   }
 
   console.log("Provider validation passed.");
+}
+
+async function validate_portable_agent_plugin() {
+  for (const failure of await validate_agent_plugin(REPO_ROOT)) fail("agent-plugins", failure);
+
+  const manifest = await read_json(path.join(REPO_ROOT, "plugin.json"));
+  const mcp = await read_json(path.join(REPO_ROOT, "mcp.json"));
+  const root_package = await read_json(path.join(REPO_ROOT, "package.json"));
+  const toolkit_package = await read_json(path.join(REPO_ROOT, "packages/agent-toolkit/package.json"));
+  const release = await read_json(path.join(REPO_ROOT, "RELEASE_MANIFEST.json"));
+  const install_data = await read_json(path.join(REPO_ROOT, "docs/install-data.json"));
+  const codex_manifest = await read_json(path.join(REPO_ROOT, "plugins/codex/realinsight-connector/.codex-plugin/plugin.json"));
+  const claude_manifest = await read_json(path.join(REPO_ROOT, "plugins/claude/realinsight-connector/.claude-plugin/plugin.json"));
+  const toolkit_definitions = await import(pathToFileURL(path.join(REPO_ROOT, "packages/agent-toolkit/src/tool-definitions.mjs")).href);
+  const versions = new Map([
+    ["root package", root_package.version],
+    ["toolkit package", toolkit_package.version],
+    ["release manifest", release.version],
+    ["install catalog", install_data.release_version],
+    ["portable plugin", manifest.version],
+    ["Codex plugin", codex_manifest.version],
+    ["Claude plugin", claude_manifest.version],
+    ["Node MCP server", toolkit_definitions.MCP_SERVER_INFO?.version],
+  ]);
+
+  const server = mcp.mcpServers?.["realinsight-agent-toolkit"];
+  if (server?.type !== "streamable-http") fail("agent-plugins", "portable MCP server type must be streamable-http.");
+  if (server?.url !== EXPECTED.prod.url) fail("agent-plugins", `portable MCP URL is ${server?.url || "(missing)"}.`);
+  if (server && Object.keys(server).some((key) => key !== "type" && key !== "url" && key !== "headers")) {
+    fail("agent-plugins", "portable MCP server contains fields outside the streamable-http schema.");
+  }
+  if (server?.headers && Object.keys(server.headers).length) {
+    fail("agent-plugins", "portable MCP configuration must not embed credential-bearing or installation-specific headers.");
+  }
+
+  const expected_version = toolkit_package.version;
+  for (const [label, actual] of versions) {
+    if (actual !== expected_version) fail("version", `${label} version ${actual || "(missing)"} does not match ${expected_version}.`);
+  }
+
+  try {
+    await fs.access(path.join(REPO_ROOT, "skills/realinsight-agent-toolkit/SKILL.md"));
+  }
+  catch {
+    fail("agent-plugins", "portable package is missing skills/realinsight-agent-toolkit/SKILL.md.");
+  }
+}
+
+async function validate_openai_submission() {
+  const submission = await read_json(path.join(REPO_ROOT, "chatgpt-app-submission.json"));
+  const tools = submission.tools ?? {};
+  const tool_names = Object.keys(tools);
+
+  if (submission.schema_version !== 1) fail("openai", "submission schema_version must be 1.");
+  if (!submission.app_info?.display_name) fail("openai", "submission display_name is missing.");
+  if ((submission.app_info?.subtitle?.length ?? 0) > 30) fail("openai", "submission subtitle exceeds 30 characters.");
+  if (tool_names.length !== 42) fail("openai", `submission must describe 42 hosted tools; found ${tool_names.length}.`);
+  if (submission.test_cases?.length !== 5) fail("openai", "submission must contain exactly five positive test cases.");
+  if (submission.negative_test_cases?.length !== 3) fail("openai", "submission must contain exactly three negative test cases.");
+
+  for (const name of tool_names) {
+    const annotations = tools[name]?.annotations;
+    for (const hint of ["readOnlyHint", "openWorldHint", "destructiveHint"]) {
+      if (typeof annotations?.[hint] !== "boolean") {
+        fail("openai", `${name} is missing explicit ${hint}.`);
+      }
+    }
+  }
+
+  for (const test_case of submission.test_cases ?? []) {
+    if (!tool_names.includes(test_case.tools_triggered)) {
+      fail("openai", `positive test references unknown tool ${test_case.tools_triggered || "(missing)"}.`);
+    }
+  }
 }
 
 async function validate_root_codex_marketplace() {
@@ -87,6 +164,9 @@ async function validate_root_codex_marketplace() {
     if (manifest.name !== expected.plugin) fail("root", `Codex manifest name for ${expected.plugin} is ${manifest.name || "(missing)"}.`);
     if (server?.type !== "http") fail("root", `Codex ${expected.plugin} MCP server type must be http.`);
     if (server?.url !== expected.url) fail("root", `Codex ${expected.plugin} MCP URL is ${server?.url || "(missing)"}.`);
+    if (server?.command || server?.args || server?.env || server?.cwd) {
+      fail("root", `Codex ${expected.plugin} HTTP MCP config must not include local stdio fields.`);
+    }
   }
 }
 

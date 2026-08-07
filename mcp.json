@@ -1,7 +1,8 @@
 {
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
   "mcpServers": {
     "realinsight-agent-toolkit": {
-      "type": "http",
+      "type": "streamable-http",
       "url": "https://www.realinsight.cloud/api/v1/mcp"
     }
   }

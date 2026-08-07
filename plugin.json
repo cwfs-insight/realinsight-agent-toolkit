@@ -1,7 +1,8 @@
 {
-  "name": "realinsight-connector-qa",
-  "description": "Cursor plugin for authenticated Realinsight schema, entity, record, dashboard, analytic, and workbench tools.",
-  "version": "0.2.2-qa",
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "realinsight-connector",
+  "version": "0.2.2",
+  "description": "Connect AI agents to authenticated Realinsight tools and reusable workflow skills.",
   "author": {
     "name": "Realinsight",
     "url": "https://www.realinsight.com"
@@ -12,8 +13,8 @@
   "keywords": [
     "realinsight",
     "mcp",
+    "agent-skills",
     "commercial-real-estate",
-    "entity-search",
-    "records"
+    "analytics"
   ]
 }

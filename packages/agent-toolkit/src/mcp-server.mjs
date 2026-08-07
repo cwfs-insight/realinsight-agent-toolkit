@@ -4,6 +4,7 @@ import { build_error_response, is_plain_object, JsonRpcError } from "./json-rpc.
 import {
   AGENT_TOOLS,
   MCP_INSTRUCTIONS,
+  MCP_MODERN_PROTOCOL_VERSION,
   MCP_PROTOCOL_VERSION,
   MCP_SERVER_INFO,
   MCP_SUPPORTED_PROTOCOL_VERSIONS,
@@ -90,7 +91,12 @@ async function handle_mcp_message(message) {
   }
 
   try {
-    const result = await handle_mcp_request(message);
+    const is_modern_request = validate_protocol_request(message);
+    const result = add_modern_result_metadata(
+      await handle_mcp_request(message, is_modern_request),
+      message.method,
+      is_modern_request,
+    );
     write_json_rpc({
       jsonrpc: "2.0",
       id: message.id,
@@ -116,11 +122,16 @@ async function handle_mcp_notification(message) {
   console.error(`Ignored MCP notification: ${message.method}`);
 }
 
-async function handle_mcp_request(message) {
+async function handle_mcp_request(message, is_modern_request) {
   switch (message.method) {
     case "initialize":
+      if (is_modern_request) throw new JsonRpcError(-32601, "Method not found: initialize");
       return build_mcp_initialize_result(message.params);
+    case "server/discover":
+      if (!is_modern_request) throw new JsonRpcError(-32601, "Method not found: server/discover");
+      return build_mcp_discover_result();
     case "ping":
+      if (is_modern_request) throw new JsonRpcError(-32601, "Method not found: ping");
       return {};
     case "tools/list":
       return { tools: AGENT_TOOLS.map(to_mcp_tool_definition) };
@@ -135,19 +146,77 @@ async function handle_mcp_request(message) {
   }
 }
 
+function validate_protocol_request(message) {
+  const metadata = is_plain_object(message.params?._meta)
+    ? message.params._meta
+    : null;
+  const requested_version = metadata?.["io.modelcontextprotocol/protocolVersion"];
+
+  if (requested_version === undefined) return false;
+  if (typeof requested_version !== "string" || !MCP_SUPPORTED_PROTOCOL_VERSIONS.includes(requested_version)) {
+    throw new JsonRpcError(-32022, "Unsupported protocol version", {
+      supported: MCP_SUPPORTED_PROTOCOL_VERSIONS,
+      requested: requested_version ?? null,
+    });
+  }
+
+  if (requested_version !== MCP_MODERN_PROTOCOL_VERSION) return false;
+  if (!is_plain_object(metadata["io.modelcontextprotocol/clientCapabilities"])) {
+    throw new JsonRpcError(
+      -32602,
+      "params._meta.io.modelcontextprotocol/clientCapabilities must be an object.",
+    );
+  }
+
+  return true;
+}
+
+function add_modern_result_metadata(result, method, is_modern_request) {
+  if (!is_modern_request || !is_plain_object(result)) return result;
+
+  const modern_result = {
+    ...result,
+    resultType: result.resultType ?? "complete",
+    _meta: {
+      ...(is_plain_object(result._meta) ? result._meta : {}),
+      "io.modelcontextprotocol/serverInfo": MCP_SERVER_INFO,
+    },
+  };
+
+  if (method === "server/discover" || method.endsWith("/list")) {
+    modern_result.ttlMs = 300000;
+    modern_result.cacheScope = "private";
+  }
+
+  return modern_result;
+}
+
+function build_mcp_discover_result() {
+  return {
+    supportedVersions: MCP_SUPPORTED_PROTOCOL_VERSIONS,
+    capabilities: build_mcp_capabilities(),
+    instructions: MCP_INSTRUCTIONS,
+  };
+}
+
+function build_mcp_capabilities() {
+  return {
+    tools: {
+      listChanged: false,
+    },
+  };
+}
+
 function build_mcp_initialize_result(params) {
   const requested_version = is_plain_object(params) ? params.protocolVersion : null;
   const protocol_version = MCP_SUPPORTED_PROTOCOL_VERSIONS.includes(requested_version)
+    && requested_version !== MCP_MODERN_PROTOCOL_VERSION
     ? requested_version
     : MCP_PROTOCOL_VERSION;
 
   return {
     protocolVersion: protocol_version,
-    capabilities: {
-      tools: {
-        listChanged: false,
-      },
-    },
+    capabilities: build_mcp_capabilities(),
     serverInfo: MCP_SERVER_INFO,
     instructions: MCP_INSTRUCTIONS,
   };
@@ -215,7 +284,7 @@ function to_mcp_tool_definition(tool) {
       readOnlyHint: tool.readOnlyHint ?? true,
       destructiveHint: tool.destructiveHint ?? false,
       idempotentHint: tool.idempotentHint ?? true,
-      openWorldHint: true,
+      openWorldHint: false,
     },
   };
 }

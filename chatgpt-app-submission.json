@@ -1,0 +1,584 @@
+{
+  "$schema": "https://developers.openai.com/apps-sdk/schemas/chatgpt-app-submission.v1.json",
+  "schema_version": 1,
+  "app_info": {
+    "display_name": "Realinsight",
+    "subtitle": "Work with Realinsight data",
+    "description": "Realinsight helps commercial real estate teams find and analyze customer-scoped records, dashboards, workbenches, reports, model forms, and chart-of-accounts configuration, with approval-gated tools for supported updates.",
+    "category": "BUSINESS"
+  },
+  "tools": {
+    "get_tool_reference": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+      }
+    },
+    "disconnect": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Revokes an OAuth grant and therefore changes authentication state.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Revokes the current OAuth grant, which immediately removes the host's access until the user reconnects."
+      }
+    },
+    "search_features": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+      }
+    },
+    "search_fields": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+      }
+    },
+    "get_fields": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+      }
+    },
+    "search_entities": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+      }
+    },
+    "get_children": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+      }
+    },
+    "get_latest_children": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+      }
+    },
+    "get_records": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+      }
+    },
+    "set_record": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Creates or changes private Realinsight state and is not read-only.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Can overwrite selected field values on an existing Realinsight record after explicit approval."
+      }
+    },
+    "get_entity_structure": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+      }
+    },
+    "list_dashboard_pages": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+      }
+    },
+    "get_dashboard_page": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+      }
+    },
+    "get_analytic_data": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+      }
+    },
+    "get_analytic_csv": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+      }
+    },
+    "extract_analytic_entities": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+      }
+    },
+    "list_workbenches": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+      }
+    },
+    "get_workbench_data": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+      }
+    },
+    "get_workbench_csv": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+      }
+    },
+    "extract_workbench_entities": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+      }
+    },
+    "search_reports": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+      }
+    },
+    "search_report_folders": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+      }
+    },
+    "get_report": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+      }
+    },
+    "get_chart_of_accounts": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+      }
+    },
+    "get_coa_data": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+      }
+    },
+    "set_chart_of_accounts": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Creates or changes private Realinsight state and is not read-only.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Can replace or remove chart rows and mappings in a private Realinsight customer after explicit approval and safety checks."
+      }
+    },
+    "search_model_forms": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+      }
+    },
+    "search_model_form_folders": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+      }
+    },
+    "get_model_form": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+      }
+    },
+    "validate_create_model_form": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+      }
+    },
+    "create_model_form": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Creates or changes private Realinsight state and is not read-only.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Creates a model form inside the authenticated customer's private Realinsight environment after explicit approval."
+      }
+    },
+    "validate_update_model_form": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+      }
+    },
+    "update_model_form": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Creates or changes private Realinsight state and is not read-only.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Can overwrite model form metadata or replace map content after explicit approval and conflict-token validation."
+      }
+    },
+    "download_model_form_template": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+      }
+    },
+    "stage_model_form_template_file": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Creates or changes private Realinsight state and is not read-only.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Creates a short-lived private upload session but does not replace the template until a separate approved call."
+      }
+    },
+    "upload_model_form_template": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Creates or changes private Realinsight state and is not read-only.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Replaces the model form's current template file after explicit approval and conflict-token validation."
+      }
+    },
+    "validate_create_report": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+      }
+    },
+    "validate_update_report": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+      }
+    },
+    "validate_delete_report": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+      }
+    },
+    "create_report": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Creates or changes private Realinsight state and is not read-only.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Creates a report definition inside the authenticated customer's private Realinsight environment after explicit approval."
+      }
+    },
+    "update_report": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Creates or changes private Realinsight state and is not read-only.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Can overwrite an existing report definition after explicit approval and conflict-token validation."
+      }
+    },
+    "delete_report": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Creates or changes private Realinsight state and is not read-only.",
+        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
+        "destructive_justification": "Soft-deletes an existing report definition after explicit approval and downstream-use validation."
+      }
+    }
+  },
+  "test_cases": [
+    {
+      "description": "Find a named loan in the authenticated customer.",
+      "user_prompt": "Find the loan named Riverfront Center and show me the matching Realinsight records.",
+      "file_attachment_urls": null,
+      "tools_triggered": "search_entities",
+      "expected_output": "Returns bounded matching entities in the signed-in customer's Realinsight data so the user can select or inspect the correct loan.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Retrieve the latest servicing child record for known loans.",
+      "user_prompt": "For these loan records, show me the latest servicing record for each one.",
+      "file_attachment_urls": null,
+      "tools_triggered": "get_latest_children",
+      "expected_output": "Returns at most one latest matching child reference per supplied parent using the requested child date or order field.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Read a selected cached portfolio analytic.",
+      "user_prompt": "Open the selected portfolio analytic and summarize the current cached rows and columns.",
+      "file_attachment_urls": null,
+      "tools_triggered": "get_analytic_data",
+      "expected_output": "Returns a bounded customer-scoped analytic result with column metadata and available cached rows for summarization.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Create an approved LIST report after validation.",
+      "user_prompt": "Using the report design we just validated, create the approved loan maturity LIST report in my agent folder.",
+      "file_attachment_urls": null,
+      "tools_triggered": "create_report",
+      "expected_output": "Creates the validated private report after explicit approval and summarizes its name, grain, saved configuration, and warnings.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Apply an approved model form map update with conflict protection.",
+      "user_prompt": "Apply the approved map patch to this model form using the latest conflict token.",
+      "file_attachment_urls": null,
+      "tools_triggered": "update_model_form",
+      "expected_output": "Updates only the approved model form metadata or map sections after authorization and conflict-token checks, then summarizes the changes.",
+      "expected_output_url": null
+    }
+  ],
+  "negative_test_cases": [
+    {
+      "description": "Do not trigger for unrelated email requests.",
+      "user_prompt": "Send an email to the borrower asking for the missing documents.",
+      "file_attachment_urls": null,
+      "tools_triggered": null,
+      "expected_output": "The plugin should not be invoked because it cannot send email or messages.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Do not trigger for public web research.",
+      "user_prompt": "Search the web for today's commercial mortgage rates and breaking market news.",
+      "file_attachment_urls": null,
+      "tools_triggered": null,
+      "expected_output": "The plugin should not be invoked because it only accesses authenticated Realinsight data and does not search the public web.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Do not perform unsupported identity administration.",
+      "user_prompt": "Reset another user's password and grant them administrator access.",
+      "file_attachment_urls": null,
+      "tools_triggered": null,
+      "expected_output": "The plugin should not be invoked because user credential and permission administration are outside its supported tools.",
+      "expected_output_url": null
+    }
+  ]
+}

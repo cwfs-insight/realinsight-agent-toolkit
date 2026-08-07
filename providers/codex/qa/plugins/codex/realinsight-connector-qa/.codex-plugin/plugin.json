@@ -1,6 +1,6 @@
 {
   "name": "realinsight-connector-qa",
-  "version": "0.2.1-qa",
+  "version": "0.2.2-qa",
   "description": "Codex plugin for authenticated Realinsight schema, entity, record, dashboard, analytic, and workbench tools.",
   "author": {
     "name": "Realinsight"

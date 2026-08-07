@@ -4,6 +4,8 @@ Realinsight For Agents is the public distribution workspace for Realinsight agen
 
 It packages the `ri-agent` CLI, local and hosted MCP connection examples, Codex, Claude, and Cursor plugin assets, Claude Desktop extension assets, and Realinsight skills for agent harnesses that can use them.
 
+The repository root also follows the Agent Plugins 1.0.0 portable package format. Compatible clients can discover the root `plugin.json`, the production `streamable-http` server in `mcp.json`, and the exported `skills/` together. See [docs/agent-plugins.md](docs/agent-plugins.md).
+
 ## Which Install Should I Use?
 
 | User | Recommended path | Why |
@@ -51,6 +53,8 @@ Dev and QA provider paths are intentionally explicit so they do not replace the 
 
 ```text
 packages/agent-toolkit/              # npm package for ri-agent CLI and stdio MCP
+plugin.json                           # portable Agent Plugins manifest
+mcp.json                              # portable production Streamable HTTP MCP config
 skills/                              # public Realinsight skills and references
 plugins/codex/realinsight-connector/ # Source Codex plugin bundle copied into providers
 plugins/claude/realinsight-connector/ # Source Claude plugin bundle copied into providers
@@ -76,7 +80,9 @@ For package publication testing:
 
 ```bash
 npm run test:contract
+npm run test:agent-plugin
 npm run pack:dry-run
+npm run validate:agent-plugin
 ```
 
 For checked-in provider marketplaces:

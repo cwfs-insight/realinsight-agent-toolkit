@@ -1,10 +1,10 @@
 {
   "package_name": "@realinsight/agent-toolkit",
   "connector_name": "Realinsight Connector",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "environment": "prod",
   "base_url": "https://www.realinsight.cloud/api/v1",
-  "generated_at_utc": "2026-07-24T16:12:31.198Z",
+  "generated_at_utc": "2026-08-07T03:52:20.237Z",
   "sources": {
     "package": "agent-toolkit-runtime",
     "plugin": "realinsight-connector",
@@ -49,6 +49,11 @@
   ],
   "repo_owned_roots": [
     "README.md",
+    "plugin.json",
+    "mcp.json",
+    "chatgpt-app-submission.json",
+    "tools/validate-agent-plugin.mjs",
+    "tools/test-agent-plugin-validator.mjs",
     "docs",
     "providers",
     "examples",
@@ -70,14 +75,14 @@
       "purpose": "Agent-readable Realinsight documentation corpora packaged from source documentation repositories."
     }
   ],
-  "source_commit": "d6f63eeb8e25f875de5601b547b9ff98501b1609",
+  "source_commit": "b3991c1f6daf797f0abc4f5977e67b342474466f",
   "managed_root_checksums": {
-    "packages/agent-toolkit/src": "b86ff7555f3956addca1fb76c017201e5805acd2a4a77e9695be95c4e0bba417",
-    "packages/agent-toolkit/test": "0b2a93223dfef93f05ab7890de00a1ed3dd87e5985c0d059a1ae9c3697e382d5",
+    "packages/agent-toolkit/src": "8c2e00b415732bed31d6a6f472e7a394e54e6a6d11664df8a5ebe50824c121f9",
+    "packages/agent-toolkit/test": "ed012aa29271ed955952983b9f570a7888f914a9c3aa8ef6928abfebcda79b1b",
     "skills": "ee05ac203ca1e02671823bafdc4a61c2a8c2374151998318127821f8b751c00e",
     "plugins/codex/realinsight-connector/skills": "ee05ac203ca1e02671823bafdc4a61c2a8c2374151998318127821f8b751c00e",
     "plugins/claude/realinsight-connector/skills": "ee05ac203ca1e02671823bafdc4a61c2a8c2374151998318127821f8b751c00e",
-    "extensions/claude-desktop/realinsight-connector/src": "b86ff7555f3956addca1fb76c017201e5805acd2a4a77e9695be95c4e0bba417",
+    "extensions/claude-desktop/realinsight-connector/src": "8c2e00b415732bed31d6a6f472e7a394e54e6a6d11664df8a5ebe50824c121f9",
     "extensions/claude-desktop/realinsight-connector/skills": "ee05ac203ca1e02671823bafdc4a61c2a8c2374151998318127821f8b751c00e"
   },
   "source_ids": {
