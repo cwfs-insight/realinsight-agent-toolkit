@@ -27,6 +27,10 @@ const SCOPES = [
   "ri:model_forms.read",
   "ri:model_forms.write",
   "ri:chart_of_accounts.write",
+  "ri:realviews.read",
+  "ri:realviews.write",
+  "ri:extended_data.read",
+  "ri:extended_data.write",
   "ri:reports.write",
 ];
 
@@ -133,6 +137,22 @@ function assert_complete_tool_input_schemas(tools) {
     by_name.get("validate_create_report")?.inputSchema?.properties?.list?.properties?.columns?.items?.properties?.schema_code,
     "report tools are missing generated column fields",
   );
+  assert(
+    by_name.get("validate_create_report")?.inputSchema?.properties?.composite?.properties?.reports?.items?.properties?.data_sets,
+    "report tools are missing generated composite component fields",
+  );
+  assert(
+    by_name.get("import_report_into_composite")?.inputSchema?.properties?.source_report_id,
+    "composite import tool is missing its source report id",
+  );
+  assert(
+    schema_property(schema_property(by_name.get("set_realview")?.inputSchema?.properties?.realview, "maps")?.items, "relationship"),
+    "set_realview is missing generated map fields",
+  );
+  assert(
+    by_name.get("set_extended_data")?.inputSchema?.properties?.field?.properties?.field_display,
+    "set_extended_data is missing generated field settings",
+  );
 }
 
 function assert_search_query_guidance(instructions, tools) {
@@ -151,6 +171,15 @@ function assert_search_query_guidance(instructions, tools) {
 function object_schema(schema) {
   if (schema?.properties) return schema;
   return (schema?.oneOf || schema?.anyOf || []).find((candidate) => candidate?.properties);
+}
+
+function schema_property(schema, name) {
+  if (schema?.properties?.[name]) return schema.properties[name];
+  for (const candidate of [...(schema?.allOf || []), ...(schema?.oneOf || []), ...(schema?.anyOf || [])]) {
+    const value = schema_property(candidate, name);
+    if (value) return value;
+  }
+  return undefined;
 }
 
 function assert_schema_node(schema, path, allow_empty_object = false) {
@@ -343,6 +372,40 @@ async function run_tool_call_smoke(call_agent_tool, temp_dir) {
   const report_config_result = await call_agent_tool("get_report", { report_id: "report-2" });
   assert(report_config_result.items[0].conflict_token === "conflict-report-2", "get_report did not return latest conflict token");
 
+  const composite_import_result = await call_agent_tool("import_report_into_composite", {
+    report_id: "composite-1",
+    source_report_id: "report-2",
+    expected_conflict_token: "conflict-composite-1",
+    approved: true,
+  });
+  assert(composite_import_result.items[0].report.composite.reports[0].report_list_id === "embedded-report-new", "import_report_into_composite did not return the independent embedded report");
+
+  const report_template_download_path = path.join(temp_dir, "composite-download.xlsx");
+  const report_template_result = await call_agent_tool("download_report_template", {
+    report_id: "composite-1",
+    output_path: report_template_download_path,
+  });
+  assert(report_template_result.items[0].template_id === "report-template-1", "download_report_template did not return report-template-1");
+  assert((await fs.readFile(report_template_download_path, "utf8")) === "report template download", "download_report_template did not fetch signed download_url");
+
+  const report_template_path = path.join(temp_dir, "composite.xlsx");
+  await fs.writeFile(report_template_path, "report template upload");
+  const report_template_stage_result = await call_agent_tool("stage_report_template_file", {
+    report_id: "composite-1",
+    file_path: report_template_path,
+    approved: true,
+  });
+  assert(report_template_stage_result.items[0].staged_file_id === "staged-report-template-1", "stage_report_template_file did not return staged id");
+  assert(!("upload_url" in report_template_stage_result.items[0]), "stage_report_template_file should remove signed upload_url after local upload");
+
+  const report_template_upload_result = await call_agent_tool("upload_report_template", {
+    report_id: "composite-1",
+    staged_file_id: "staged-report-template-1",
+    expected_conflict_token: "conflict-composite-2",
+    approved: true,
+  });
+  assert(report_template_upload_result.items[0].template_file.template_id === "report-template-2", "upload_report_template did not return a fresh template id");
+
   const coa_result = await call_agent_tool("get_chart_of_accounts", {
     coa_id: "coa-1",
     include_accounts: true,
@@ -379,6 +442,54 @@ async function run_tool_call_smoke(call_agent_tool, temp_dir) {
     approved: true,
   });
   assert(coa_update_result.items[0].chart_of_accounts.chart.Layout[0].ItemName === "Revenue Updated", "set_chart_of_accounts did not update account name");
+
+  const realview_result = await call_agent_tool("get_realviews", { realview_id: "realview-1" });
+  assert(realview_result.items[0].realview_id === "realview-1", "get_realviews did not return realview-1");
+  assert(realview_result.items[0].conflict_token === "conflict-realview-1", "get_realviews did not return conflict token");
+
+  const realview_execution = await call_agent_tool("execute_realview", {
+    realview_id: "realview-1",
+    entity_ids: ["loan-1", "loan-2"],
+  });
+  assert(realview_execution.items[0].entity_id === "loan-1", "execute_realview did not preserve entity order");
+  assert(realview_execution.items[0].value === 1250000, "execute_realview did not return the computed value");
+  assert(realview_execution.items[1].has_result === false, "execute_realview did not return the blank second result");
+
+  const realview_dry_run = await call_agent_tool("set_realview", {
+    realview_id: "realview-1",
+    expected_conflict_token: "conflict-realview-1",
+    realview: { display: "Loan Balance", root_feature_code: "Loan", maps: [] },
+    dry_run: true,
+  });
+  assert(realview_dry_run.items[0].can_apply === true, "set_realview dry_run did not return can_apply");
+  const realview_update = await call_agent_tool("set_realview", {
+    realview_id: "realview-1",
+    expected_conflict_token: "conflict-realview-1",
+    realview: { display: "Loan Balance", root_feature_code: "Loan", maps: [] },
+    approved: true,
+  });
+  assert(realview_update.items[0].realview.conflict_token === "conflict-realview-2", "set_realview did not return updated conflict token");
+
+  const extended_data_result = await call_agent_tool("get_extended_data", { configuration_id: "extended-1" });
+  assert(extended_data_result.items[0].kind === "custom", "get_extended_data did not distinguish custom configuration");
+  assert(extended_data_result.items[0].field.field_display === "Watch List", "get_extended_data did not return configuration metadata");
+
+  const extended_data_dry_run = await call_agent_tool("set_extended_data", {
+    configuration_id: "extended-1",
+    operation: "upsert",
+    expected_conflict_token: "conflict-extended-1",
+    field: { field_display: "Watch List Updated" },
+    dry_run: true,
+  });
+  assert(extended_data_dry_run.items[0].can_apply === true, "set_extended_data dry_run did not return can_apply");
+  const extended_data_update = await call_agent_tool("set_extended_data", {
+    configuration_id: "extended-1",
+    operation: "upsert",
+    expected_conflict_token: "conflict-extended-1",
+    field: { field_display: "Watch List Updated" },
+    approved: true,
+  });
+  assert(extended_data_update.items[0].extended_data.configuration.field_display === "Watch List Updated", "set_extended_data did not return updated configuration");
 
   const model_form_search_result = await call_agent_tool("search_model_forms", { search_text: "Loan" });
   assert(model_form_search_result.items[0].model_form_id === "model-form-1", "search_model_forms did not return model-form-1");
@@ -564,11 +675,15 @@ async function run_mcp_smoke(config_path, mcp_instructions) {
   const expected_destructive_tools = [
     "delete_report",
     "disconnect_realinsight",
+    "import_report_into_composite",
     "set_chart_of_accounts",
+    "set_extended_data",
+    "set_realview",
     "set_record",
     "update_model_form",
     "update_report",
     "upload_model_form_template",
+    "upload_report_template",
   ];
   assert(
     JSON.stringify(destructive_tools) === JSON.stringify(expected_destructive_tools),
@@ -1023,6 +1138,78 @@ async function handle_request(request, response) {
     return;
   }
 
+  if (request.method === "POST" && url.pathname === "/agent/reports/configurations/composite-1/composite/import-list-report") {
+    assert(body.approved === true, "import_report_into_composite did not send approved=true");
+    assert(body.source_report_id === "report-2", "import_report_into_composite did not send source_report_id");
+    assert(!("insert_at" in body), "import_report_into_composite should omit insert_at to append");
+    write_json(response, 200, agent_result("import_report_into_composite", "ri:reports.write", [
+      {
+        report: {
+          report_id: "composite-1",
+          report_type: "COMPOSITE",
+          conflict_token: "conflict-composite-2",
+          composite: { reports: [{ report_list_id: "embedded-report-new", report_sheet: "Loan List" }] },
+        },
+      },
+    ]));
+    return;
+  }
+
+  if (request.method === "GET" && url.pathname === "/agent/reports/configurations/composite-1/template-file") {
+    write_json(response, 200, agent_result("download_report_template", "ri:analytics.read", [
+      {
+        report_id: "composite-1",
+        template_id: "report-template-1",
+        file_name: "composite.xlsx",
+        download_url: `${base_url}/signed/report-template-download`,
+      },
+    ]));
+    return;
+  }
+
+  if (request.method === "GET" && url.pathname === "/signed/report-template-download") {
+    response.writeHead(200, { "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    response.end("report template download");
+    return;
+  }
+
+  if (request.method === "POST" && url.pathname === "/agent/reports/configurations/composite-1/template-file/stage") {
+    assert(body.approved === true, "stage_report_template_file did not send approved=true");
+    assert(body.file_name === "composite.xlsx", "stage_report_template_file did not send file_name");
+    write_json(response, 200, agent_result("stage_report_template_file", "ri:reports.write", [
+      {
+        report_id: "composite-1",
+        staged_file_id: "staged-report-template-1",
+        file_name: body.file_name,
+        upload_url: `${base_url}/signed/report-template-upload`,
+      },
+    ]));
+    return;
+  }
+
+  if (request.method === "POST" && url.pathname === "/signed/report-template-upload") {
+    assert(String(request.headers["content-type"] || "").startsWith("multipart/form-data"), "signed report template upload did not use multipart/form-data");
+    assert(body.__raw_text.includes("report template upload"), "signed report template upload did not include file bytes");
+    write_json(response, 200, {
+      report_id: "composite-1",
+      staged_file_id: "staged-report-template-1",
+      file_name: "composite.xlsx",
+    });
+    return;
+  }
+
+  if (request.method === "POST" && url.pathname === "/agent/reports/configurations/composite-1/template-file") {
+    assert(body.approved === true, "upload_report_template did not send approved=true");
+    assert(body.staged_file_id === "staged-report-template-1", "upload_report_template did not send staged_file_id");
+    write_json(response, 200, agent_result("upload_report_template", "ri:reports.write", [
+      {
+        report: { report_id: "composite-1", conflict_token: "conflict-composite-3" },
+        template_file: { report_id: "composite-1", template_id: "report-template-2", file_name: "composite.xlsx" },
+      },
+    ]));
+    return;
+  }
+
   if (request.method === "POST" && url.pathname === "/agent/chart-of-accounts/get") {
     write_json(response, 200, agent_result("get_chart_of_accounts", "", [
       {
@@ -1156,6 +1343,75 @@ async function handle_request(request, response) {
         },
       },
     ]));
+    return;
+  }
+
+  if (request.method === "POST" && url.pathname === "/agent/realviews/get") {
+    assert(body.realview_id === "realview-1", "get_realviews missing realview_id");
+    write_json(response, 200, agent_result("get_realviews", "ri:realviews.read", [{
+      realview_id: "realview-1",
+      active: true,
+      definition: {
+        display: "Loan Balance",
+        root_feature_code: "Loan",
+        maps: [{ order: 1, relationship: "root" }],
+      },
+      conflict_token: "conflict-realview-1",
+    }]));
+    return;
+  }
+
+  if (request.method === "POST" && url.pathname === "/agent/realviews/execute") {
+    assert(body.realview_id === "realview-1", "execute_realview missing realview_id");
+    assert(JSON.stringify(body.entity_ids) === JSON.stringify(["loan-1", "loan-2"]), "execute_realview missing entity_ids");
+    write_json(response, 200, agent_result("execute_realview", "ri:realviews.read", [
+      { entity_id: "loan-1", has_result: true, value: 1250000, is_aggregate: false },
+      { entity_id: "loan-2", has_result: false, value: null, is_aggregate: false },
+    ]));
+    return;
+  }
+
+  if (request.method === "POST" && url.pathname === "/agent/realviews/set") {
+    assert(body.expected_conflict_token === "conflict-realview-1", "set_realview missing conflict token");
+    if (body.dry_run === true) {
+      write_json(response, 200, agent_result("set_realview", "ri:realviews.write", [{ can_apply: true, errors: [], warnings: [], normalized_preview: { realview: body.realview, conflict_token: "conflict-realview-1" } }]));
+      return;
+    }
+    assert(body.approved === true, "set_realview did not send approved=true");
+    write_json(response, 200, agent_result("set_realview", "ri:realviews.write", [{
+      realview: { realview: { id: "realview-1", ...body.realview }, conflict_token: "conflict-realview-2" },
+      audit_log: { resource_type: "realview", action: "update", operation_id: "op-realview-1" },
+      warnings: [],
+    }]));
+    return;
+  }
+
+  if (request.method === "POST" && url.pathname === "/agent/extended-data/get") {
+    assert(body.configuration_id === "extended-1", "get_extended_data missing configuration_id");
+    write_json(response, 200, agent_result("get_extended_data", "ri:extended_data.read", [{
+      configuration_id: "extended-1",
+      kind: "custom",
+      active: true,
+      schema_code: "Loan.extended-1",
+      field: { feature_code: "Loan", field_display: "Watch List" },
+      conflict_token: "conflict-extended-1",
+    }]));
+    return;
+  }
+
+  if (request.method === "POST" && url.pathname === "/agent/extended-data/set") {
+    assert(body.operation === "upsert", "set_extended_data missing explicit upsert operation");
+    assert(body.expected_conflict_token === "conflict-extended-1", "set_extended_data missing conflict token");
+    if (body.dry_run === true) {
+      write_json(response, 200, agent_result("set_extended_data", "ri:extended_data.write", [{ can_apply: true, errors: [], warnings: [], normalized_preview: { kind: "custom", configuration: { _id: "extended-1", ...body.field }, conflict_token: "conflict-extended-1" } }]));
+      return;
+    }
+    assert(body.approved === true, "set_extended_data did not send approved=true");
+    write_json(response, 200, agent_result("set_extended_data", "ri:extended_data.write", [{
+      extended_data: { kind: "custom", configuration: { _id: "extended-1", ...body.field }, conflict_token: "conflict-extended-2" },
+      audit_log: { resource_type: "extended_data", action: "update", operation_id: "op-extended-1" },
+      warnings: [],
+    }]));
     return;
   }
 

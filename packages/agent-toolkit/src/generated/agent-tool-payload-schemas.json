@@ -941,6 +941,746 @@
         "op"
       ]
     },
+    "realview_definition": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "display": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "root_feature_code": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "description": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "editable": {
+          "type": "boolean"
+        },
+        "field_type": {
+          "type": "integer",
+          "description": "",
+          "x-enumNames": [
+            "text",
+            "note",
+            "integer",
+            "decimal",
+            "double",
+            "money",
+            "percent",
+            "date",
+            "boolean",
+            "location",
+            "reference",
+            "user",
+            "accounts",
+            "approval",
+            "document",
+            "currency",
+            "currency_forward",
+            "index_rate",
+            "index_rate_forward"
+          ],
+          "enum": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18
+          ]
+        },
+        "source_field_template": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "aggregation": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "group_by": {
+                  "type": [
+                    "array",
+                    "null"
+                  ],
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "field": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "order": {
+                        "type": "integer",
+                        "format": "int32"
+                      }
+                    }
+                  }
+                },
+                "unique": {
+                  "type": "boolean"
+                },
+                "delimiter": {
+                  "type": "string",
+                  "description": "",
+                  "x-enumNames": [
+                    "comma",
+                    "pipe",
+                    "semicolon",
+                    "colon",
+                    "fw_slash"
+                  ],
+                  "enum": [
+                    "comma",
+                    "pipe",
+                    "semicolon",
+                    "colon",
+                    "fw_slash"
+                  ]
+                },
+                "exclude_space": {
+                  "type": "boolean"
+                },
+                "order": {
+                  "type": "string",
+                  "description": "",
+                  "x-enumNames": [
+                    "asc",
+                    "dsc"
+                  ],
+                  "enum": [
+                    "asc",
+                    "dsc"
+                  ]
+                },
+                "numeric_method": {
+                  "type": "string",
+                  "description": "",
+                  "x-enumNames": [
+                    "sum",
+                    "avg",
+                    "max",
+                    "min",
+                    "concat",
+                    "count",
+                    "sum_product"
+                  ],
+                  "enum": [
+                    "sum",
+                    "avg",
+                    "max",
+                    "min",
+                    "concat",
+                    "count",
+                    "sum_product"
+                  ]
+                },
+                "date_method": {
+                  "type": "string",
+                  "description": "",
+                  "x-enumNames": [
+                    "latest",
+                    "earliest",
+                    "concat",
+                    "count"
+                  ],
+                  "enum": [
+                    "latest",
+                    "earliest",
+                    "concat",
+                    "count"
+                  ]
+                },
+                "bool_method": {
+                  "type": "string",
+                  "description": "",
+                  "x-enumNames": [
+                    "any_yes",
+                    "any_no",
+                    "both",
+                    "count"
+                  ],
+                  "enum": [
+                    "any_yes",
+                    "any_no",
+                    "both",
+                    "count"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "has_result_link": {
+          "type": "boolean"
+        },
+        "is_population": {
+          "type": "boolean"
+        },
+        "maps": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "order": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "relationship": {
+                "type": "integer",
+                "description": "",
+                "x-enumNames": [
+                  "self",
+                  "parent",
+                  "master",
+                  "reference",
+                  "reference_external",
+                  "child",
+                  "sibling",
+                  "structure",
+                  "virtual"
+                ],
+                "enum": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  7,
+                  8
+                ]
+              },
+              "target_feature_code": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "reference_field": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "filter": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "field": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "op": {
+                      "type": "string",
+                      "description": "",
+                      "x-enumNames": [
+                        "eq",
+                        "neq",
+                        "gt",
+                        "lt",
+                        "gte",
+                        "lte",
+                        "contains",
+                        "not_contains"
+                      ],
+                      "enum": [
+                        "eq",
+                        "neq",
+                        "gt",
+                        "lt",
+                        "gte",
+                        "lte",
+                        "contains",
+                        "not_contains"
+                      ]
+                    },
+                    "has_parameter": {
+                      "type": "boolean"
+                    },
+                    "value": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "and_or": {
+                      "type": "string",
+                      "description": "",
+                      "x-enumNames": [
+                        "and",
+                        "or"
+                      ],
+                      "enum": [
+                        "and",
+                        "or"
+                      ]
+                    },
+                    "param_key": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    }
+                  }
+                }
+              },
+              "sort": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "field": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "direction": {
+                      "type": "string",
+                      "description": "",
+                      "x-enumNames": [
+                        "ascending",
+                        "decending"
+                      ],
+                      "enum": [
+                        "ascending",
+                        "decending"
+                      ]
+                    }
+                  }
+                }
+              },
+              "selector_option": {
+                "type": "integer",
+                "description": "",
+                "x-enumNames": [
+                  "first",
+                  "top",
+                  "all"
+                ],
+                "enum": [
+                  0,
+                  1,
+                  2
+                ]
+              },
+              "selector_top_num": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "periodic_option": {
+                "type": "integer",
+                "description": "",
+                "x-enumNames": [
+                  "none",
+                  "current",
+                  "as_of",
+                  "exact",
+                  "earliest",
+                  "latest",
+                  "all"
+                ],
+                "enum": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6
+                ]
+              },
+              "periodic_param_key": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "parameters": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "key": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "usage": {
+                      "type": "string",
+                      "description": "",
+                      "x-enumNames": [
+                        "periodic",
+                        "filter"
+                      ],
+                      "enum": [
+                        "periodic",
+                        "filter"
+                      ]
+                    },
+                    "type": {
+                      "type": "string",
+                      "description": "",
+                      "x-enumNames": [
+                        "value",
+                        "record",
+                        "lookup",
+                        "provided"
+                      ],
+                      "enum": [
+                        "value",
+                        "record",
+                        "lookup",
+                        "provided"
+                      ]
+                    },
+                    "lookup_type": {
+                      "type": "string",
+                      "description": "",
+                      "x-enumNames": [
+                        "parent",
+                        "master",
+                        "nearest_periodic",
+                        "nearest_periodic_up_to_next"
+                      ],
+                      "enum": [
+                        "parent",
+                        "master",
+                        "nearest_periodic",
+                        "nearest_periodic_up_to_next"
+                      ]
+                    },
+                    "value": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "field": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "extended_data_field": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "feature_code": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "system_schema_code": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "field_display": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "field_description": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "field_type": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "integer",
+              "description": "",
+              "x-enumNames": [
+                "text",
+                "note",
+                "integer",
+                "decimal",
+                "double",
+                "money",
+                "percent",
+                "date",
+                "boolean",
+                "location",
+                "reference",
+                "user",
+                "accounts",
+                "approval",
+                "document",
+                "currency",
+                "currency_forward",
+                "index_rate",
+                "index_rate_forward"
+              ],
+              "enum": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                16,
+                17,
+                18
+              ]
+            }
+          ]
+        },
+        "ref_feature_code": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "ref_display_template": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "max_len": {
+          "type": [
+            "null",
+            "number"
+          ],
+          "format": "double"
+        },
+        "decimals": {
+          "type": [
+            "null",
+            "number"
+          ],
+          "format": "double"
+        },
+        "is_dictionary_value": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "values": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "order": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "display": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "hide_from_selection": {
+                "type": "boolean"
+              },
+              "description": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "parameters": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "code": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "display": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "description": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "is_searchable": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "is_list_field": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "list_field_order": {
+          "type": [
+            "null",
+            "number"
+          ],
+          "format": "decimal"
+        },
+        "is_key_info_field": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "key_info_field_order": {
+          "type": [
+            "null",
+            "number"
+          ],
+          "format": "decimal"
+        },
+        "is_computed": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "is_internal_compute": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "formula": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "formula_order": {
+          "type": [
+            "null",
+            "number"
+          ],
+          "format": "decimal"
+        },
+        "is_sensitive": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "is_encrypted": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "is_multi_select": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      }
+    },
     "model_form_map": {
       "type": "object",
       "additionalProperties": false,
@@ -4559,6 +5299,677 @@
               "order": {
                 "type": "integer",
                 "format": "int32"
+              }
+            }
+          }
+        }
+      }
+    },
+    "report_composite": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "template_id": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "default_currency_code": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "reports": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "report_list_id": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "master_feature_code": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "default_currency_code": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "use_currency_code": {
+                "type": "boolean"
+              },
+              "report_header": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "sub_header": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "template_type": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "template_id": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "report_sheet": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "first_data_header_cell": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "first_data_cell": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "data_direction": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "suppress_header_load": {
+                "type": "boolean"
+              },
+              "suppress_report_headers": {
+                "type": "boolean"
+              },
+              "report_header_cell": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "report_sub_header_cell": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "default_currency_cell": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "prompts": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "prompt_id": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "prompt_code": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "prompt_name": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "data_type": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "based_on_column_id": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "default_value": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    }
+                  }
+                }
+              },
+              "data_sets": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "data_set_id": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "data_set_name": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "data_set_type": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "feature_code": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "periodic_option": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "periodic_as_of_date": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "join_option": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "join_criteria": {
+                      "type": [
+                        "array",
+                        "null"
+                      ],
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "column_id": {
+                            "type": [
+                              "null",
+                              "string"
+                            ]
+                          },
+                          "criteria_order": {
+                            "type": "integer",
+                            "format": "int32"
+                          },
+                          "open_parenthesis": {
+                            "type": "boolean"
+                          },
+                          "close_parenthesis": {
+                            "type": "boolean"
+                          },
+                          "and_or": {
+                            "type": [
+                              "null",
+                              "string"
+                            ]
+                          },
+                          "operator_code": {
+                            "type": [
+                              "null",
+                              "string"
+                            ]
+                          },
+                          "match_value": {
+                            "type": [
+                              "null",
+                              "string"
+                            ]
+                          },
+                          "match_value_code": {
+                            "type": [
+                              "null",
+                              "string"
+                            ]
+                          },
+                          "filter_post_agg": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    },
+                    "periodic_prior_to_data_set_id": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "coa_id": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    }
+                  }
+                }
+              },
+              "columns": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "column_id": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "data_set_id": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "column_order": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "include_on_report": {
+                      "type": "boolean"
+                    },
+                    "is_visible": {
+                      "type": "boolean"
+                    },
+                    "column_type": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "schema_code": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "column_name": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "column_prompt_id": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "format_code": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "has_sub_total": {
+                      "type": "boolean"
+                    },
+                    "sub_total_type": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "wrap_text": {
+                      "type": "boolean"
+                    },
+                    "column_width": {
+                      "type": "number",
+                      "format": "double"
+                    },
+                    "suppress_repeating_values": {
+                      "type": "boolean"
+                    },
+                    "computed_column_type": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "computed_column_data_type": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "computed_column_formula": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "real_view_id": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "compute_post_agg": {
+                      "type": "boolean"
+                    },
+                    "computed_column_strats": {
+                      "type": [
+                        "array",
+                        "null"
+                      ],
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "strat_order": {
+                            "type": "integer",
+                            "format": "int32"
+                          },
+                          "low_value": {
+                            "type": "number",
+                            "format": "double"
+                          },
+                          "high_value": {
+                            "type": "number",
+                            "format": "double"
+                          },
+                          "is_min": {
+                            "type": "boolean"
+                          },
+                          "is_max": {
+                            "type": "boolean"
+                          },
+                          "strat_description": {
+                            "type": [
+                              "null",
+                              "string"
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "is_sticky_column": {
+                      "type": "boolean"
+                    },
+                    "output_unique_id": {
+                      "type": "boolean"
+                    },
+                    "aggregate_options": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "exclude": {
+                              "type": "boolean"
+                            },
+                            "unique": {
+                              "type": "boolean"
+                            },
+                            "order": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "delimiter": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "exclude_space": {
+                              "type": "boolean"
+                            },
+                            "numeric_method": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "date_method": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "boolean_method": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "use_currency_code": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              },
+              "sorts": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "column_id": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "sort_order": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "sort_direction": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "group_break": {
+                      "type": "boolean"
+                    },
+                    "outline_group": {
+                      "type": "boolean"
+                    },
+                    "sort_post_agg": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              },
+              "criteria": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "column_id": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "criteria_order": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "open_parenthesis": {
+                      "type": "boolean"
+                    },
+                    "close_parenthesis": {
+                      "type": "boolean"
+                    },
+                    "and_or": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "operator_code": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "match_value": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "match_value_code": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "filter_post_agg": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              },
+              "team_role_criteria": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "enable_team_criteria": {
+                        "type": "boolean"
+                      },
+                      "filter_any_user_team": {
+                        "type": "boolean"
+                      },
+                      "filter_any_user_team_targets": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "team_role_criteria": {
+                        "type": [
+                          "array",
+                          "null"
+                        ],
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "filter_targets": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "team_id": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "role_id": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              "is_aggregate_report": {
+                "type": "boolean"
+              },
+              "aggregate_group_by": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "column_id": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "order": {
+                      "type": "integer",
+                      "format": "int32"
+                    }
+                  }
+                }
               }
             }
           }

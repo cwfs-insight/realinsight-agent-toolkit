@@ -24,6 +24,10 @@ export const DEFAULT_SCOPE = [
   "ri:model_forms.read",
   "ri:model_forms.write",
   "ri:chart_of_accounts.write",
+  "ri:realviews.read",
+  "ri:realviews.write",
+  "ri:extended_data.read",
+  "ri:extended_data.write",
   "ri:reports.write",
 ].join(" ");
 export const REFRESH_SKEW_MS = 2 * 60 * 1000;
@@ -44,17 +48,26 @@ export const ANALYTICS_READ_SCOPE = "ri:analytics.read";
 export const MODEL_FORMS_READ_SCOPE = "ri:model_forms.read";
 export const MODEL_FORMS_WRITE_SCOPE = "ri:model_forms.write";
 export const CHART_OF_ACCOUNTS_WRITE_SCOPE = "ri:chart_of_accounts.write";
+export const REALVIEWS_READ_SCOPE = "ri:realviews.read";
+export const REALVIEWS_WRITE_SCOPE = "ri:realviews.write";
+export const EXTENDED_DATA_READ_SCOPE = "ri:extended_data.read";
+export const EXTENDED_DATA_WRITE_SCOPE = "ri:extended_data.write";
 export const REPORT_WRITE_SCOPE = "ri:reports.write";
 export const WRITE_TOOLS_ENABLED = parse_env_bool(process.env.RI_AGENT_ENABLE_WRITE_TOOLS, true);
 const WRITE_TOOL_NAMES = new Set([
   "set_record",
   "set_chart_of_accounts",
+  "set_realview",
+  "set_extended_data",
   "validate_create_report",
   "validate_update_report",
   "validate_delete_report",
   "create_report",
   "update_report",
   "delete_report",
+  "import_report_into_composite",
+  "stage_report_template_file",
+  "upload_report_template",
   "validate_create_model_form",
   "create_model_form",
   "validate_update_model_form",
@@ -79,7 +92,7 @@ export const MCP_SERVER_INFO = {
 export const MCP_INSTRUCTIONS = [
   "Realinsight is a commercial real estate asset management and servicing platform.",
   "All Realinsight tool calls run through Core API using the authenticated Realinsight user and customer context.",
-  "For harnesses that implement tool search, search by tool family first instead of loading every tool: schema features fields; entity search records structure children; analytics dashboard workbench CSV; report configuration folders; model form configuration folders template map; chart of accounts configuration COAData; tool reference schema. Common always-useful entry tools are get_tool_reference, search_features, search_fields, get_fields, search_entities, get_records, get_entity_structure, search_reports, search_report_folders, get_report, search_model_forms, search_model_form_folders, get_model_form, and get_chart_of_accounts.",
+  "For harnesses that implement tool search, search by tool family first instead of loading every tool: schema features fields; entity search records structure children; analytics dashboard workbench CSV; report configuration folders; model form configuration folders template map; chart of accounts configuration COAData; RealVIEW configuration execute; Extended Data custom field configuration; tool reference schema. Common always-useful entry tools are get_tool_reference, search_features, search_fields, get_fields, search_entities, get_records, get_entity_structure, search_reports, search_report_folders, get_report, search_model_forms, search_model_form_folders, get_model_form, get_chart_of_accounts, get_realviews, and get_extended_data.",
   "Each callable tool includes its complete input schema. If the Realinsight Agent Toolkit skill is unavailable, call get_tool_reference for compact workflow guidance and cross-tool sequencing.",
   "Choose the tool family from the shape of the user's question. For a named loan, deal, property, tenant, borrower, or other specific record, use schema/entity/record tools first. For broad portfolio, system, dashboard, saved-list, or operational-table questions, inspect curated dashboard/workbench/cache tools when they match the request.",
   "Do not default to dashboard/workbench tools only because a question is broad business data; use them when the user mentions an existing page/list/analytic/workbench, when tool evidence points to one, or when a curated cached table is the best source for a portfolio/system-wide population.",
@@ -94,13 +107,15 @@ export const MCP_INSTRUCTIONS = [
   "Use get_entity_structure for parent, master, child, reference, or periodic relationship traversal when the user asks how entities are connected.",
   "Use list_dashboard_pages/get_dashboard_page for dashboard pages, analytics, portfolio pages, curated visual/report tiles, or broad questions where an existing curated analytic is likely the best source.",
   "Use list_workbenches/get_workbench_data for existing workbench lists, saved lists, queues, cached operational tables, or broad questions where an operational list is likely the best source.",
-  "Use search_reports/get_report when the user asks to inspect, create, edit, copy, or delete report definitions. Reports are best for extracting/listing data: choose the report grain with master_feature_code first, then add related datasets and fields. Use search_report_folders when the user asks to place a report in a specific folder.",
+  "Use search_reports/get_report when the user asks to inspect, create, edit, copy, or delete LIST or COMPOSITE report definitions. A LIST report defines one table. A COMPOSITE report embeds independent LIST definitions, writes each to its target worksheet, and uses one custom Excel template for formulas, charts, and summary sheets. Use import_report_into_composite for existing reports so clone-owned ids are regenerated safely.",
   "Use search_model_forms/get_model_form when the user asks about model/form templates, Excel/PDF outputs, workbook maps, generated files, posting, or repeating template layout. Models are best for transforming or presenting data through a template and map. Use search_model_form_folders when the user asks to place a model form in a specific folder.",
   "Use get_chart_of_accounts for Chart of Accounts setup, account labels/computes, rollup mappings, external GL mappings, system-code mappings, and availability. Use get_coa_data when an accounts record field returns a COAData id and values are needed.",
+  "Use get_realviews only for RealVIEW configuration. Use normal entity tools to find ids for the definition's root_feature_code, then use execute_realview to calculate actual values for one to 100 entities. Configuration reads and value execution are intentionally separate.",
+  "Use get_extended_data only when the user explicitly asks about custom-field or system-field-overlay configuration. search_fields/get_fields returns the merged effective runtime catalog; get_extended_data returns the persisted customer configuration object and conflict token. Never use set_record to change an Extended Data definition.",
   "Model form maps are nested in storage but returned as flat node ids through get_model_form sections; inspect only the needed map nodes/items. Prefer map_patch for small add/update/remove node/item edits, and reserve full map replacement for bulk import/revert. Markers are repeating-block/layout anchors, not entity fields. Read the model-form skill reference for map usage and embedded relationship semantics before writing.",
   "For model form writes, read the latest model form first, preserve unchanged metadata/map values, validate create/update requests when changing metadata or map structure, then write only after explicit approval. Use source_model_form_id to create a derivative copy from an existing model form. If parent_folder_id is omitted on create, Core saves under agent/{current user name}; pass WORKBOOKPROCESS or ROOT only when the user explicitly asks for root.",
   "Use download_model_form_template with output_path when working locally so workbook bytes stay out of chat. In hosted flows, use the returned signed download_url outside model context. Modify the Excel file, call stage_model_form_template_file to get a signed multipart upload_url and staged_file_id, upload the file outside the tool call, then use upload_model_form_template with staged_file_id, expected_conflict_token, and approved=true.",
-  "Before building reports, use search_features/get_entity_structure/get_fields to choose one top-level master_feature_code, related datasets under that same top-level feature family, and exact field names. For report column order or computed formulas, use get_tool_reference topic=report_computed_fields or the report computed-fields skill reference before writing. If parent_folder_id is omitted on create, Core saves under agent/{current user name}; pass REPORT or ROOT only when the user explicitly asks for root.",
+  "Before building LIST reports, use search_features/get_entity_structure/get_fields to choose one top-level master_feature_code, related datasets under that same top-level feature family, and exact field names. For COMPOSITE reports, create the shell, import or add embedded reports, upload a workbook whose sheet names match each component report_sheet, then validate the latest definition.",
   "Use extract_analytic_entities or extract_workbench_entities to turn cached table rows into compact entity refs for later get_records/get_children calls.",
   "Cached analytic and workbench rows can be large; for multi-page analysis, use CSV tools or paged data tools, write pages to a temporary CSV/JSONL/SQLite table in your environment, then query that local copy.",
   "Server caps are reported in tool result limits. Default cached data pages are small; max page size is 1000 rows, and all=true is capped server-side.",
@@ -108,7 +123,7 @@ export const MCP_INSTRUCTIONS = [
   "Read-only tools have no side effects; agent harnesses may auto-approve read calls when local policy allows, but keep reads bounded and report truncation, cache, and access warnings.",
   "Local auth tools can list and switch only saved local ri-agent profiles. They must not imply that Realinsight exposes a directory of all customers. To switch to a different customer, start a fresh browser login with switch_profile, passing customer_code only when it is the user's Realinsight login/company code. If only a customer number or uncertain identifier is known, omit customer_code so the user can type it on the login screen.",
   ...(WRITE_TOOLS_ENABLED
-    ? ["set_record, set_chart_of_accounts, report create/update/delete, and model form create/update/template upload are write operations: call them only after the user approves the exact side effect, with approved=true. Config writes default to audit_detail=summary; request audit_detail=changes for changed paths/types or audit_detail=full only when audit/reversal work needs before/after values. After a successful write, summarize what changed using friendly names/context, avoid raw ids in the user-facing answer except report/model/COA ids or open links when useful, and include warnings."]
+    ? ["set_record, set_chart_of_accounts, set_realview, set_extended_data, report create/update/delete, and model form create/update/template upload are write operations: call them only after the user approves the exact side effect, with approved=true. Configuration writes should first use dry_run where available and must use the latest conflict token for an existing object. Config writes default to audit_detail=summary; request audit_detail=changes for changed paths/types or audit_detail=full only when audit/reversal work needs before/after values. After a successful write, summarize what changed using friendly names/context, avoid raw ids in the user-facing answer except configuration ids or open links when useful, and include warnings."]
     : []),
   "Every tool call can include a profile name; otherwise the active local ri-agent auth profile is used.",
 ].join("\n");
@@ -135,6 +150,8 @@ const ALL_AGENT_TOOLS = [
             "reports",
             "report_computed_fields",
             "chart_of_accounts",
+            "realviews",
+            "extended_data",
             "entities_records",
             "analytics_workbenches",
           ],
@@ -1362,7 +1379,7 @@ const ALL_AGENT_TOOLS = [
         },
         report_type: {
           type: "string",
-          description: "Optional report type filter such as LIST, ANALYTIC, or COMPOSITE. The first write pass supports LIST only.",
+          description: "Optional report type filter such as LIST, ANALYTIC, or COMPOSITE. LIST and COMPOSITE are writable through the configuration tools.",
         },
         parent_folder_id: {
           type: "string",
@@ -1431,7 +1448,7 @@ const ALL_AGENT_TOOLS = [
     cli: "ri-agent get-report REPORT_ID",
     route: "GET /agent/reports/configurations/{report_id}",
     scope: ANALYTICS_READ_SCOPE,
-    description: "Read one compact report definition, including editable LIST setup and the latest conflict_token. This inspects configuration, not report execution output. Always call it immediately before validate_update_report, update_report, validate_delete_report, or delete_report.",
+    description: "Read one compact report definition, including editable LIST or COMPOSITE setup and the latest conflict_token. This inspects configuration, not report execution output. Always call it immediately before validate_update_report, update_report, validate_delete_report, or delete_report.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
@@ -1635,6 +1652,127 @@ const ALL_AGENT_TOOLS = [
           type: "boolean",
           description: "Alias for approved=true after explicit user approval.",
         },
+      },
+    },
+  },
+  {
+    name: "get_realviews",
+    title: "Get Realinsight RealVIEWS",
+    cli: "ri-agent get-realviews [REALVIEW_ID]",
+    route: "POST /agent/realviews/get",
+    scope: REALVIEWS_READ_SCOPE,
+    description: "Read customer RealVIEW definitions and ordered maps with conflict tokens. This reads system configuration, not computed values.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        profile: { type: "string", description: "Optional local ri-agent auth profile name." },
+        realview_id: { type: "string", description: "Optional RealVIEW ObjectId for one full definition." },
+        root_feature_code: { type: "string", description: "Optional root entity feature filter." },
+        search_text: { type: "string", description: "Optional name, description, or schema-code search." },
+        include_inactive: { type: "boolean", description: "Include inactive definitions." },
+      },
+    },
+  },
+  {
+    name: "execute_realview",
+    title: "Execute Realinsight RealVIEW",
+    cli: "ri-agent execute-realview REALVIEW_ID ENTITY_ID [ENTITY_ID ...]",
+    route: "POST /agent/realviews/execute",
+    scope: REALVIEWS_READ_SCOPE,
+    description: "Calculate one saved RealVIEW for one to 100 entity ids matching its root feature. Use entity tools to find ids first.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        profile: { type: "string", description: "Optional local ri-agent auth profile name." },
+        realview_id: { type: "string", description: "RealVIEW ObjectId." },
+        entity_ids: { type: "array", minItems: 1, maxItems: 100, items: { type: "string" }, description: "Entity ids matching the RealVIEW root_feature_code." },
+      },
+      required: ["realview_id", "entity_ids"],
+    },
+  },
+  {
+    name: "set_realview",
+    title: "Set Realinsight RealVIEW",
+    cli: "ri-agent set-realview [REALVIEW_ID] --request-json JSON --approved",
+    route: "POST /agent/realviews/set",
+    scope: REALVIEWS_WRITE_SCOPE,
+    readOnlyHint: false,
+    destructiveHint: true,
+    idempotentHint: false,
+    description: "Create or replace a customer RealVIEW definition and ordered maps after dry-run validation, explicit approval, and conflict-token checks. Execute the saved definition for representative entities.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        profile: { type: "string", description: "Optional local ri-agent auth profile name." },
+        realview_id: { type: "string", description: "Existing RealVIEW ObjectId. Omit to create." },
+        realview: { ...generated_payload_schema("realview_definition", "Complete RealVIEW definition and ordered maps. Preserve unchanged values when replacing.") },
+        expected_conflict_token: { type: "string", description: "Latest conflict_token from get_realviews. Required for replacement." },
+        dry_run: { type: "boolean", description: "Validate and return a normalized preview without saving." },
+        change_reason: { type: "string", description: "Reason stored with ConfigAuditLog." },
+        reverses_operation_id: { type: "string", description: "Optional ConfigAuditLog operation being reversed." },
+        correlation_id: { type: "string" },
+        source_reference: { type: "string" },
+        audit_detail: audit_detail_property(),
+        approved: { type: "boolean", description: "Must be true only after explicit user approval." },
+        confirm_update: { type: "boolean", description: "Alias for approved=true." },
+        confirm_save: { type: "boolean", description: "Alias for approved=true." },
+      },
+      required: ["realview"],
+    },
+  },
+  {
+    name: "get_extended_data",
+    title: "Get Realinsight Extended Data",
+    cli: "ri-agent get-extended-data [CONFIGURATION_ID]",
+    route: "POST /agent/extended-data/get",
+    scope: EXTENDED_DATA_READ_SCOPE,
+    description: "Read persisted customer custom-field and system-field-overlay configuration, separately from the merged runtime field catalog returned by search_fields/get_fields.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        profile: { type: "string", description: "Optional local ri-agent auth profile name." },
+        configuration_id: { type: "string", description: "Optional Extended Data configuration ObjectId." },
+        feature_code: { type: "string", description: "Optional owning entity feature." },
+        schema_code: { type: "string", description: "Optional effective field schema code." },
+        search_text: { type: "string", description: "Optional display, description, or schema search." },
+        kind: { type: "string", enum: ["custom", "overlay"], description: "Restrict to customer custom fields or system-field overlays." },
+        include_inactive: { type: "boolean" },
+      },
+    },
+  },
+  {
+    name: "set_extended_data",
+    title: "Set Realinsight Extended Data",
+    cli: "ri-agent set-extended-data [CONFIGURATION_ID] --request-json JSON --approved",
+    route: "POST /agent/extended-data/set",
+    scope: EXTENDED_DATA_WRITE_SCOPE,
+    readOnlyHint: false,
+    destructiveHint: true,
+    idempotentHint: false,
+    description: "Create, update, or safely deactivate a custom-field or system-field-overlay configuration after dry-run validation, explicit approval, and conflict-token checks.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        profile: { type: "string", description: "Optional local ri-agent auth profile name." },
+        configuration_id: { type: "string", description: "Existing configuration ObjectId for update/deactivate." },
+        operation: { type: "string", enum: ["upsert", "deactivate"], description: "Defaults to upsert. Upsert creates when configuration_id is omitted and updates when it is supplied." },
+        field: { ...generated_payload_schema("extended_data_field", "Typed custom field or system-field overlay settings. For an upsert create, system_schema_code selects overlay behavior; omit it for a custom field with generated id-based schema code.") },
+        expected_conflict_token: { type: "string", description: "Latest conflict_token from get_extended_data. Required for update/deactivate." },
+        dry_run: { type: "boolean", description: "Validate and return a normalized preview without saving." },
+        change_reason: { type: "string", description: "Reason stored with ConfigAuditLog." },
+        reverses_operation_id: { type: "string", description: "Optional ConfigAuditLog operation being reversed." },
+        correlation_id: { type: "string" },
+        source_reference: { type: "string" },
+        audit_detail: audit_detail_property(),
+        approved: { type: "boolean", description: "Must be true only after explicit user approval." },
+        confirm_update: { type: "boolean", description: "Alias for approved=true." },
+        confirm_save: { type: "boolean", description: "Alias for approved=true." },
+        confirm_delete: { type: "boolean", description: "Alias for approved=true when deactivating." },
       },
     },
   },
@@ -2078,7 +2216,7 @@ const ALL_AGENT_TOOLS = [
     cli: "ri-agent validate-create-report --request-json JSON",
     route: "POST /agent/reports/configurations/validate-create",
     scope: REPORT_WRITE_SCOPE,
-    description: "Validate and normalize a LIST report create request without writing. Choose the report grain first; use get_tool_reference topic=reports for payload shape and topic=report_computed_fields for column order, computed formulas, or aggregate behavior. If parent_folder_id is omitted, create_report will save under agent/{current user name}.",
+    description: "Validate and normalize a LIST or COMPOSITE report create request without writing. A composite embeds independent LIST definitions and uses one custom Excel template.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
@@ -2089,7 +2227,8 @@ const ALL_AGENT_TOOLS = [
         },
         report_type: {
           type: "string",
-          description: "Report type. Use LIST; analytic/composite writes are deferred.",
+          enum: ["LIST", "COMPOSITE"],
+          description: "Report type. Defaults to LIST.",
         },
         parent_folder_id: {
           type: "string",
@@ -2105,13 +2244,16 @@ const ALL_AGENT_TOOLS = [
         },
         publish_to_users: {
           type: "boolean",
-          description: "Whether other users can see the report.",
+          description: "Whether other users can see the report. Defaults to false.",
         },
         list: {
           ...generated_payload_schema(
             "report_list",
             "Typed LIST report configuration. Every data_set.feature_code must belong to the same top-level feature family as master_feature_code.",
           ),
+        },
+        composite: {
+          ...generated_payload_schema("report_composite", "Typed COMPOSITE configuration. Use import_report_into_composite when adding an existing LIST report."),
         },
         change_reason: {
           type: "string",
@@ -2126,7 +2268,7 @@ const ALL_AGENT_TOOLS = [
           description: "Optional caller source reference.",
         },
       },
-      required: ["report_name", "list"],
+      required: ["report_name"],
     },
   },
   {
@@ -2135,7 +2277,7 @@ const ALL_AGENT_TOOLS = [
     cli: "ri-agent validate-update-report REPORT_ID --request-json JSON",
     route: "POST /agent/reports/configurations/{report_id}/validate-update",
     scope: REPORT_WRITE_SCOPE,
-    description: "Validate and normalize a LIST report update request without writing. Call get_report first and pass its latest conflict_token as expected_conflict_token. Use get_fields for dataset feature codes before adding or changing columns, filters, sorts, prompts, column order, or computed formulas.",
+    description: "Validate and normalize a LIST or COMPOSITE report update request without writing. Call get_report first and pass its latest conflict_token.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
@@ -2150,11 +2292,12 @@ const ALL_AGENT_TOOLS = [
         },
         report_type: {
           type: "string",
-          description: "Report type. Use LIST; analytic/composite writes are deferred.",
+          enum: ["LIST", "COMPOSITE"],
+          description: "Report type. Omit to preserve the existing value; it cannot change.",
         },
         parent_folder_id: {
           type: "string",
-          description: "Target report folder id. Use REPORT or ROOT for the root folder and preserve the current value when unchanged.",
+          description: "Target report folder id. Omit to preserve the current folder; use REPORT or ROOT to move to root.",
         },
         report_name: {
           type: "string",
@@ -2166,13 +2309,16 @@ const ALL_AGENT_TOOLS = [
         },
         publish_to_users: {
           type: "boolean",
-          description: "Whether other users can see the report.",
+          description: "Whether other users can see the report. Omit to preserve the current value.",
         },
         list: {
           ...generated_payload_schema(
             "report_list",
             "Typed normalized LIST report configuration.",
           ),
+        },
+        composite: {
+          ...generated_payload_schema("report_composite", "Typed normalized COMPOSITE configuration."),
         },
         expected_conflict_token: {
           type: "string",
@@ -2191,7 +2337,7 @@ const ALL_AGENT_TOOLS = [
           description: "Optional caller source reference.",
         },
       },
-      required: ["report_id", "report_name", "list", "expected_conflict_token"],
+      required: ["report_id", "report_name", "expected_conflict_token"],
     },
   },
   {
@@ -2200,7 +2346,7 @@ const ALL_AGENT_TOOLS = [
     cli: "ri-agent validate-delete-report REPORT_ID --expected-conflict-token TOKEN",
     route: "POST /agent/reports/configurations/{report_id}/validate-delete",
     scope: REPORT_WRITE_SCOPE,
-    description: "Validate LIST report delete prerequisites without writing. Call get_report first and pass its latest conflict_token. If active schedules, related analytics, dashboard references, or workbench lists would be changed, validation blocks the delete and the user must use the Realinsight app for the cascading cleanup.",
+    description: "Validate LIST or COMPOSITE report delete prerequisites without writing. Call get_report first and pass its latest conflict_token.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
@@ -2229,7 +2375,7 @@ const ALL_AGENT_TOOLS = [
     scope: REPORT_WRITE_SCOPE,
     readOnlyHint: false,
     idempotentHint: false,
-    description: "Create a LIST report definition after explicit user approval. If parent_folder_id is omitted, Core creates/uses agent/{current user name}; pass REPORT or ROOT only when the user explicitly asks for root, or use search_report_folders for a specific folder. Run validate_create_report first, review normalized_preview/errors with the user, then call this with approved=true. Core validates again, persists the definition, and derives ConfigAuditLog changes server-side. Default audit_detail is summary; request changes or full only when audit/reversal work needs it. After success, summarize the report name, master feature, meaningful saved sections, warnings, and an open link or report_id only when useful for the user to jump back to it.",
+    description: "Create a LIST or COMPOSITE report definition after explicit user approval. If parent_folder_id is omitted, Core creates/uses agent/{current user name}. Validate first.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
@@ -2240,7 +2386,8 @@ const ALL_AGENT_TOOLS = [
         },
         report_type: {
           type: "string",
-          description: "Report type. Use LIST; analytic/composite writes are deferred.",
+          enum: ["LIST", "COMPOSITE"],
+          description: "Report type. Defaults to LIST.",
         },
         parent_folder_id: {
           type: "string",
@@ -2256,13 +2403,16 @@ const ALL_AGENT_TOOLS = [
         },
         publish_to_users: {
           type: "boolean",
-          description: "Whether other users can see the report.",
+          description: "Whether other users can see the report. Defaults to false.",
         },
         list: {
           ...generated_payload_schema(
             "report_list",
             "Typed LIST report configuration.",
           ),
+        },
+        composite: {
+          ...generated_payload_schema("report_composite", "Typed COMPOSITE configuration. Use import_report_into_composite to add an existing LIST report safely."),
         },
         change_reason: {
           type: "string",
@@ -2290,7 +2440,7 @@ const ALL_AGENT_TOOLS = [
           description: "Alias for approved=true after explicit user approval.",
         },
       },
-      required: ["report_name", "list", "approved"],
+      required: ["report_name", "approved"],
     },
   },
   {
@@ -2302,7 +2452,7 @@ const ALL_AGENT_TOOLS = [
     readOnlyHint: false,
     destructiveHint: true,
     idempotentHint: false,
-    description: "Update a LIST report definition after explicit user approval. Call get_report first, pass the latest expected_conflict_token, run validate_update_report, then call this with approved=true. Core derives ConfigAuditLog changes server-side. Default audit_detail is summary; request changes or full only when audit/reversal work needs it. After success, summarize the report name, meaningful changed sections, warnings, and an open link or report_id only when useful for the user to jump back to it.",
+    description: "Update a LIST or COMPOSITE report after explicit user approval. Use import_report_into_composite to add an existing LIST report without sharing nested ids.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
@@ -2317,11 +2467,12 @@ const ALL_AGENT_TOOLS = [
         },
         report_type: {
           type: "string",
-          description: "Report type. Use LIST; analytic/composite writes are deferred.",
+          enum: ["LIST", "COMPOSITE"],
+          description: "Report type. Omit to preserve the existing value; it cannot change.",
         },
         parent_folder_id: {
           type: "string",
-          description: "Target report folder id. Use REPORT or ROOT for the root folder and preserve the current value when unchanged.",
+          description: "Target report folder id. Omit to preserve the current folder; use REPORT or ROOT to move to root.",
         },
         report_name: {
           type: "string",
@@ -2333,13 +2484,16 @@ const ALL_AGENT_TOOLS = [
         },
         publish_to_users: {
           type: "boolean",
-          description: "Whether other users can see the report.",
+          description: "Whether other users can see the report. Omit to preserve the current value.",
         },
         list: {
           ...generated_payload_schema(
             "report_list",
             "Typed normalized LIST report configuration.",
           ),
+        },
+        composite: {
+          ...generated_payload_schema("report_composite", "Typed normalized COMPOSITE configuration."),
         },
         expected_conflict_token: {
           type: "string",
@@ -2375,7 +2529,7 @@ const ALL_AGENT_TOOLS = [
           description: "Alias for approved=true after explicit user approval.",
         },
       },
-      required: ["report_id", "report_name", "list", "expected_conflict_token", "approved"],
+      required: ["report_id", "report_name", "expected_conflict_token", "approved"],
     },
   },
   {
@@ -2387,7 +2541,7 @@ const ALL_AGENT_TOOLS = [
     readOnlyHint: false,
     destructiveHint: true,
     idempotentHint: false,
-    description: "Soft-delete a LIST report definition after explicit user approval only when validate_delete_report reports no active downstream resources. Core validates the latest conflict token and derives ConfigAuditLog changes server-side. Default audit_detail is summary; request changes or full only when audit/reversal work needs it. After success, summarize the deleted report name and warnings without raw ids unless needed for follow-up.",
+    description: "Soft-delete a LIST or COMPOSITE report after explicit user approval only when validate_delete_report reports no active downstream resources.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
@@ -2429,6 +2583,112 @@ const ALL_AGENT_TOOLS = [
           type: "boolean",
           description: "Alias for approved=true after explicit user approval.",
         },
+      },
+      required: ["report_id", "expected_conflict_token", "approved"],
+    },
+  },
+  {
+    name: "import_report_into_composite",
+    title: "Import Report Into Composite",
+    cli: "ri-agent import-report-into-composite COMPOSITE_REPORT_ID SOURCE_REPORT_ID --expected-conflict-token TOKEN --approved",
+    route: "POST /agent/reports/configurations/{report_id}/composite/import-list-report",
+    scope: REPORT_WRITE_SCOPE,
+    readOnlyHint: false,
+    destructiveHint: true,
+    idempotentHint: false,
+    description: "Import an independent copy of an existing LIST report into a COMPOSITE report. Core always regenerates report_list_id plus dataset, column, and prompt ids and rewrites every internal reference. The same source can be imported repeatedly and edited independently. Omit insert_at to append and report_sheet to derive a unique sheet name.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        profile: { type: "string", description: "Optional local auth profile." },
+        report_id: { type: "string", description: "Target COMPOSITE report id." },
+        source_report_id: { type: "string", description: "Active LIST report id to clone." },
+        insert_at: { type: "integer", minimum: 0, description: "Optional zero-based insertion index. Omit to append." },
+        report_header: { type: "string", description: "Optional embedded report header override. Defaults to source report name." },
+        report_sheet: { type: "string", description: "Optional target worksheet override. The default is made unique within the composite." },
+        expected_conflict_token: { type: "string", description: "Latest target composite conflict_token from get_report." },
+        change_reason: { type: "string", description: "Reason to store with ConfigAuditLog." },
+        reverses_operation_id: { type: "string", description: "Optional operation id intentionally reversed." },
+        correlation_id: { type: "string", description: "Optional caller correlation id." },
+        source_reference: { type: "string", description: "Optional caller source reference." },
+        audit_detail: audit_detail_property(),
+        approved: { type: "boolean", description: "Must be true after explicit user approval." },
+        confirm_update: { type: "boolean", description: "Alias approval flag." },
+        confirm_import: { type: "boolean", description: "Alias approval flag." },
+      },
+      required: ["report_id", "source_report_id", "expected_conflict_token", "approved"],
+    },
+  },
+  {
+    name: "download_report_template",
+    title: "Download Report Template",
+    cli: "ri-agent download-report-template REPORT_ID --output-path ./template.xlsx",
+    route: "GET /agent/reports/configurations/{report_id}/template-file",
+    scope: ANALYTICS_READ_SCOPE,
+    description: "Read the current custom Excel template metadata for a LIST or COMPOSITE report. Pass output_path locally so workbook bytes stay outside model context.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        profile: { type: "string", description: "Optional local auth profile." },
+        report_id: { type: "string", description: "LIST or COMPOSITE report id." },
+        output_path: { type: "string", description: "Preferred local output path for the downloaded workbook." },
+      },
+      required: ["report_id"],
+    },
+  },
+  {
+    name: "stage_report_template_file",
+    title: "Stage Report Template File",
+    cli: "ri-agent stage-report-template REPORT_ID --file-path ./template.xlsx --approved",
+    route: "POST /agent/reports/configurations/{report_id}/template-file/stage",
+    scope: REPORT_WRITE_SCOPE,
+    readOnlyHint: false,
+    idempotentHint: false,
+    description: "Create a report-bound staged upload session for an Excel template. Local callers may pass file_path; hosted callers upload multipart field file to upload_url, then finalize with upload_report_template.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        profile: { type: "string", description: "Optional local auth profile." },
+        report_id: { type: "string", description: "LIST or COMPOSITE report id." },
+        file_path: { type: "string", description: "Preferred local Excel file path." },
+        file_name: { type: "string", description: "Excel file name, required when file_path is omitted." },
+        content_type: { type: "string", description: "Optional Excel content type; defaults from file name." },
+        approved: { type: "boolean", description: "Must be true after explicit approval to stage this file." },
+        confirm_upload: { type: "boolean", description: "Alias approval flag." },
+      },
+      required: ["report_id", "approved"],
+    },
+  },
+  {
+    name: "upload_report_template",
+    title: "Upload Report Template",
+    cli: "ri-agent upload-report-template REPORT_ID --file-path ./template.xlsx --expected-conflict-token TOKEN --approved",
+    route: "POST /agent/reports/configurations/{report_id}/template-file",
+    scope: REPORT_WRITE_SCOPE,
+    readOnlyHint: false,
+    destructiveHint: true,
+    idempotentHint: false,
+    description: "Finalize an Excel template for a LIST or COMPOSITE report. Core creates a fresh template id and switches only this report to it, preventing accidental changes to other reports that shared a legacy template.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        profile: { type: "string", description: "Optional local auth profile." },
+        report_id: { type: "string", description: "LIST or COMPOSITE report id." },
+        file_path: { type: "string", description: "Preferred local Excel file path; stages automatically." },
+        staged_file_id: { type: "string", description: "Staged id after upload to stage_report_template_file upload_url." },
+        expected_conflict_token: { type: "string", description: "Latest conflict_token from get_report." },
+        change_reason: { type: "string", description: "Reason to store with ConfigAuditLog." },
+        reverses_operation_id: { type: "string", description: "Optional operation id intentionally reversed." },
+        correlation_id: { type: "string", description: "Optional caller correlation id." },
+        source_reference: { type: "string", description: "Optional caller source reference." },
+        audit_detail: audit_detail_property(),
+        approved: { type: "boolean", description: "Must be true after explicit user approval." },
+        confirm_update: { type: "boolean", description: "Alias approval flag." },
+        confirm_save: { type: "boolean", description: "Alias approval flag." },
       },
       required: ["report_id", "expected_conflict_token", "approved"],
     },

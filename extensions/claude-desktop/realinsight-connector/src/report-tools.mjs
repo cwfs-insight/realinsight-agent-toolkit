@@ -1,4 +1,5 @@
 import { promises as fs } from "node:fs";
+import path from "node:path";
 
 import { option_bool, option_bool_if_present, option_value } from "./args.mjs";
 import { load_fresh_profile_by_name } from "./auth.mjs";
@@ -19,6 +20,7 @@ const REPORT_SAVE_FIELDS = [
   "report_description",
   "publish_to_users",
   "list",
+  "composite",
   "expected_conflict_token",
   "change_reason",
   "reverses_operation_id",
@@ -249,6 +251,66 @@ export async function delete_report(positionals, options) {
   print_report_configuration_payload(payload, options);
 }
 
+export async function import_report_into_composite(positionals, options) {
+  const payload = await agent_import_report_into_composite({
+    profile: option_value(options, "profile", undefined),
+    report_id: option_value(options, "report-id", option_value(options, "report_id", positionals[0])),
+    source_report_id: option_value(options, "source-report-id", option_value(options, "source_report_id", positionals[1])),
+    insert_at: option_value(options, "insert-at", option_value(options, "insert_at", undefined)),
+    report_header: option_value(options, "report-header", option_value(options, "report_header", undefined)),
+    report_sheet: option_value(options, "report-sheet", option_value(options, "report_sheet", undefined)),
+    expected_conflict_token: option_value(options, "expected-conflict-token", option_value(options, "expected_conflict_token", undefined)),
+    change_reason: option_value(options, "change-reason", option_value(options, "change_reason", undefined)),
+    reverses_operation_id: option_value(options, "reverses-operation-id", option_value(options, "reverses_operation_id", undefined)),
+    correlation_id: option_value(options, "correlation-id", option_value(options, "correlation_id", undefined)),
+    source_reference: option_value(options, "source-reference", option_value(options, "source_reference", undefined)),
+    audit_detail: option_value(options, "audit-detail", option_value(options, "audit_detail", undefined)),
+    approved: option_bool(options, "approved", false),
+    confirm_import: option_bool(options, "confirm-import", option_bool(options, "confirm_import", false)),
+  });
+  print_report_configuration_payload(payload, options);
+}
+
+export async function download_report_template(positionals, options) {
+  const payload = await agent_download_report_template({
+    profile: option_value(options, "profile", undefined),
+    report_id: option_value(options, "report-id", option_value(options, "report_id", positionals[0])),
+    output_path: option_value(options, "output-path", option_value(options, "output_path", undefined)),
+  });
+  print_report_configuration_payload(payload, options);
+}
+
+export async function stage_report_template_file(positionals, options) {
+  const payload = await agent_stage_report_template_file({
+    profile: option_value(options, "profile", undefined),
+    report_id: option_value(options, "report-id", option_value(options, "report_id", positionals[0])),
+    file_path: option_value(options, "file-path", option_value(options, "file_path", positionals[1])),
+    file_name: option_value(options, "file-name", option_value(options, "file_name", undefined)),
+    content_type: option_value(options, "content-type", option_value(options, "content_type", undefined)),
+    approved: option_bool(options, "approved", false),
+    confirm_upload: option_bool(options, "confirm-upload", option_bool(options, "confirm_upload", false)),
+  });
+  print_report_configuration_payload(payload, options);
+}
+
+export async function upload_report_template(positionals, options) {
+  const payload = await agent_upload_report_template({
+    profile: option_value(options, "profile", undefined),
+    report_id: option_value(options, "report-id", option_value(options, "report_id", positionals[0])),
+    file_path: option_value(options, "file-path", option_value(options, "file_path", positionals[1])),
+    staged_file_id: option_value(options, "staged-file-id", option_value(options, "staged_file_id", undefined)),
+    expected_conflict_token: option_value(options, "expected-conflict-token", option_value(options, "expected_conflict_token", undefined)),
+    change_reason: option_value(options, "change-reason", option_value(options, "change_reason", undefined)),
+    reverses_operation_id: option_value(options, "reverses-operation-id", option_value(options, "reverses_operation_id", undefined)),
+    correlation_id: option_value(options, "correlation-id", option_value(options, "correlation_id", undefined)),
+    source_reference: option_value(options, "source-reference", option_value(options, "source_reference", undefined)),
+    audit_detail: option_value(options, "audit-detail", option_value(options, "audit_detail", undefined)),
+    approved: option_bool(options, "approved", false),
+    confirm_update: option_bool(options, "confirm-update", option_bool(options, "confirm_update", false)),
+  });
+  print_report_configuration_payload(payload, options);
+}
+
 export async function agent_list_dashboard_pages(input) {
   const { profile } = await load_fresh_profile_by_name(optional_string(input, "profile"));
 
@@ -468,6 +530,157 @@ export async function agent_delete_report(input) {
     approved: true,
     confirm_delete: optional_boolean(input, "confirm_delete") === true,
   });
+}
+
+export async function agent_import_report_into_composite(input) {
+  const report_id = required_string(input, "report_id", "import_report_into_composite requires the target composite report_id.");
+  const source_report_id = required_string(input, "source_report_id", "import_report_into_composite requires source_report_id for an active LIST report.");
+  const expected_conflict_token = required_string(input, "expected_conflict_token", "import_report_into_composite requires the target composite conflict_token from get_report.");
+  const approved = optional_boolean(input, "approved") || optional_boolean(input, "confirm_update") || optional_boolean(input, "confirm_import") || false;
+  if (!approved) throw new JsonRpcError(-32602, "import_report_into_composite requires approved=true after explicit user approval.");
+
+  const { profile } = await load_fresh_profile_by_name(optional_string(input, "profile"));
+  return await post_agent_json(profile, `/agent/reports/configurations/${encodeURIComponent(report_id)}/composite/import-list-report`, {
+    source_report_id,
+    insert_at: optional_integer(input, "insert_at"),
+    report_header: optional_string(input, "report_header"),
+    report_sheet: optional_string(input, "report_sheet"),
+    expected_conflict_token,
+    change_reason: optional_string(input, "change_reason"),
+    reverses_operation_id: optional_string(input, "reverses_operation_id"),
+    correlation_id: optional_string(input, "correlation_id"),
+    source_reference: optional_string(input, "source_reference"),
+    audit_detail: optional_string(input, "audit_detail"),
+    approved: true,
+  });
+}
+
+export async function agent_download_report_template(input) {
+  const report_id = required_string(input, "report_id", "download_report_template requires report_id.");
+  const output_path = optional_string(input, "output_path");
+  const { profile } = await load_fresh_profile_by_name(optional_string(input, "profile"));
+  const payload = await request_agent_json(profile, `/agent/reports/configurations/${encodeURIComponent(report_id)}/template-file`, {});
+
+  if (output_path) {
+    const item = first_payload_item(payload);
+    if (!item?.download_url) throw new JsonRpcError(-32603, "Report template download did not return download_url.");
+    const resolved_path = path.resolve(output_path);
+    await fs.mkdir(path.dirname(resolved_path), { recursive: true });
+    await download_signed_file(profile, item.download_url, resolved_path);
+    item.local_file_path = resolved_path;
+  }
+
+  return payload;
+}
+
+export async function agent_stage_report_template_file(input) {
+  const report_id = required_string(input, "report_id", "stage_report_template_file requires report_id.");
+  const approved = optional_boolean(input, "approved") || optional_boolean(input, "confirm_upload") || false;
+  if (!approved) throw new JsonRpcError(-32602, "stage_report_template_file requires approved=true after explicit user approval.");
+
+  const request = resolve_report_template_stage_request(input);
+  const { profile } = await load_fresh_profile_by_name(optional_string(input, "profile"));
+  const payload = await post_agent_json(profile, `/agent/reports/configurations/${encodeURIComponent(report_id)}/template-file/stage`, {
+    file_name: request.file_name,
+    content_type: request.content_type,
+    approved: true,
+  }, { timeout_ms: 120000 });
+
+  const file_path = optional_string(input, "file_path");
+  if (!file_path) return payload;
+  const item = first_payload_item(payload);
+  if (!item?.upload_url || !item?.staged_file_id) throw new JsonRpcError(-32603, "stage_report_template_file did not return upload_url and staged_file_id.");
+  await upload_file_to_signed_url(profile, item.upload_url, file_path, request.content_type);
+  delete item.upload_url;
+  return payload;
+}
+
+export async function agent_upload_report_template(input) {
+  const report_id = required_string(input, "report_id", "upload_report_template requires report_id.");
+  const expected_conflict_token = required_string(input, "expected_conflict_token", "upload_report_template requires expected_conflict_token from get_report.");
+  const approved = optional_boolean(input, "approved") || optional_boolean(input, "confirm_update") || optional_boolean(input, "confirm_save") || false;
+  if (!approved) throw new JsonRpcError(-32602, "upload_report_template requires approved=true after explicit user approval.");
+
+  let staged_file_id = optional_string(input, "staged_file_id");
+  const file_path = optional_string(input, "file_path");
+  if (file_path) {
+    const stage_payload = await agent_stage_report_template_file({
+      profile: optional_string(input, "profile"),
+      report_id,
+      file_path,
+      file_name: optional_string(input, "file_name"),
+      content_type: optional_string(input, "content_type"),
+      approved: true,
+    });
+    staged_file_id = first_payload_item(stage_payload)?.staged_file_id;
+  }
+  if (!staged_file_id) throw new JsonRpcError(-32602, "upload_report_template requires staged_file_id or file_path.");
+
+  const { profile } = await load_fresh_profile_by_name(optional_string(input, "profile"));
+  return await post_agent_json(profile, `/agent/reports/configurations/${encodeURIComponent(report_id)}/template-file`, {
+    staged_file_id,
+    expected_conflict_token,
+    change_reason: optional_string(input, "change_reason"),
+    reverses_operation_id: optional_string(input, "reverses_operation_id"),
+    correlation_id: optional_string(input, "correlation_id"),
+    source_reference: optional_string(input, "source_reference"),
+    audit_detail: optional_string(input, "audit_detail"),
+    approved: true,
+  }, { timeout_ms: 120000 });
+}
+
+function resolve_report_template_stage_request(input) {
+  const file_path = optional_string(input, "file_path");
+  let file_name = optional_string(input, "file_name");
+  let content_type = optional_string(input, "content_type");
+  if (file_path) {
+    const resolved_path = path.resolve(file_path);
+    file_name ||= path.basename(resolved_path);
+    content_type ||= content_type_for_file_name(file_name);
+  }
+  if (!file_name) throw new JsonRpcError(-32602, "stage_report_template_file requires file_name or file_path.");
+  return { file_name, content_type: content_type || content_type_for_file_name(file_name) };
+}
+
+function first_payload_item(payload) {
+  return Array.isArray(payload?.items) ? payload.items[0] : undefined;
+}
+
+async function download_signed_file(profile, download_url, output_path) {
+  const response = await fetch(new URL(download_url, profile.base_url));
+  if (!response.ok) throw await transfer_error(response, "Report template download failed");
+  await fs.writeFile(output_path, Buffer.from(await response.arrayBuffer()));
+}
+
+async function upload_file_to_signed_url(profile, upload_url, file_path, content_type) {
+  const resolved_path = path.resolve(file_path);
+  const file_name = path.basename(resolved_path);
+  const bytes = await fs.readFile(resolved_path);
+  const form = new FormData();
+  form.set("file", new Blob([bytes], { type: content_type || content_type_for_file_name(file_name) }), file_name);
+  const response = await fetch(new URL(upload_url, profile.base_url), { method: "POST", body: form });
+  if (!response.ok) throw await transfer_error(response, "Report template upload failed");
+  return await parse_transfer_response(response);
+}
+
+async function transfer_error(response, fallback) {
+  const payload = await parse_transfer_response(response);
+  const message = payload?.Message || payload?.message || payload?.error_description || payload?.error || response.statusText || fallback;
+  return new JsonRpcError(-32603, `${fallback}: ${message}`);
+}
+
+async function parse_transfer_response(response) {
+  const text = await response.text();
+  if (!text) return {};
+  try { return JSON.parse(text); }
+  catch { return { text }; }
+}
+
+function content_type_for_file_name(file_name) {
+  const lower = String(file_name || "").toLowerCase();
+  if (lower.endsWith(".xlsm")) return "application/vnd.ms-excel.sheet.macroEnabled.12";
+  if (lower.endsWith(".xls")) return "application/vnd.ms-excel";
+  return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 }
 
 async function read_report_request_from_options(options) {

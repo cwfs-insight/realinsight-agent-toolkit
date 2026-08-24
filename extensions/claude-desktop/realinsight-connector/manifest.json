@@ -159,7 +159,7 @@
     },
     {
       "name": "get_report",
-      "description": "Read one compact report definition, including editable LIST setup and the latest conflict_token. This inspects configuration, not report execution output. Always call it immediately before validate_update_report, update_report, validate_delete_report, or delete_report."
+      "description": "Read one compact report definition, including editable LIST or COMPOSITE setup and the latest conflict_token. This inspects configuration, not report execution output. Always call it immediately before validate_update_report, update_report, validate_delete_report, or delete_report."
     },
     {
       "name": "get_chart_of_accounts",
@@ -172,6 +172,26 @@
     {
       "name": "set_chart_of_accounts",
       "description": "Create or patch a chart of accounts after explicit user approval. Supports metadata updates, availability, rollup chart mappings, monitor rule sets, add/update/replace/remove/move account rows, generated item ids, temporary item-id stub replacement, and dry_run validation. Call get_chart_of_accounts first for expected_conflict_token on updates. Core blocks remove_account and high-risk account mapping/type edits when existing data or servicing/financial usage would make the change unsafe."
+    },
+    {
+      "name": "get_realviews",
+      "description": "Read customer RealVIEW definitions and ordered maps with conflict tokens. This reads system configuration, not computed values."
+    },
+    {
+      "name": "execute_realview",
+      "description": "Calculate one saved RealVIEW for one to 100 entity ids matching its root feature. Use entity tools to find ids first."
+    },
+    {
+      "name": "set_realview",
+      "description": "Create or replace a customer RealVIEW definition and ordered maps after dry-run validation, explicit approval, and conflict-token checks. Execute the saved definition for representative entities."
+    },
+    {
+      "name": "get_extended_data",
+      "description": "Read persisted customer custom-field and system-field-overlay configuration, separately from the merged runtime field catalog returned by search_fields/get_fields."
+    },
+    {
+      "name": "set_extended_data",
+      "description": "Create, update, or safely deactivate a custom-field or system-field-overlay configuration after dry-run validation, explicit approval, and conflict-token checks."
     },
     {
       "name": "search_model_forms",
@@ -215,27 +235,43 @@
     },
     {
       "name": "validate_create_report",
-      "description": "Validate and normalize a LIST report create request without writing. Choose the report grain first; use get_tool_reference topic=reports for payload shape and topic=report_computed_fields for column order, computed formulas, or aggregate behavior. If parent_folder_id is omitted, create_report will save under agent/{current user name}."
+      "description": "Validate and normalize a LIST or COMPOSITE report create request without writing. A composite embeds independent LIST definitions and uses one custom Excel template."
     },
     {
       "name": "validate_update_report",
-      "description": "Validate and normalize a LIST report update request without writing. Call get_report first and pass its latest conflict_token as expected_conflict_token. Use get_fields for dataset feature codes before adding or changing columns, filters, sorts, prompts, column order, or computed formulas."
+      "description": "Validate and normalize a LIST or COMPOSITE report update request without writing. Call get_report first and pass its latest conflict_token."
     },
     {
       "name": "validate_delete_report",
-      "description": "Validate LIST report delete prerequisites without writing. Call get_report first and pass its latest conflict_token. If active schedules, related analytics, dashboard references, or workbench lists would be changed, validation blocks the delete and the user must use the Realinsight app for the cascading cleanup."
+      "description": "Validate LIST or COMPOSITE report delete prerequisites without writing. Call get_report first and pass its latest conflict_token."
     },
     {
       "name": "create_report",
-      "description": "Create a LIST report definition after explicit user approval. If parent_folder_id is omitted, Core creates/uses agent/{current user name}; pass REPORT or ROOT only when the user explicitly asks for root, or use search_report_folders for a specific folder. Run validate_create_report first, review normalized_preview/errors with the user, then call this with approved=true. Core validates again, persists the definition, and derives ConfigAuditLog changes server-side. Default audit_detail is summary; request changes or full only when audit/reversal work needs it. After success, summarize the report name, master feature, meaningful saved sections, warnings, and an open link or report_id only when useful for the user to jump back to it."
+      "description": "Create a LIST or COMPOSITE report definition after explicit user approval. If parent_folder_id is omitted, Core creates/uses agent/{current user name}. Validate first."
     },
     {
       "name": "update_report",
-      "description": "Update a LIST report definition after explicit user approval. Call get_report first, pass the latest expected_conflict_token, run validate_update_report, then call this with approved=true. Core derives ConfigAuditLog changes server-side. Default audit_detail is summary; request changes or full only when audit/reversal work needs it. After success, summarize the report name, meaningful changed sections, warnings, and an open link or report_id only when useful for the user to jump back to it."
+      "description": "Update a LIST or COMPOSITE report after explicit user approval. Use import_report_into_composite to add an existing LIST report without sharing nested ids."
     },
     {
       "name": "delete_report",
-      "description": "Soft-delete a LIST report definition after explicit user approval only when validate_delete_report reports no active downstream resources. Core validates the latest conflict token and derives ConfigAuditLog changes server-side. Default audit_detail is summary; request changes or full only when audit/reversal work needs it. After success, summarize the deleted report name and warnings without raw ids unless needed for follow-up."
+      "description": "Soft-delete a LIST or COMPOSITE report after explicit user approval only when validate_delete_report reports no active downstream resources."
+    },
+    {
+      "name": "import_report_into_composite",
+      "description": "Import an independent copy of an existing LIST report into a COMPOSITE report. Core always regenerates report_list_id plus dataset, column, and prompt ids and rewrites every internal reference. The same source can be imported repeatedly and edited independently. Omit insert_at to append and report_sheet to derive a unique sheet name."
+    },
+    {
+      "name": "download_report_template",
+      "description": "Read the current custom Excel template metadata for a LIST or COMPOSITE report. Pass output_path locally so workbook bytes stay outside model context."
+    },
+    {
+      "name": "stage_report_template_file",
+      "description": "Create a report-bound staged upload session for an Excel template. Local callers may pass file_path; hosted callers upload multipart field file to upload_url, then finalize with upload_report_template."
+    },
+    {
+      "name": "upload_report_template",
+      "description": "Finalize an Excel template for a LIST or COMPOSITE report. Core creates a fresh template id and switches only this report to it, preventing accidental changes to other reports that shared a legacy template."
     }
   ],
   "tools_generated": true,

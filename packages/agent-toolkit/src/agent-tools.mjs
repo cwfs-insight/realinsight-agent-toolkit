@@ -10,6 +10,7 @@ import {
 import { agent_get_children, agent_get_latest_children } from "./child-tools.mjs";
 import { agent_get_chart_of_accounts, agent_get_coa_data, agent_set_chart_of_accounts } from "./chart-of-accounts-tools.mjs";
 import { agent_search_entities } from "./entity-tools.mjs";
+import { agent_get_extended_data, agent_set_extended_data } from "./extended-data-tools.mjs";
 import { JsonRpcError } from "./json-rpc.mjs";
 import {
   agent_create_model_form,
@@ -24,9 +25,11 @@ import {
   agent_validate_update_model_form,
 } from "./model-form-tools.mjs";
 import { agent_get_records, agent_set_record } from "./record-tools.mjs";
+import { agent_execute_realview, agent_get_realviews, agent_set_realview } from "./realview-tools.mjs";
 import {
   agent_create_report,
   agent_delete_report,
+  agent_download_report_template,
   agent_extract_analytic_entities,
   agent_extract_workbench_entities,
   agent_get_analytic_data,
@@ -35,11 +38,14 @@ import {
   agent_get_report,
   agent_get_workbench_data,
   agent_get_workbench_csv,
+  agent_import_report_into_composite,
   agent_list_dashboard_pages,
   agent_list_workbenches,
   agent_search_report_folders,
   agent_search_reports,
+  agent_stage_report_template_file,
   agent_update_report,
+  agent_upload_report_template,
   agent_validate_create_report,
   agent_validate_delete_report,
   agent_validate_update_report,
@@ -147,6 +153,21 @@ export async function call_agent_tool(name, args) {
     case "set_chart_of_accounts":
       payload = await agent_set_chart_of_accounts(args);
       break;
+    case "get_realviews":
+      payload = await agent_get_realviews(args);
+      break;
+    case "execute_realview":
+      payload = await agent_execute_realview(args);
+      break;
+    case "set_realview":
+      payload = await agent_set_realview(args);
+      break;
+    case "get_extended_data":
+      payload = await agent_get_extended_data(args);
+      break;
+    case "set_extended_data":
+      payload = await agent_set_extended_data(args);
+      break;
     case "search_model_forms":
       payload = await agent_search_model_forms(args);
       break;
@@ -194,6 +215,18 @@ export async function call_agent_tool(name, args) {
       break;
     case "delete_report":
       payload = await agent_delete_report(args);
+      break;
+    case "download_report_template":
+      payload = await agent_download_report_template(args);
+      break;
+    case "import_report_into_composite":
+      payload = await agent_import_report_into_composite(args);
+      break;
+    case "stage_report_template_file":
+      payload = await agent_stage_report_template_file(args);
+      break;
+    case "upload_report_template":
+      payload = await agent_upload_report_template(args);
       break;
     default:
       throw new JsonRpcError(-32602, `Unknown tool: ${name}`);

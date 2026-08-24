@@ -7,6 +7,7 @@ import { get_children, get_latest_children } from "./child-tools.mjs";
 import { get_chart_of_accounts, get_coa_data, set_chart_of_accounts } from "./chart-of-accounts-tools.mjs";
 import { doctor } from "./doctor.mjs";
 import { search_entities } from "./entity-tools.mjs";
+import { get_extended_data, set_extended_data } from "./extended-data-tools.mjs";
 import { format_error_message, HttpJsonError } from "./http.mjs";
 import { start_mcp_server } from "./mcp-server.mjs";
 import {
@@ -22,9 +23,11 @@ import {
   validate_update_model_form,
 } from "./model-form-tools.mjs";
 import { get_records, set_record } from "./record-tools.mjs";
+import { execute_realview, get_realviews, set_realview } from "./realview-tools.mjs";
 import {
   create_report,
   delete_report,
+  download_report_template,
   extract_analytic_entities,
   extract_workbench_entities,
   get_analytic_data,
@@ -33,11 +36,14 @@ import {
   get_report,
   get_workbench_data,
   get_workbench_csv,
+  import_report_into_composite,
   list_dashboard_pages,
   list_workbenches,
   search_report_folders,
   search_reports,
+  stage_report_template_file,
   update_report,
+  upload_report_template,
   validate_create_report,
   validate_delete_report,
   validate_update_report,
@@ -51,6 +57,10 @@ import {
   DEFAULT_CLIENT_ID,
   MODEL_FORMS_READ_SCOPE,
   MODEL_FORMS_WRITE_SCOPE,
+  REALVIEWS_READ_SCOPE,
+  REALVIEWS_WRITE_SCOPE,
+  EXTENDED_DATA_READ_SCOPE,
+  EXTENDED_DATA_WRITE_SCOPE,
   SCHEMA_READ_SCOPE,
   WRITE_TOOLS_ENABLED,
 } from "./tool-definitions.mjs";
@@ -101,6 +111,16 @@ async function main() {
 
   if (command === "chart-of-accounts" || command === "chart_of_accounts" || command === "coa") {
     await run_chart_of_accounts_command(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "realviews" || command === "real-views" || command === "real_views") {
+    await run_realview_command(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "extended-data" || command === "extended_data" || command === "xd") {
+    await run_extended_data_command(parsed.positionals.slice(1), parsed.options);
     return;
   }
 
@@ -223,6 +243,33 @@ async function main() {
   if (command === "set-chart-of-accounts" || command === "set_chart_of_accounts" || command === "set-coa" || command === "set_coa") {
     assert_write_tools_enabled();
     await set_chart_of_accounts(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "get-realviews" || command === "get_realviews") {
+    await get_realviews(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "execute-realview" || command === "execute_realview") {
+    await execute_realview(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "set-realview" || command === "set_realview") {
+    assert_write_tools_enabled();
+    await set_realview(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "get-extended-data" || command === "get_extended_data") {
+    await get_extended_data(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "set-extended-data" || command === "set_extended_data") {
+    assert_write_tools_enabled();
+    await set_extended_data(parsed.positionals.slice(1), parsed.options);
     return;
   }
 
@@ -349,6 +396,29 @@ async function main() {
   if (command === "delete-report" || command === "delete_report" || command === "delete-report-configuration") {
     assert_write_tools_enabled();
     await delete_report(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "download-report-template" || command === "download_report_template") {
+    await download_report_template(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "import-report-into-composite" || command === "import_report_into_composite") {
+    assert_write_tools_enabled();
+    await import_report_into_composite(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "stage-report-template" || command === "stage_report_template" || command === "stage_report_template_file") {
+    assert_write_tools_enabled();
+    await stage_report_template_file(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "upload-report-template" || command === "upload_report_template") {
+    assert_write_tools_enabled();
+    await upload_report_template(parsed.positionals.slice(1), parsed.options);
     return;
   }
 
@@ -556,6 +626,35 @@ async function run_chart_of_accounts_command(positionals, options) {
   throw new Error(`Unknown chart-of-accounts command: ${command}`);
 }
 
+async function run_realview_command(positionals, options) {
+  const command = positionals[0];
+  if (!command || command === "help") {
+    console.log(`Realinsight RealVIEW commands\n\n  ri-agent realviews get [REALVIEW_ID]\n  ri-agent realviews execute REALVIEW_ID ENTITY_ID [ENTITY_ID ...]\n  ri-agent realviews set [REALVIEW_ID] --request-json JSON --approved\n\nRead scope: ${REALVIEWS_READ_SCOPE}\nWrite scope: ${REALVIEWS_WRITE_SCOPE}`);
+    return;
+  }
+  if (command === "get") return await get_realviews(positionals.slice(1), options);
+  if (command === "execute") return await execute_realview(positionals.slice(1), options);
+  if (command === "set") {
+    assert_write_tools_enabled();
+    return await set_realview(positionals.slice(1), options);
+  }
+  throw new Error(`Unknown realviews command: ${command}`);
+}
+
+async function run_extended_data_command(positionals, options) {
+  const command = positionals[0];
+  if (!command || command === "help") {
+    console.log(`Realinsight Extended Data commands\n\n  ri-agent extended-data get [CONFIGURATION_ID]\n  ri-agent extended-data set [CONFIGURATION_ID] --request-json JSON --approved\n\nRead scope: ${EXTENDED_DATA_READ_SCOPE}\nWrite scope: ${EXTENDED_DATA_WRITE_SCOPE}`);
+    return;
+  }
+  if (command === "get") return await get_extended_data(positionals.slice(1), options);
+  if (command === "set") {
+    assert_write_tools_enabled();
+    return await set_extended_data(positionals.slice(1), options);
+  }
+  throw new Error(`Unknown extended-data command: ${command}`);
+}
+
 async function run_report_command(positionals, options) {
   const command = positionals[0];
 
@@ -660,6 +759,29 @@ async function run_report_command(positionals, options) {
     return;
   }
 
+  if (command === "download-report-template" || command === "download_report_template" || command === "download-template") {
+    await download_report_template(positionals.slice(1), options);
+    return;
+  }
+
+  if (command === "import-report-into-composite" || command === "import_report_into_composite" || command === "import-into-composite" || command === "import") {
+    assert_write_tools_enabled();
+    await import_report_into_composite(positionals.slice(1), options);
+    return;
+  }
+
+  if (command === "stage-report-template" || command === "stage_report_template" || command === "stage-template") {
+    assert_write_tools_enabled();
+    await stage_report_template_file(positionals.slice(1), options);
+    return;
+  }
+
+  if (command === "upload-report-template" || command === "upload_report_template" || command === "upload-template") {
+    assert_write_tools_enabled();
+    await upload_report_template(positionals.slice(1), options);
+    return;
+  }
+
   throw new Error(`Unknown reports command: ${command}`);
 }
 
@@ -667,8 +789,13 @@ function print_help() {
   const write_help = WRITE_TOOLS_ENABLED
     ? `  ri-agent set-record ENTITY_ID --record-json JSON --approved [--update-fields A,B] [--table]
   ri-agent set-chart-of-accounts [COA_ID] --request-json JSON --approved
+  ri-agent set-realview [REALVIEW_ID] --request-json JSON --approved
+  ri-agent set-extended-data [CONFIGURATION_ID] --request-json JSON --approved
   ri-agent validate-create-report --request-json JSON [--table]
   ri-agent validate-update-report REPORT_ID --request-json JSON [--expected-conflict-token TOKEN] [--table]
+  ri-agent import-report-into-composite COMPOSITE_REPORT_ID SOURCE_REPORT_ID --expected-conflict-token TOKEN --approved
+  ri-agent stage-report-template REPORT_ID --file-path ./template.xlsx --approved
+  ri-agent upload-report-template REPORT_ID --file-path ./template.xlsx --expected-conflict-token TOKEN --approved
   ri-agent validate-delete-report REPORT_ID --expected-conflict-token TOKEN [--table]
   ri-agent create-report --request-json JSON --approved [--table]
   ri-agent update-report REPORT_ID --request-json JSON --expected-conflict-token TOKEN --approved [--table]
@@ -708,7 +835,11 @@ ${write_help.trimEnd()}
   ri-agent search-reports [--report-type LIST] [--search-text TEXT] [--table]
   ri-agent search-report-folders [--parent-folder-id REPORT] [--table]
   ri-agent get-report REPORT_ID [--table]
+  ri-agent download-report-template REPORT_ID --output-path ./template.xlsx
   ri-agent get-chart-of-accounts [COA_ID|--coa-data-id ID|--search-text TEXT]
+  ri-agent get-realviews [REALVIEW_ID|--root-feature-code CODE|--search-text TEXT]
+  ri-agent execute-realview REALVIEW_ID ENTITY_ID [ENTITY_ID ...]
+  ri-agent get-extended-data [CONFIGURATION_ID|--feature-code CODE|--schema-code CODE|--kind custom|overlay]
   ri-agent search-model-forms [--root-feature-code CODE] [--search-text TEXT] [--table]
   ri-agent search-model-form-folders [--parent-folder-id WORKBOOKPROCESS] [--table]
   ri-agent get-model-form MODEL_FORM_ID [--sections template,map_tree,used_fields] [--detail-level overview|map|node|item|full] [--table]
@@ -716,7 +847,9 @@ ${write_help.trimEnd()}
   ri-agent upload-model-form-template MODEL_FORM_ID --file-path ./template.xlsx --expected-conflict-token TOKEN --approved
   ri-agent model-forms <search|folders|get|validate-create|create|validate-update|update|download-template|stage-template|upload-template> ...
   ri-agent chart-of-accounts <get|set> ...
-  ri-agent reports <list-dashboard-pages|get-dashboard-page|get-analytic-data|get-analytic-csv|extract-analytic-entities|list-workbenches|get-workbench-data|get-workbench-csv|extract-workbench-entities|search|folders|get|validate-create|validate-update|validate-delete|create|update|delete> ...
+  ri-agent realviews <get|execute|set> ...
+  ri-agent extended-data <get|set> ...
+  ri-agent reports <list-dashboard-pages|get-dashboard-page|get-analytic-data|get-analytic-csv|extract-analytic-entities|list-workbenches|get-workbench-data|get-workbench-csv|extract-workbench-entities|search|folders|get|validate-create|validate-update|validate-delete|create|update|delete|import-into-composite|download-template|stage-template|upload-template> ...
   ri-agent schema <search-features|search-fields|get-fields> ...
   ri-agent tools
   ri-agent mcp
@@ -803,6 +936,9 @@ function print_report_help() {
   ri-agent reports create --request-json JSON --approved [--table]
   ri-agent reports update REPORT_ID --request-json JSON --expected-conflict-token TOKEN --approved [--table]
   ri-agent reports delete REPORT_ID --expected-conflict-token TOKEN --approved [--table]
+  ri-agent reports import-into-composite COMPOSITE_REPORT_ID SOURCE_REPORT_ID --expected-conflict-token TOKEN --approved [--table]
+  ri-agent reports stage-template REPORT_ID --file-path ./template.xlsx --approved [--table]
+  ri-agent reports upload-template REPORT_ID --file-path ./template.xlsx --expected-conflict-token TOKEN --approved [--table]
 `
     : "";
 
@@ -821,10 +957,12 @@ Usage:
   ri-agent reports search [--report-type LIST] [--search-text TEXT] [--table]
   ri-agent reports folders [--parent-folder-id REPORT] [--limit N] [--cursor CURSOR] [--table]
   ri-agent reports get REPORT_ID [--table]
+  ri-agent reports download-template REPORT_ID --output-path ./template.xlsx [--table]
 ${report_write_help.trimEnd()}
 
 Cached analytic and workbench tables can be large. Prefer paging results into a temporary CSV/JSONL/SQLite file for multi-page analysis.
-Report writes are side effects. Call get-report first for the latest conflict token, validate before saving, and use --approved only after explicit user approval.
+LIST reports define one table. COMPOSITE reports place independent LIST outputs in a custom Excel workbook; use import-into-composite for existing reports so all owned ids are regenerated.
+Report writes are side effects. Call get first for the latest conflict token, validate before saving, and use --approved only after explicit user approval.
 `);
 }
 
