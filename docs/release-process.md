@@ -7,6 +7,7 @@ This repository is the public distribution workspace. The Realinsight release pi
 | Path | Owner | Export behavior |
 | --- | --- | --- |
 | `packages/agent-toolkit/src/` | Realinsight release pipeline | Managed, overwrite allowed. |
+| `packages/agent-toolkit/skills/` | Realinsight release pipeline | Managed npm-package copy used by MCP skill resource reads. |
 | `packages/agent-toolkit/package.json` | Shared | Update version and package metadata only through the release manifest. |
 | `plugin.json` | This repo with release version updates | Portable Agent Plugins manifest; preserve descriptive metadata and the pinned schema. |
 | `mcp.json` | This repo with hosted environment updates | Portable Agent Plugins MCP config; keep the production entry `streamable-http` and credential-free. |

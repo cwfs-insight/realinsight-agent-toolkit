@@ -1,6 +1,6 @@
 {
   "name": "@realinsight/claude-desktop-connector",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Claude Desktop MCPB source for the Realinsight Connector.",
   "private": true,
   "type": "module",

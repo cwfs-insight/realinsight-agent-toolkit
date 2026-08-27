@@ -6,7 +6,7 @@ import { login, list_profiles, logout, status } from "./auth.mjs";
 import { get_children, get_latest_children } from "./child-tools.mjs";
 import { get_chart_of_accounts, get_coa_data, set_chart_of_accounts } from "./chart-of-accounts-tools.mjs";
 import { doctor } from "./doctor.mjs";
-import { search_entities } from "./entity-tools.mjs";
+import { run_entity_query, search_entities } from "./entity-tools.mjs";
 import { get_extended_data, set_extended_data } from "./extended-data-tools.mjs";
 import { format_error_message, HttpJsonError } from "./http.mjs";
 import { start_mcp_server } from "./mcp-server.mjs";
@@ -141,6 +141,11 @@ async function main() {
 
   if (command === "search-entities" || command === "search_entities") {
     await search_entities(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "run-entity-query" || command === "run_entity_query" || command === "query-entities" || command === "query_entities") {
+    await run_entity_query(parsed.positionals.slice(1), parsed.options);
     return;
   }
 
@@ -818,6 +823,7 @@ Usage:
   ri-agent search-fields QUERY [--profile NAME] [--feature-code CODE] [--limit N] [--postable-only] [--table]
   ri-agent get-fields FEATURE_CODE [--profile NAME] [--limit N] [--cursor CURSOR] [--postable-only] [--table]
   ri-agent search-entities QUERY [--profile NAME] [--schema-code CODE|--schema-codes A.B,C.D|--feature-code CODE --field-names A,B] [--exact] [--table]
+  ri-agent run-entity-query FEATURE_CODE [--filter 'Field|Value|eq'] [--sort 'Field|desc'] [--limit N] [--master-ids ID1,ID2 --limit-per-master N] [--table]
   ri-agent get-children --feature-code CODE --parent-ids ID1,ID2 [--limit N|--limit-per-parent N] [--sort 'Field|desc'] [--filter 'Field|Value|eq'] [--table]
   ri-agent get-latest-children --feature-code CODE --parent-ids ID1,ID2 --mode-field DateField [--table]
   ri-agent get-records --feature-code CODE --entity-ids ID1,ID2 [--field-profile key_fields|--fields A,B|--schema-codes F.A,F.B] [--table]

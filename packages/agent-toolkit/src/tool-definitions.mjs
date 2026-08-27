@@ -87,12 +87,13 @@ export const MCP_SUPPORTED_PROTOCOL_VERSIONS = [
 export const MCP_SERVER_INFO = {
   name: "realinsight-agent-toolkit",
   title: "Realinsight Agent Toolkit",
-  version: "0.2.2",
+  version: "0.2.3",
 };
 export const MCP_INSTRUCTIONS = [
   "Realinsight is a commercial real estate asset management and servicing platform.",
   "All Realinsight tool calls run through Core API using the authenticated Realinsight user and customer context.",
-  "For harnesses that implement tool search, search by tool family first instead of loading every tool: schema features fields; entity search records structure children; analytics dashboard workbench CSV; report configuration folders; model form configuration folders template map; chart of accounts configuration COAData; RealVIEW configuration execute; Extended Data custom field configuration; tool reference schema. Common always-useful entry tools are get_tool_reference, search_features, search_fields, get_fields, search_entities, get_records, get_entity_structure, search_reports, search_report_folders, get_report, search_model_forms, search_model_form_folders, get_model_form, get_chart_of_accounts, get_realviews, and get_extended_data.",
+  "This server publishes skill://realinsight-agent-toolkit/SKILL.md through the draft io.modelcontextprotocol/skills extension. Clients that support MCP-served skills can discover it with skills/list and load its files lazily with resources/read.",
+  "For harnesses that implement tool search, search by tool family first instead of loading every tool: schema features fields; entity search query records structure children; analytics dashboard workbench CSV; report configuration folders; model form configuration folders template map; chart of accounts configuration COAData; RealVIEW configuration execute; Extended Data custom field configuration; tool reference schema. Common always-useful entry tools are get_tool_reference, search_features, search_fields, get_fields, search_entities, run_entity_query, get_records, get_entity_structure, search_reports, search_report_folders, get_report, search_model_forms, search_model_form_folders, get_model_form, get_chart_of_accounts, get_realviews, and get_extended_data.",
   "Each callable tool includes its complete input schema. If the Realinsight Agent Toolkit skill is unavailable, call get_tool_reference for compact workflow guidance and cross-tool sequencing.",
   "Choose the tool family from the shape of the user's question. For a named loan, deal, property, tenant, borrower, or other specific record, use schema/entity/record tools first. For broad portfolio, system, dashboard, saved-list, or operational-table questions, inspect curated dashboard/workbench/cache tools when they match the request.",
   "Do not default to dashboard/workbench tools only because a question is broad business data; use them when the user mentions an existing page/list/analytic/workbench, when tool evidence points to one, or when a curated cached table is the best source for a portfolio/system-wide population.",
@@ -100,6 +101,7 @@ export const MCP_INSTRUCTIONS = [
   "Use search_fields or get_fields to identify exact schema codes and field names before requesting record values, child rows, report columns, filters, sorts, or model-map field meaning.",
   "Keep each search query to one coherent concept, name, identifier, or field label. Multiword phrases are fine when they form one concept; do not concatenate alternatives or independent clues. Issue a small bounded set of independent searches in parallel when comparing alternatives or distinct clues.",
   "Use search_entities to find concrete Realinsight entity ids. Use generic search for discovery, and prefer exact schema_codes or feature_code plus field_names when the searchable field and expected value are known.",
+  "Use run_entity_query for deterministic population selection with exact field filters, sorts, paging, and top-N limits. Then use get_records to hydrate only the returned entity ids and fields needed for the answer.",
   "Use get_records after search_entities to hydrate entity ids into a compact table with shared columns and one row per record.",
   "Use get_children after finding a parent entity when the user asks for payment history, rent-roll rows, collateral, owners, or another child dataset.",
   "Use get_latest_children when you need one latest child per parent, then hydrate returned child_entity_id values with get_records.",
@@ -378,7 +380,7 @@ const ALL_AGENT_TOOLS = [
     local_only: true,
     readOnlyHint: false,
     idempotentHint: false,
-    description: "Start a browser-based Realinsight consent flow for a new or expanded local OAuth scope set. By default this waits up to five minutes for browser approval and stores the profile when approval completes.",
+    description: "Start a browser-based Realinsight consent flow that adds the requested scopes to the selected profile's existing OAuth scope set. By default this waits up to five minutes for browser approval and stores the profile when approval completes.",
     inputSchema: {
       type: "object",
       additionalProperties: false,
@@ -397,12 +399,12 @@ const ALL_AGENT_TOOLS = [
         },
         scope: {
           type: "string",
-          description: "OAuth scope string to request.",
+          description: "OAuth scope string to add to the selected profile's existing scopes.",
         },
         scopes: {
           type: "array",
           items: { type: "string" },
-          description: "OAuth scopes to request as an array.",
+          description: "OAuth scopes to add to the selected profile's existing scopes.",
         },
         device_label: {
           type: "string",
@@ -639,6 +641,97 @@ const ALL_AGENT_TOOLS = [
     },
   },
   {
+    name: "run_entity_query",
+    title: "Run Realinsight Entity Query",
+    cli: "ri-agent run-entity-query FEATURE_CODE [--filter 'Field|Value|eq'] [--sort 'Field|desc'] [--limit N]",
+    route: "POST /agent/entities/query",
+    scope: ENTITY_READ_SCOPE,
+    description: "Select a bounded entity population using exact runtime-field filters, deterministic sorts, and paging. Use this for requests such as top loans by balance or all entities matching a status. Unlike search_entities, this is not fuzzy text discovery; unlike get_records, it selects ids rather than hydrating record values.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        profile: {
+          type: "string",
+          description: "Optional local ri-agent auth profile name. Uses the active profile when omitted.",
+        },
+        feature_code: {
+          type: "string",
+          description: "Feature code for the entity population to query. Discover it with search_features when uncertain.",
+        },
+        parent_ids: {
+          type: "array",
+          items: { type: "string" },
+          maxItems: 25,
+          description: "Optional parent entity ids that bound the population. Use get_children when the request is specifically about known-parent traversal.",
+        },
+        master_ids: {
+          type: "array",
+          items: { type: "string" },
+          maxItems: 25,
+          description: "Optional master entity ids that bound a dependent population. Cannot be combined with parent_ids.",
+        },
+        limit: {
+          type: "integer",
+          minimum: 1,
+          maximum: 500,
+          description: "Maximum results to return. Defaults to 100.",
+        },
+        skip: {
+          type: "integer",
+          minimum: 0,
+          maximum: 100000,
+          description: "Number of accessible, sorted results to skip for paging. Requires at least one explicit sort when greater than zero.",
+        },
+        limit_per_master: {
+          type: "integer",
+          minimum: 1,
+          maximum: 100,
+          description: "Return the top N dependent rows for each supplied master_id. Requires an explicit sort and cannot be combined with limit or skip; total requested rows cannot exceed 500.",
+        },
+        filters: {
+          type: "array",
+          maxItems: 10,
+          items: {
+            type: "object",
+            additionalProperties: false,
+            properties: {
+              field_name: { type: "string", description: "Runtime field name to filter on." },
+              schema_code: { type: "string", description: "Schema code in FeatureCode.FieldName format. Must match feature_code." },
+              op: {
+                type: "string",
+                enum: ["eq", "neq", "gt", "gte", "lt", "lte", "contains", "not_contains"],
+                description: "Filter operator. Defaults to eq.",
+              },
+              value: { type: "string", description: "Filter value. Core converts it using the runtime field type." },
+              and_or: { type: "string", enum: ["and", "or"], description: "Filter combiner. Defaults to and." },
+            },
+          },
+          description: "Exact runtime-field filters. Discover field names or schema codes with search_fields/get_fields first.",
+        },
+        sorts: {
+          type: "array",
+          maxItems: 3,
+          items: {
+            type: "object",
+            additionalProperties: false,
+            properties: {
+              field_name: { type: "string", description: "Runtime field name to sort on." },
+              schema_code: { type: "string", description: "Schema code in FeatureCode.FieldName format. Must match feature_code." },
+              direction: {
+                type: "string",
+                enum: ["ascending", "descending", "asc", "desc"],
+                description: "Sort direction. Defaults to ascending. Use descending for top/largest requests.",
+              },
+            },
+          },
+          description: "Deterministic sorts applied before skip/limit.",
+        },
+      },
+      required: ["feature_code"],
+    },
+  },
+  {
     name: "get_children",
     title: "Get Realinsight Entity Children",
     cli: "ri-agent get-children --feature-code CHILD_FEATURE --parent-ids ID1,ID2 [--limit N|--limit-per-parent N] [--sort 'Field|desc']",
@@ -699,7 +792,7 @@ const ALL_AGENT_TOOLS = [
               },
               op: {
                 type: "string",
-                enum: ["eq", "neq", "gt", "gte", "lt", "lte", "contains"],
+                enum: ["eq", "neq", "gt", "gte", "lt", "lte", "contains", "not_contains"],
                 description: "Filter operator. Defaults to eq.",
               },
               value: {
@@ -812,7 +905,7 @@ const ALL_AGENT_TOOLS = [
               },
               op: {
                 type: "string",
-                enum: ["eq", "neq", "gt", "gte", "lt", "lte", "contains"],
+                enum: ["eq", "neq", "gt", "gte", "lt", "lte", "contains", "not_contains"],
                 description: "Filter operator. Defaults to eq.",
               },
               value: {

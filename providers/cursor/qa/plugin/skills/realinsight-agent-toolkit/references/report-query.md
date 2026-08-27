@@ -1,14 +1,15 @@
 # Report Query Composition
 
-Use this for ad hoc analytical questions before a dedicated `run_entity_query` or `run_report` tool exists.
+Use this for ad hoc analytical questions when `run_entity_query` can select the live entity population but a dedicated `run_report` tool does not exist.
 
 ## Current State
 
-The toolkit exposes report definition search/read tools, but it does not yet run arbitrary report jobs or expose a general query tool. Compose small read-only answers from:
+The toolkit exposes deterministic entity population queries and report definition search/read tools, but it does not yet run arbitrary report jobs. Compose small read-only answers from:
 
 - `search_features`
 - `search_fields`
 - `search_entities`
+- `run_entity_query`
 - `get_children`
 - `get_entity_structure`
 - `get_records`
@@ -21,7 +22,7 @@ If the user asks to run an existing RI report, say that report execution is not 
 
 1. Restate the target population, metric, grouping, and limit.
 2. Discover features and fields for the root entities and child rows.
-3. Resolve root entity ids with `search_entities`.
+3. Resolve a named root with `search_entities`, or select a filtered/sorted root population with `run_entity_query`.
 4. Fetch child rows with `get_children` when the metric lives in a child dataset.
 5. Hydrate labels and metric fields with `get_records`.
 6. Sort/filter/group locally only on values returned by Realinsight tools.

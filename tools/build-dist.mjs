@@ -192,7 +192,7 @@ async function read_source_metadata() {
     mcpb_manifest,
     package_json,
     release_manifest,
-    version: package_json.version || codex_manifest.version || claude_manifest.version || "0.2.2",
+    version: package_json.version || codex_manifest.version || claude_manifest.version || "0.2.3",
     description: host_neutral_description(codex_manifest, claude_manifest, package_json),
   };
 }

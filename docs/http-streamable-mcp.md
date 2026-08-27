@@ -4,6 +4,8 @@ The hosted MCP version is an HTTPS MCP protocol endpoint, not a hosted copy of t
 
 The endpoint is dual-era. MCP `2026-07-28` clients use stateless per-request protocol/client metadata and may call `server/discover` for versions, capabilities, server identity, and Realinsight instructions. Older clients through `2025-11-25` keep the initialization handshake. The local stdio package implements the same split, so existing hosts remain compatible while newer hosts can adopt the finalized protocol.
 
+Both transports advertise the current draft `io.modelcontextprotocol/skills` extension. A compatible client can enumerate the public toolkit skill with `skills/list`, retrieve its complete frontmatter and SHA-256 resource manifest with `skills/get`, and fetch each declared file only when needed through ordinary `resources/read`. Optional directory browsing is not advertised.
+
 ## Recommended Shape
 
 - Host the Streamable HTTP MCP endpoint at `/api/v1/mcp` for the current Realinsight API deployment, or at the equivalent path for a Realinsight-provided environment.

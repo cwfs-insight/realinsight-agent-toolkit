@@ -118,9 +118,15 @@ export async function agent_connect_realinsight(input = {}) {
 }
 
 export async function agent_request_realinsight_scopes(input = {}) {
-  const requested_scope = scope_from_input(input) || DEFAULT_SCOPE;
+  const config = await read_config();
+  const profile_name = resolve_profile_name(config, optional_string(input, "profile"));
+  const existing_scopes = config.profiles?.[profile_name]?.scope || [];
+  const requested_scope = merge_scope_values(existing_scopes, scope_from_input(input) || DEFAULT_SCOPE);
 
-  return await start_pending_authorization(input, requested_scope, "request_realinsight_scopes");
+  return await start_pending_authorization(
+    { ...input, scope: requested_scope },
+    requested_scope,
+    "request_realinsight_scopes");
 }
 
 export async function agent_switch_profile(input = {}) {
@@ -444,6 +450,15 @@ function scope_from_input(input) {
 
   const scopes = optional_string_array(input, "scopes");
   return scopes?.join(" ") || "";
+}
+
+function merge_scope_values(existing_scopes, requested_scope) {
+  const existing = Array.isArray(existing_scopes)
+    ? existing_scopes
+    : String(existing_scopes || "").split(/\s+/);
+  const requested = String(requested_scope || "").split(/\s+/);
+
+  return [...new Set([...existing, ...requested].map((scope) => scope.trim()).filter(Boolean))].join(" ");
 }
 
 function redact_pending_authorization(pending) {

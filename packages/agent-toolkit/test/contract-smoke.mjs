@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import { createHash } from "node:crypto";
 import { promises as fs } from "node:fs";
 import http from "node:http";
 import os from "node:os";
@@ -166,6 +167,7 @@ function assert_search_query_guidance(instructions, tools) {
   }
 
   assert(by_name.get("search_entities")?.description?.includes("exact field-targeted search"), "search_entities is missing exact-field preference guidance");
+  assert(by_name.get("run_entity_query")?.description?.includes("deterministic sorts"), "run_entity_query is missing deterministic population guidance");
 }
 
 function object_schema(schema) {
@@ -282,6 +284,16 @@ async function run_tool_call_smoke(call_agent_tool, temp_dir) {
   const return_switch_result = await call_agent_tool("switch_profile", { profile: "default" });
   assert(return_switch_result.status === "active_profile_switched", "switch_profile did not switch back to default");
 
+  const scope_request_result = await call_agent_tool("request_realinsight_scopes", {
+    profile: "default",
+    scopes: ["ri:additional.read"],
+    open_browser: false,
+    wait_for_approval: false,
+  });
+  assert(scope_request_result.status === "authorization_pending", "request_realinsight_scopes did not start authorization");
+  assert(scope_request_result.scope.includes("ri:additional.read"), "scope request omitted the newly requested scope");
+  assert(SCOPES.every((scope) => scope_request_result.scope.includes(scope)), "scope request dropped an existing profile scope");
+
   const tool_reference_result = await call_agent_tool("get_tool_reference", {
     topic: "reports",
     format: "schema",
@@ -326,6 +338,14 @@ async function run_tool_call_smoke(call_agent_tool, temp_dir) {
 
   const entity_result = await call_agent_tool("search_entities", { query: "Madison", feature_code: "Loan" });
   assert(entity_result.items[0].entity_id === "loan-1", "search_entities did not return loan-1");
+
+  const entity_query_result = await call_agent_tool("run_entity_query", {
+    feature_code: "Loan",
+    filters: [{ schema_code: "Loan.Status", op: "eq", value: "ACTIVE" }],
+    sorts: [{ schema_code: "Loan.Balance", direction: "descending" }],
+    limit: 5,
+  });
+  assert(entity_query_result.items[0].entity_id === "loan-1", "run_entity_query did not return loan-1");
 
   const children_result = await call_agent_tool("get_children", {
     feature_code: "LoanPaymentHistory",
@@ -655,6 +675,47 @@ async function run_mcp_smoke(config_path, mcp_instructions) {
     method: "initialize",
     params: { protocolVersion: "2026-07-28" },
   }) + "\n");
+  child.stdin.write(JSON.stringify({
+    jsonrpc: "2.0",
+    id: 8,
+    method: "skills/list",
+    params: {
+      _meta: {
+        "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+        "io.modelcontextprotocol/clientCapabilities": {},
+      },
+    },
+  }) + "\n");
+  child.stdin.write(JSON.stringify({
+    jsonrpc: "2.0",
+    id: 9,
+    method: "skills/get",
+    params: {
+      uri: "skill://realinsight-agent-toolkit/SKILL.md",
+      _meta: {
+        "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+        "io.modelcontextprotocol/clientCapabilities": {},
+      },
+    },
+  }) + "\n");
+  child.stdin.write(JSON.stringify({
+    jsonrpc: "2.0",
+    id: 10,
+    method: "resources/read",
+    params: {
+      uri: "skill://realinsight-agent-toolkit/SKILL.md",
+      _meta: {
+        "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+        "io.modelcontextprotocol/clientCapabilities": {},
+      },
+    },
+  }) + "\n");
+  child.stdin.write(JSON.stringify({
+    jsonrpc: "2.0",
+    id: 11,
+    method: "resources/list",
+    params: {},
+  }) + "\n");
   child.stdin.end();
 
   const exit_code = await wait_for_child(child);
@@ -697,11 +758,40 @@ async function run_mcp_smoke(config_path, mcp_instructions) {
   assert(discover_response?.instructions === mcp_instructions, "mcp server/discover instructions drifted from initialize instructions");
   assert(discover_response?.resultType === "complete", "mcp server/discover resultType missing");
   assert(discover_response?._meta?.["io.modelcontextprotocol/serverInfo"]?.name === "realinsight-agent-toolkit", "mcp server/discover serverInfo metadata missing");
+  assert(discover_response?._meta?.["io.modelcontextprotocol/serverInfo"]?.version === "0.2.3", "mcp server/discover version was not bumped");
+  assert(discover_response?.capabilities?.extensions?.["io.modelcontextprotocol/skills"], "mcp server/discover skills extension capability missing");
+  assert(discover_response?.capabilities?.resources, "mcp server/discover resources capability missing");
   const modern_tools_response = responses.find((response) => response.id === 5)?.result;
   assert(modern_tools_response?.resultType === "complete", "modern tools/list resultType missing");
   assert(modern_tools_response?.cacheScope === "private", "modern tools/list cache scope missing");
   assert(responses.find((response) => response.id === 6)?.error?.code === -32601, "modern initialize should be removed");
   assert(responses.find((response) => response.id === 7)?.result?.protocolVersion === "2025-11-25", "legacy initialize negotiated a modern version");
+
+  const skills_result = responses.find((response) => response.id === 8)?.result;
+  const skill = skills_result?.skills?.[0];
+  assert(skills_result?.resultType === "complete", "skills/list resultType missing");
+  assert(skill?.uri === "skill://realinsight-agent-toolkit/SKILL.md", "skills/list returned the wrong skill URI");
+  assert(skill?.frontmatter?.name === "realinsight-agent-toolkit", "skills/list frontmatter name drifted");
+  assert(typeof skill?.frontmatter?.description === "string" && skill.frontmatter.description.length > 0, "skills/list frontmatter description missing");
+  assert(skill?.resources?.length > 1 && skill.resources.length <= 512, "skills/list returned an invalid resource manifest");
+  const skill_resource = skill.resources.find((resource) => resource.uri === skill.uri);
+  assert(skill_resource?.digest?.startsWith("sha256:"), "skills/list SKILL.md digest missing");
+  assert(skill_resource?.size > 0, "skills/list SKILL.md size missing");
+
+  const get_skill_result = responses.find((response) => response.id === 9)?.result;
+  assert(get_skill_result?.skill?.uri === skill.uri, "skills/get did not return the listed skill");
+  assert(get_skill_result?.skill?.resources?.length === skill.resources.length, "skills/get manifest drifted from skills/list");
+
+  const read_resource_result = responses.find((response) => response.id === 10)?.result;
+  const skill_content = read_resource_result?.contents?.[0];
+  assert(skill_content?.uri === skill.uri, "resources/read returned the wrong skill URI");
+  assert(skill_content?.mimeType === "text/markdown", "resources/read returned the wrong SKILL.md MIME type");
+  assert(skill_content?.text?.startsWith("---\nname: realinsight-agent-toolkit"), "resources/read returned invalid SKILL.md content");
+  const actual_digest = `sha256:${createHash("sha256").update(skill_content.text, "utf8").digest("hex")}`;
+  assert(actual_digest === skill_resource.digest, "resources/read content did not match the skills/list digest");
+
+  const resource_list = responses.find((response) => response.id === 11)?.result?.resources;
+  assert(resource_list?.some((resource) => resource.uri === skill.uri), "resources/list did not expose the public skill entrypoint");
 }
 
 function run_result_limit_smoke(enforce_tool_result_limit) {
@@ -785,14 +875,32 @@ async function handle_request(request, response) {
   }
 
   if (request.method === "POST" && url.pathname === "/oauth/device_authorization") {
-    assert(body.customer_code === "NEXT", "device authorization did not receive customer_code");
-    assert(body.prompt === "login", "device authorization did not receive prompt=login");
-    assert(body.force_login === true, "device authorization did not receive force_login");
+    if (body.customer_code === "NEXT") {
+      assert(body.prompt === "login", "device authorization did not receive prompt=login");
+      assert(body.force_login === true, "device authorization did not receive force_login");
+      write_json(response, 200, {
+        device_code: "ridc_pending_switch",
+        user_code: "NEXT-CODE",
+        verification_uri: `${base_url}/oauth/device`,
+        verification_uri_complete: `${base_url}/oauth/device?user_code=NEXT-CODE&customer_code=NEXT&prompt=login`,
+        expires_in: 600,
+        interval: 5,
+      });
+      return;
+    }
+
+    const requested_scopes = String(body.scope || "").split(/\s+/).filter(Boolean);
+    assert(body.customer_code === "", "scope request unexpectedly required a customer_code hint");
+    assert(requested_scopes.includes("ri:additional.read"), "device authorization omitted the newly requested scope");
+    assert(
+      SCOPES.every((scope) => requested_scopes.includes(scope)),
+      `device authorization dropped an existing profile scope: ${requested_scopes.join(" ")}`,
+    );
     write_json(response, 200, {
-      device_code: "ridc_pending_switch",
-      user_code: "NEXT-CODE",
+      device_code: "ridc_pending_scopes",
+      user_code: "SCOPE-CODE",
       verification_uri: `${base_url}/oauth/device`,
-      verification_uri_complete: `${base_url}/oauth/device?user_code=NEXT-CODE&customer_code=NEXT&prompt=login`,
+      verification_uri_complete: `${base_url}/oauth/device?user_code=SCOPE-CODE`,
       expires_in: 600,
       interval: 5,
     });
@@ -896,6 +1004,23 @@ async function handle_request(request, response) {
         entity_id: "payment-1",
         feature_code: "LoanPaymentHistory",
         parent_id: "loan-1",
+        master_id: "deal-1",
+      },
+    ]));
+    return;
+  }
+
+  if (request.method === "POST" && url.pathname === "/agent/entities/query") {
+    assert(body.feature_code === "Loan", "unexpected entity query feature");
+    assert(body.filters?.[0]?.schema_code === "Loan.Status", "entity query did not forward the filter schema code");
+    assert(body.sorts?.[0]?.schema_code === "Loan.Balance", "entity query did not forward the sort schema code");
+    assert(body.sorts?.[0]?.direction === "descending", "entity query did not forward descending sort");
+    assert(body.limit === 5, "entity query did not forward limit");
+    write_json(response, 200, agent_result("run_entity_query", "ri:entity.read", [
+      {
+        entity_id: "loan-1",
+        feature_code: "Loan",
+        parent_id: "deal-1",
         master_id: "deal-1",
       },
     ]));

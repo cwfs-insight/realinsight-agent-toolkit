@@ -10,6 +10,7 @@ const TOPICS = new Map([
       "search_fields",
       "get_fields",
       "search_entities",
+      "run_entity_query",
       "get_records",
       "get_entity_structure",
       "search_reports",
@@ -26,6 +27,7 @@ const TOPICS = new Map([
     tool_search_queries: [
       { intent: "feature, field, or schema-code discovery", query: "Realinsight schema features fields" },
       { intent: "find a concrete loan/deal/property/tenant/borrower record", query: "Realinsight entity search records" },
+      { intent: "filter, sort, page, or select top entities across a population", query: "Realinsight entity query filters sorts top records" },
       { intent: "relationship traversal, child rows, parent/master, references, periodic data", query: "Realinsight entity structure children latest records" },
       { intent: "dashboard, analytic, workbench, cached table, CSV paging", query: "Realinsight analytics dashboard workbench CSV" },
       { intent: "report definition inspect/create/update/delete", query: "Realinsight report configuration search folders get validate" },
@@ -427,11 +429,12 @@ const TOPICS = new Map([
   ["entities_records", {
     topic: "entities_records",
     purpose: "Find entities, traverse relationships, and hydrate record values.",
-    primary_tools: ["search_features", "search_entities", "get_entity_structure", "get_children", "get_latest_children", "get_records"],
+    primary_tools: ["search_features", "search_entities", "run_entity_query", "get_entity_structure", "get_children", "get_latest_children", "get_records"],
     workflow: [
       "Use search_features when business terms need feature codes.",
       "Use one coherent concept, candidate, identifier, or field label per search query. Run a small bounded set of independent searches in parallel for alternatives or distinct clues.",
-      "Use search_entities to find concrete ids. Prefer exact field-targeted search when the field and expected value are known; use generic search for discovery.",
+      "Use search_entities to find concrete ids by name, identifier, address, or searchable value.",
+      "Use run_entity_query to select an exact population with runtime-field filters, deterministic sorts, paging, or top-N limits.",
       "Use get_entity_structure for parent/master/children/reference/periodic traversal.",
       "Use get_records with explicit schema_codes or field_names for final values.",
     ],

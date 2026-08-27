@@ -90,7 +90,7 @@ The MCP tool schemas intentionally keep `map` and nested `node`/`item` objects c
 - `REFERENCE` requires `reference_map_item_id` pointing to a FIELD map item on the parent node. That field's `ref_feature_code` must match the embedded map `feature_code`.
 - `REFERENCE_EXTERNAL` targets a dataset that has an external reference field back to the parent node feature.
 - Valid periodic actions are `CURRENT`, `ASOF`, `EXACT`, `EARLIEST`, `DETAIL`, `MAX`, `PRIOR`, and `PRIORTOROOT`; use periodic settings only for periodic or multi-occurring target datasets.
-- Valid multi-entity directions are `ACROSS`, `DOWN`, and `SHEET`. For multi-entity embedded maps, omitted direction defaults to `DOWN`.
+- Valid multi-entity directions are `ACROSS`, `DOWN`, and `SHEET`. A blank direction leaves that node non-repeating and is not inherited by descendants. Core defaults an omitted direction to `DOWN` only when the same node supplies direction-dependent repeating settings. In a focused `update_node` patch, send `multi_entity_direction: ""` to clear it; omission or JSON `null` preserves the existing value.
 - If `multi_entity_top=true` and no positive `multi_entity_top_records` is supplied, the server defaults to `1`.
 - Map item `usage` is `REF`, `SOURCE`, or `RESULT`. Empty or omitted usage defaults to `REF` only for `FIELD` items, defaults to `SOURCE` for `COA_REF` items, and stays blank for `MARKER` items.
 - `REF` is the normal read-only mapping mode for generated/reference template values. It does not post uploaded workbook values back to Realinsight.

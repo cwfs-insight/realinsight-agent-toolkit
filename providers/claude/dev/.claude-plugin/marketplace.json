@@ -10,7 +10,7 @@
       "displayName": "Realinsight Connector Dev",
       "source": "./plugins/claude/realinsight-connector-dev",
       "description": "Connect Claude to Realinsight tools and skills.",
-      "version": "0.2.2-dev",
+      "version": "0.2.3-dev",
       "author": {
         "name": "Realinsight"
       },

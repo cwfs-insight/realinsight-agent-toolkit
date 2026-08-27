@@ -307,7 +307,7 @@ function normalize_base_url(value) {
 
 async function read_package_version() {
   const package_json = await read_json(path.join(REPO_ROOT, "packages/agent-toolkit/package.json"));
-  return package_json.version || "0.2.2";
+  return package_json.version || "0.2.3";
 }
 
 async function render_codex_bundle({ env, runtime, package_version, dest_root, options }) {
@@ -432,19 +432,17 @@ function build_codex_plugin_manifest(manifest, env, build_options = {}) {
 function codex_long_description(description, runtime) {
   const fallback = "Use Realinsight from Codex with Realinsight MCP tools and bundled skills.";
   const value = description || fallback;
+  const details = value.replace(
+    /^Use Realinsight from Codex through the (?:hosted Realinsight Streamable HTTP|(?:bundled )?local ri-agent) MCP server\.\s*/,
+    "",
+  );
 
   if (runtime === "http") {
-    return value.replace(
-      "Use Realinsight from Codex through the local ri-agent MCP server.",
-      "Use Realinsight from Codex through the hosted Realinsight Streamable HTTP MCP server.",
-    );
+    return `Use Realinsight from Codex through the hosted Realinsight Streamable HTTP MCP server.${details ? ` ${details}` : ""}`;
   }
 
   if (runtime === "node") {
-    return value.replace(
-      "Use Realinsight from Codex through the local ri-agent MCP server.",
-      "Use Realinsight from Codex through the bundled local ri-agent MCP server.",
-    );
+    return `Use Realinsight from Codex through the bundled local ri-agent MCP server.${details ? ` ${details}` : ""}`;
   }
 
   return value;

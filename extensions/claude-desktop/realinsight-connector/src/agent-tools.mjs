@@ -9,7 +9,7 @@ import {
 } from "./auth-tools.mjs";
 import { agent_get_children, agent_get_latest_children } from "./child-tools.mjs";
 import { agent_get_chart_of_accounts, agent_get_coa_data, agent_set_chart_of_accounts } from "./chart-of-accounts-tools.mjs";
-import { agent_search_entities } from "./entity-tools.mjs";
+import { agent_run_entity_query, agent_search_entities } from "./entity-tools.mjs";
 import { agent_get_extended_data, agent_set_extended_data } from "./extended-data-tools.mjs";
 import { JsonRpcError } from "./json-rpc.mjs";
 import {
@@ -92,6 +92,9 @@ export async function call_agent_tool(name, args) {
       break;
     case "search_entities":
       payload = await agent_search_entities(args);
+      break;
+    case "run_entity_query":
+      payload = await agent_run_entity_query(args);
       break;
     case "get_children":
       payload = await agent_get_children(args);

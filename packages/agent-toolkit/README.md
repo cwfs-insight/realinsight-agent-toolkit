@@ -25,7 +25,8 @@ The native `npx -y @realinsight/agent-toolkit@<version>` path is reserved for fu
 - `ri-agent` CLI commands.
 - Local browser/device auth helpers.
 - Stdio MCP server transport.
+- Draft SEP-2640 `skills/list`, `skills/get`, and lazy `resources/read` support for the packaged public toolkit skill.
 - Shared tool definitions for schema, entity, record, dashboard, analytic, and workbench tools.
 - Environment-specific defaults through `RI_AGENT_BASE_URL`, `RI_AGENT_PROFILE`, and `REALINSIGHT_AGENT_CONFIG`.
 
-Skills, Codex plugin manifests, Claude Desktop extension manifests, and host-specific install guides live in the repository outside this package.
+The MCP-served public skill is packaged under `skills/`. Codex plugin manifests, Claude Desktop extension manifests, and host-specific install guides remain repository-level assets.

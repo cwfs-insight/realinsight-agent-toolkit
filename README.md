@@ -6,6 +6,8 @@ It packages the `ri-agent` CLI, local and hosted MCP connection examples, Codex,
 
 The repository root also follows the Agent Plugins 1.0.0 portable package format. Compatible clients can discover the root `plugin.json`, the production `streamable-http` server in `mcp.json`, and the exported `skills/` together. See [docs/agent-plugins.md](docs/agent-plugins.md).
 
+Toolkit 0.2.3 also exposes the public Realinsight skill through the current draft SEP-2640 MCP extension. Compatible hosted and stdio clients can discover it with `skills/list`, resolve it with `skills/get`, and fetch its declared files lazily with `resources/read`.
+
 ## Which Install Should I Use?
 
 | User | Recommended path | Why |
@@ -107,6 +109,7 @@ The native `npx -y @realinsight/agent-toolkit@<version>` path is reserved for a 
 The managed export contract lives in [docs/release-process.md](docs/release-process.md). In short:
 
 - Generated runtime code lives under `packages/agent-toolkit/src/`.
+- The npm-packaged MCP skill copy lives under `packages/agent-toolkit/skills/`.
 - Exported public skills live under `skills/`.
 - Host bundle copies live under `plugins/` and `extensions/`.
 - Root docs, install guides, provider metadata, security files, and release process files are repo-owned.

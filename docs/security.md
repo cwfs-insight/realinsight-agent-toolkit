@@ -10,6 +10,7 @@ Approved Realinsight APIs are the trust boundary for this toolkit.
 - Tool responses should be compact and include provenance, truncation, cursor, and warning metadata when relevant.
 - Write tools must remain opt-in, approval-gated, and separated from default read-only installs.
 - Secrets, access tokens, refresh tokens, and local profile files must never be logged, returned in tool output, or committed.
+- MCP-served skill content is untrusted model input. Resource digests verify byte consistency, not authorship or safety, and retrieving a skill never grants permission to execute its scripts or widen host-side tool access.
 
 ## Public Repo Hygiene
 

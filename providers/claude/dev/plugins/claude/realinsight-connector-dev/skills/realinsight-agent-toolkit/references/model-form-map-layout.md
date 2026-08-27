@@ -11,7 +11,7 @@ Use this with `model-form-configuration.md` when changing workbook layout behavi
 
 ## Repeating Sections
 
-- Multi-entity embedded maps can repeat by row, column, or sheet. Valid `multi_entity_direction` values are `DOWN`, `ACROSS`, and `SHEET`; omitted direction defaults to `DOWN` when Core can identify the embedded dataset as multi-entity.
+- Multi-entity embedded maps can repeat by row, column, or sheet. Valid `multi_entity_direction` values are `DOWN`, `ACROSS`, and `SHEET`. A blank direction leaves that node non-repeating and does not inherit a direction from an ancestor. Core defaults an omitted direction to `DOWN` only when the same node supplies direction-dependent repeating settings. In a focused `update_node` patch, send `multi_entity_direction: ""` to clear it; omission or JSON `null` preserves the existing value.
 - `start_relative_to_embed_map_id` and `relative_start_direction` control layout relative to another embedded map. Preserve existing relative-layout anchors unless the user asks to move the repeated region.
 - `sheet_name_map_item_id` can derive dynamic sheet names from a map item. Verify the target item exists and belongs to the repeated section before changing it.
 - `multi_entity_top=true` limits repeated rows to the top N records. If no positive `multi_entity_top_records` is supplied, Core defaults it to `1`. Use explicit sorting when the selected "top" row matters.

@@ -2,6 +2,13 @@ import { format_error_message } from "./http.mjs";
 import { call_agent_tool } from "./agent-tools.mjs";
 import { build_error_response, is_plain_object, JsonRpcError } from "./json-rpc.mjs";
 import {
+  get_mcp_skill,
+  list_mcp_resources,
+  list_mcp_skills,
+  MCP_SKILLS_EXTENSION,
+  read_mcp_resource,
+} from "./mcp-skill-resources.mjs";
+import {
   AGENT_TOOLS,
   MCP_INSTRUCTIONS,
   MCP_MODERN_PROTOCOL_VERSION,
@@ -137,8 +144,14 @@ async function handle_mcp_request(message, is_modern_request) {
       return { tools: AGENT_TOOLS.map(to_mcp_tool_definition) };
     case "tools/call":
       return await handle_mcp_tool_call(message.params);
+    case "skills/list":
+      return await list_mcp_skills(message.params);
+    case "skills/get":
+      return await get_mcp_skill(message.params);
     case "resources/list":
-      return { resources: [] };
+      return await list_mcp_resources(message.params);
+    case "resources/read":
+      return await read_mcp_resource(message.params);
     case "prompts/list":
       return { prompts: [] };
     default:
@@ -203,6 +216,13 @@ function build_mcp_capabilities() {
   return {
     tools: {
       listChanged: false,
+    },
+    resources: {
+      subscribe: false,
+      listChanged: false,
+    },
+    extensions: {
+      [MCP_SKILLS_EXTENSION]: {},
     },
   };
 }

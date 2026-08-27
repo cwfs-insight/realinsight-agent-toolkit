@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "release_version": "0.2.2",
+  "release_version": "0.2.3",
   "repository": "https://github.com/cwfs-insight/realinsight-agent-toolkit",
   "defaults": {
     "harness": "chatgpt",

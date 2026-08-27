@@ -19,7 +19,7 @@ For local stdio MCP:
 2. If the user asks which local Realinsight connections are available, call `list_profiles`; this lists only saved local profiles and pending authorizations, not all Realinsight customers.
 3. If not connected, call `connect_realinsight`.
 4. If the user wants to switch customer context, call `switch_profile`. Use an existing profile when known; otherwise pass `customer_code` only when it is the user's Realinsight login/company code. If only a customer number or uncertain identifier is known, omit it so the user can type the customer code on the Realinsight login screen.
-5. If a tool reports insufficient scopes, call `request_realinsight_scopes` with the needed access.
+5. If a tool reports insufficient scopes, call `request_realinsight_scopes` with the needed access. The helper adds those scopes to the selected profile's existing scope set before consent.
 6. Use local `disconnect_realinsight` only when the user asks to log out, rotate credentials, or reconnect as a different Realinsight customer/user. Hosted HTTP MCP exposes `disconnect` instead; it revokes the current grant and the user may still need to reconnect Realinsight in the host.
 
 For CLI use:
@@ -50,7 +50,7 @@ Use the user's wording to choose the lightest useful tool family:
 When the harness supports tool search, search by family instead of loading or reasoning over every Realinsight tool up front:
 
 - Schema and field discovery: search for `Realinsight schema features fields`; common tools are `search_features`, `search_fields`, and `get_fields`.
-- Entity, record, and relationship reads: search for `Realinsight entity search records structure children`; common tools are `search_entities`, `get_records`, `get_entity_structure`, `get_children`, and `get_latest_children`.
+- Entity, query, record, and relationship reads: search for `Realinsight entity search query records structure children`; common tools are `search_entities`, `run_entity_query`, `get_records`, `get_entity_structure`, `get_children`, and `get_latest_children`.
 - Dashboard, analytic, workbench, and cached-table reads: search for `Realinsight analytics dashboard workbench CSV`; common tools are `list_dashboard_pages`, `get_dashboard_page`, `list_workbenches`, and CSV/data/entity extraction tools.
 - Report configuration: search for `Realinsight report configuration composite Excel template import`; start with `search_reports`, `search_report_folders` when placing a report in a user-requested folder, and `get_report`, then validate/import/template write tools only after approval.
 - Model form configuration: search for `Realinsight model form configuration folders template map`; start with `search_model_forms`, `search_model_form_folders` when placing a model in a user-requested folder, and `get_model_form`, then focused map/template tools only when needed.
@@ -59,7 +59,7 @@ When the harness supports tool search, search by family instead of loading or re
 - Extended Data configuration: search for `Realinsight Extended Data custom field configuration`; use `get_extended_data` for persisted definitions and `set_extended_data` only after dry-run validation and approval.
 - Reference/schema fallback: search for `Realinsight tool reference schema` or call `get_tool_reference` when this skill or its reference files are unavailable.
 
-Keep these common entry tools visible or easy to discover: `get_tool_reference`, `search_features`, `search_fields`, `get_fields`, `search_entities`, `get_records`, `get_entity_structure`, `search_reports`, `search_report_folders`, `get_report`, `search_model_forms`, `search_model_form_folders`, `get_model_form`, `get_chart_of_accounts`, `get_coa_data`, `get_realviews`, and `get_extended_data`.
+Keep these common entry tools visible or easy to discover: `get_tool_reference`, `search_features`, `search_fields`, `get_fields`, `search_entities`, `run_entity_query`, `get_records`, `get_entity_structure`, `search_reports`, `search_report_folders`, `get_report`, `search_model_forms`, `search_model_form_folders`, `get_model_form`, `get_chart_of_accounts`, `get_coa_data`, `get_realviews`, and `get_extended_data`.
 
 Use the complete input schema attached to the selected callable tool instead of guessing payload fields from prose. Fixed report, model-form, and Chart of Accounts objects are fully typed. `set_record.record` is intentionally runtime-defined, so discover its exact field names and value contracts with `search_fields` or `get_fields` before calling it.
 
@@ -72,6 +72,7 @@ Read only the reference files needed for the user's request:
 - `references/security-and-limits.md`: required before broad reads, sensitive data, or write tools.
 - `references/field-discovery.md`: choosing feature codes, field names, and schema codes.
 - `references/entity-search.md`: finding Realinsight entities before record or relationship reads.
+- `references/entity-query.md`: deterministic field filters, sorts, paging, top-N populations, and per-master limits.
 - `references/record-augmentation.md`: hydrating entity ids with key fields or selected fields.
 - `references/structure-traversal.md`: parent, master, children, references, referenced-by, and periodic traversal.
 - `references/analytics-workbenches.md`: dashboard pages, analytics, workbenches, cached tables, CSV paging, and entity extraction.
@@ -93,7 +94,7 @@ Reusable helper scripts are available under `scripts/` for common local file wor
 1. Check auth and available tools.
 2. Choose the path above before calling tools.
 3. For entity/record questions, discover feature and field codes before assuming schema details.
-4. Use one coherent concept, name, identifier, or field label per search query. Multiword phrases are fine when they form one concept; do not concatenate alternatives or independent clues. For alternatives or distinct clues, make a small bounded set of independent searches in parallel and compare results. Search for a small candidate entity set, prefer exact field targeting when the field and expected value are known, and use generic or fuzzy search for discovery. Then hydrate only key fields or explicit fields.
+4. Use one coherent concept, name, identifier, or field label per search query. Multiword phrases are fine when they form one concept; do not concatenate alternatives or independent clues. For alternatives or distinct clues, make a small bounded set of independent searches in parallel and compare results. Use `search_entities` for candidate discovery and `run_entity_query` for exact population filters, deterministic sorting, and top-N selection. Then hydrate only the returned ids and fields needed with `get_records`.
 5. Use relationship tools only when the next step needs parent, master, child, reference, or periodic context.
 6. For dashboard, analytic, workbench, or saved-list questions, prefer cached table tools over manual entity fan-out when the cached source matches the request.
 7. For report definition or template changes, read `references/report-configuration.md`, and also read `references/report-computed-fields.md` before editing column order, computed columns, formulas, aggregate settings, or post-aggregate behavior. Use the safe import tool for existing LIST components in a COMPOSITE, get the latest conflict token, validate before writing, and require explicit approval.
@@ -112,7 +113,7 @@ Reusable helper scripts are available under `scripts/` for common local file wor
 - Reference/schema fallback: `get_tool_reference`.
 - Local auth helpers: `auth_status`, `list_profiles`, `connect_realinsight`, `switch_profile`, `disconnect_realinsight`, `request_realinsight_scopes`. Hosted HTTP MCP exposes hosted-only `disconnect`, which revokes the current hosted OAuth grant and then the host/user must reconnect Realinsight.
 - Schema discovery: `search_features`, `search_fields`, `get_fields`.
-- Entity search and relationships: `search_entities`, `get_children`, `get_latest_children`, `get_entity_structure`.
+- Entity selection and relationships: `search_entities`, `run_entity_query`, `get_children`, `get_latest_children`, `get_entity_structure`.
 - Records: `get_records` returns a compact table with shared columns and row `values`/`display_values`; gated writes use `set_record`.
 - Dashboards, analytics, and workbenches: `list_dashboard_pages`, `get_dashboard_page`, `get_analytic_data`, `get_analytic_csv`, `extract_analytic_entities`, `list_workbenches`, `get_workbench_data`, `get_workbench_csv`, `extract_workbench_entities`.
 - Report configuration: `search_reports`, `search_report_folders`, `get_report`, `download_report_template`; gated validation/write tools with `validate_create_report`, `validate_update_report`, `validate_delete_report`, `create_report`, `update_report`, `delete_report`, `import_report_into_composite`, `stage_report_template_file`, and `upload_report_template`.
