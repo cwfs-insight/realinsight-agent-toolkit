@@ -21,6 +21,7 @@ const SCOPES = [
   "ri:schema.read",
   "ri:entity.search",
   "ri:entity.read",
+  "ri:entity.create",
   "ri:record.read",
   "ri:record.write",
   "ri:structure.read",
@@ -235,6 +236,10 @@ function run_build_url_smoke(build_url) {
 }
 
 async function run_doctor_smoke(config_path) {
+  const context = await run_node_cli(["connection-context"], config_path);
+  assert(context.status === 0 && JSON.parse(context.stdout).items[0].customer_code === "TEST", "connection-context CLI failed");
+  const create = await run_node_cli(["create-entity", "Loan", "--parent-id", "deal-1", "--record-json", JSON.stringify({ Name: "New loan" })], config_path);
+  assert(create.status === 0 && JSON.parse(create.stdout).items[0].dry_run, "create-entity CLI did not validate by default");
   const result = await run_node_cli(["doctor", "--json"], config_path);
 
   assert(result.status === 0, `doctor failed: ${result.stderr || result.stdout}`);
@@ -317,6 +322,24 @@ async function run_tool_call_smoke(call_agent_tool, temp_dir) {
   assert(model_form_map_reference_result.schema.coa_actuals_layout.fields.includes("coa_adjustment_column"), "model form map reference did not include actual adjustment column");
   assert(model_form_map_reference_result.schema.coa_budget_layout.fields.includes("coa_total_column"), "model form map reference did not include budget total column");
   assert(model_form_map_reference_result.schema.coa_servicing_balance_layout.fields.includes("value_column"), "model form map reference did not include servicing balance value column");
+
+  const connection = await call_agent_tool("get_connection_context", {});
+  assert(connection.items[0].customer_code === "TEST" && connection.items[0].transport === "local", "connection context did not use the authenticated customer");
+  const creation = { feature_code: "Loan", parent_id: "deal-1", record: { Name: "New loan" } };
+  const preview = await call_agent_tool("create_entity", creation);
+  assert(preview.items[0].dry_run === true && preview.items[0].created === false, "entity creation must default to validation");
+  const before_rejected = requests.length;
+  await assert_rejects(() => call_agent_tool("create_entity", { ...creation, dry_run: false }), "approved");
+  assert(requests.length === before_rejected, "unapproved creation reached Core");
+  const created = await call_agent_tool("create_entity", { ...creation, dry_run: false, approved: true });
+  assert(created.items[0].entity_id === "new-loan-1" && created.items[0].created, "approved creation lost its fields or result");
+  const before_failed = requests.length;
+  await assert_rejects(() => call_agent_tool("create_entity", { ...creation, record: { Name: "Unknown outcome" }, dry_run: false, approved: true }), "Service Unavailable");
+  assert(requests.length === before_failed + 1, "creation was automatically retried after an unknown outcome");
+
+  const before_invalid = requests.length;
+  await assert_rejects(() => call_agent_tool("create_entity", { ...creation, record: { Name: "Invalid field" } }), "Invalid initial field value");
+  assert(requests.length === before_invalid + 1, "validation error was retried");
 
   const feature_result = await call_agent_tool("search_features", { query: "loan" });
   assert(feature_result.items[0].feature_code === "Loan", "search_features did not return Loan");
@@ -716,6 +739,7 @@ async function run_mcp_smoke(config_path, mcp_instructions) {
     method: "resources/list",
     params: {},
   }) + "\n");
+  child.stdin.write(`${JSON.stringify({ jsonrpc: "2.0", id: 12, method: "resources/read", params: { uri: "ui://realinsight/connection/v1.html" } })}\n`);
   child.stdin.end();
 
   const exit_code = await wait_for_child(child);
@@ -758,7 +782,7 @@ async function run_mcp_smoke(config_path, mcp_instructions) {
   assert(discover_response?.instructions === mcp_instructions, "mcp server/discover instructions drifted from initialize instructions");
   assert(discover_response?.resultType === "complete", "mcp server/discover resultType missing");
   assert(discover_response?._meta?.["io.modelcontextprotocol/serverInfo"]?.name === "realinsight-agent-toolkit", "mcp server/discover serverInfo metadata missing");
-  assert(discover_response?._meta?.["io.modelcontextprotocol/serverInfo"]?.version === "0.2.3", "mcp server/discover version was not bumped");
+  assert(discover_response?._meta?.["io.modelcontextprotocol/serverInfo"]?.version === "0.2.4", "mcp server/discover version was not bumped");
   assert(discover_response?.capabilities?.extensions?.["io.modelcontextprotocol/skills"], "mcp server/discover skills extension capability missing");
   assert(discover_response?.capabilities?.resources, "mcp server/discover resources capability missing");
   const modern_tools_response = responses.find((response) => response.id === 5)?.result;
@@ -790,6 +814,12 @@ async function run_mcp_smoke(config_path, mcp_instructions) {
   const actual_digest = `sha256:${createHash("sha256").update(skill_content.text, "utf8").digest("hex")}`;
   assert(actual_digest === skill_resource.digest, "resources/read content did not match the skills/list digest");
 
+  const app = responses.find(response => response.id === 12)?.result?.contents?.[0];
+  assert(app?.mimeType === "text/html;profile=mcp-app" && app?.text?.startsWith("<!doctype html>"), "MCP App resource is not packaged as HTML");
+  const connection_tool = listed_tools.find(tool => tool.name === "get_connection_context");
+  assert(connection_tool?._meta?.ui?.resourceUri === app.uri, "connection view references an unavailable resource");
+  assert(connection_tool.outputSchema?.properties?.items, "typed connection output schema is missing");
+  assert(listed_tools.find(tool => tool.name === "create_entity")?.annotations?.idempotentHint === false, "creation must not permit automatic retries");
   const resource_list = responses.find((response) => response.id === 11)?.result?.resources;
   assert(resource_list?.some((resource) => resource.uri === skill.uri), "resources/list did not expose the public skill entrypoint");
 }
@@ -904,6 +934,21 @@ async function handle_request(request, response) {
       expires_in: 600,
       interval: 5,
     });
+    return;
+  }
+
+  if (request.method === "GET" && url.pathname === "/agent/context") {
+    write_json(response, 200, agent_result("get_connection_context", "ri:profile.read", [{ customer_code: "TEST", customer_name: "Test Customer", environment: "Test", base_url: url.origin, user_name: "Test User", scopes: SCOPES, write_tools_enabled: true }]));
+    return;
+  }
+  if (request.method === "POST" && url.pathname === "/agent/entities/create") {
+    assert(body.feature_code === "Loan" && body.parent_id === "deal-1", "creation lost feature or parent");
+    if (body.record.Name === "Unknown outcome") { write_json(response, 503, { error: "unavailable" }); return; }
+    if (body.record.Name === "Invalid field") { write_json(response, 400, { Code: "INVALID_FIELD", Message: "Invalid initial field value" }); return; }
+    assert(body.record.Name === "New loan", "creation lost initial fields");
+    assert(!("expected_customer_code" in body) && !("customer_code" in body), "creation must use only the authenticated customer");
+    if (!body.dry_run) assert(body.approved, "creation lost approval");
+    write_json(response, 200, agent_result("create_entity", "ri:entity.create", [{ dry_run: body.dry_run, created: !body.dry_run, feature_code: "Loan", entity_id: body.dry_run ? null : "new-loan-1", values: [{ field_name: "Name", value: body.record.Name }] }]));
     return;
   }
 
@@ -2079,3 +2124,9 @@ main().catch((error) => {
   console.error(error?.stack || error?.message || String(error));
   process.exitCode = 1;
 });
+
+async function assert_rejects(action, message) {
+  let error;
+  try { await action(); } catch (caught) { error = caught; }
+  assert(error && String(error.message).includes(message), `Expected rejection containing ${message}, got ${error?.message}`);
+}

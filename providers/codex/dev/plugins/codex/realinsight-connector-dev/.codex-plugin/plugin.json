@@ -1,7 +1,7 @@
 {
   "name": "realinsight-connector-dev",
-  "version": "0.2.3-dev",
-  "description": "Codex plugin for authenticated Realinsight schema, entity, record, dashboard, analytic, and workbench tools.",
+  "version": "0.2.4-dev",
+  "description": "Connect Codex to Realinsight records, analytics, configuration, and approved entity creation.",
   "author": {
     "name": "Realinsight"
   },
@@ -16,7 +16,7 @@
   "interface": {
     "displayName": "Realinsight Connector Dev",
     "shortDescription": "Connect Codex to Realinsight tools and skills",
-    "longDescription": "Use Realinsight from Codex through the hosted Realinsight Streamable HTTP MCP server. This connector supports browser-based Realinsight login, schema and field discovery, broad entity search, child/latest-child retrieval, structure traversal, read-only record hydration, dashboard/analytic/workbench cached data, CSV export pages, and entity-ref helpers using the active user's Realinsight permissions.",
+    "longDescription": "Work with the hosted Realinsight Streamable HTTP MCP server through secure customer-scoped authentication. View your current customer and environment, discover schema, search and read records, analyze dashboards and reports, and create entities with initial fields or update supported data and configuration after explicit approval.",
     "developerName": "Realinsight",
     "category": "Developer Tools",
     "capabilities": [
@@ -29,7 +29,7 @@
       "Find the Realinsight feature and fields for this request.",
       "Use Realinsight records to answer my portfolio question."
     ],
-    "brandColor": "#2563EB"
+    "brandColor": "#075DC5"
   },
   "mcpServers": "./.mcp.json"
 }

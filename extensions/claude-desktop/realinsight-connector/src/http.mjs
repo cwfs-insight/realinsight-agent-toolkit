@@ -81,8 +81,8 @@ async function request_json_once(url, options) {
     if (!response.ok) {
       throw new HttpJsonError(
         response.status,
-        payload && payload.error ? payload.error : `http_${response.status}`,
-        payload && payload.error_description ? payload.error_description : response.statusText,
+        payload?.error || payload?.Code || `http_${response.status}`,
+        payload?.error_description || payload?.Message || response.statusText,
         payload,
       );
     }

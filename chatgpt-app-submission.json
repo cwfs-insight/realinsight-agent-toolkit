@@ -4,10 +4,34 @@
   "app_info": {
     "display_name": "Realinsight",
     "subtitle": "Work with Realinsight data",
-    "description": "Realinsight helps commercial real estate teams find and analyze customer-scoped records, dashboards, workbenches, reports, model forms, and chart-of-accounts configuration, with approval-gated tools for supported updates.",
+    "description": "Find and analyze your Realinsight records, dashboards, reports, and configuration. View your connected customer and environment, switch connections, and create entities with initial fields or make supported updates after explicit approval.",
     "category": "BUSINESS"
   },
   "tools": {
+    "get_connection_context": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
+      }
+    },
+    "create_entity": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Validates without writing by default; the same tool creates an entity and initial fields when explicitly approved.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
+      }
+    },
     "get_tool_reference": {
       "annotations": {
         "readOnlyHint": true,
@@ -15,21 +39,9 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
-      }
-    },
-    "disconnect": {
-      "annotations": {
-        "readOnlyHint": false,
-        "openWorldHint": false,
-        "destructiveHint": true
-      },
-      "justifications": {
-        "read_only_justification": "Revokes an OAuth grant and therefore changes authentication state.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Revokes the current OAuth grant, which immediately removes the host's access until the user reconnects."
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
       }
     },
     "search_features": {
@@ -39,9 +51,9 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
       }
     },
     "search_fields": {
@@ -51,9 +63,9 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
       }
     },
     "get_fields": {
@@ -63,9 +75,9 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
       }
     },
     "search_entities": {
@@ -75,9 +87,21 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
+      }
+    },
+    "run_entity_query": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
       }
     },
     "get_children": {
@@ -87,9 +111,9 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
       }
     },
     "get_latest_children": {
@@ -99,9 +123,9 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
       }
     },
     "get_records": {
@@ -111,9 +135,9 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
       }
     },
     "set_record": {
@@ -123,9 +147,9 @@
         "destructiveHint": true
       },
       "justifications": {
-        "read_only_justification": "Creates or changes private Realinsight state and is not read-only.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Can overwrite selected field values on an existing Realinsight record after explicit approval."
+        "read_only_justification": "Changes Realinsight data or connection state after explicit user approval.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Can overwrite or remove existing configuration or record values after approval."
       }
     },
     "get_entity_structure": {
@@ -135,9 +159,9 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
       }
     },
     "list_dashboard_pages": {
@@ -147,9 +171,9 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
       }
     },
     "get_dashboard_page": {
@@ -159,9 +183,9 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
       }
     },
     "get_analytic_data": {
@@ -171,9 +195,9 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
       }
     },
     "get_analytic_csv": {
@@ -183,9 +207,9 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
       }
     },
     "extract_analytic_entities": {
@@ -195,9 +219,9 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
       }
     },
     "list_workbenches": {
@@ -207,9 +231,9 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
       }
     },
     "get_workbench_data": {
@@ -219,9 +243,9 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
       }
     },
     "get_workbench_csv": {
@@ -231,9 +255,9 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
       }
     },
     "extract_workbench_entities": {
@@ -243,9 +267,9 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
       }
     },
     "search_reports": {
@@ -255,9 +279,9 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
       }
     },
     "search_report_folders": {
@@ -267,9 +291,9 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
       }
     },
     "get_report": {
@@ -279,9 +303,9 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
       }
     },
     "get_chart_of_accounts": {
@@ -291,9 +315,9 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
       }
     },
     "get_coa_data": {
@@ -303,9 +327,9 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
       }
     },
     "set_chart_of_accounts": {
@@ -315,9 +339,69 @@
         "destructiveHint": true
       },
       "justifications": {
-        "read_only_justification": "Creates or changes private Realinsight state and is not read-only.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Can replace or remove chart rows and mappings in a private Realinsight customer after explicit approval and safety checks."
+        "read_only_justification": "Changes Realinsight data or connection state after explicit user approval.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Can overwrite or remove existing configuration or record values after approval."
+      }
+    },
+    "get_realviews": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
+      }
+    },
+    "execute_realview": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
+      }
+    },
+    "set_realview": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Changes Realinsight data or connection state after explicit user approval.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Can overwrite or remove existing configuration or record values after approval."
+      }
+    },
+    "get_extended_data": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
+      }
+    },
+    "set_extended_data": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Changes Realinsight data or connection state after explicit user approval.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Can overwrite or remove existing configuration or record values after approval."
       }
     },
     "search_model_forms": {
@@ -327,9 +411,9 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
       }
     },
     "search_model_form_folders": {
@@ -339,9 +423,9 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
       }
     },
     "get_model_form": {
@@ -351,9 +435,9 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
       }
     },
     "validate_create_model_form": {
@@ -363,9 +447,9 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
       }
     },
     "create_model_form": {
@@ -375,9 +459,9 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Creates or changes private Realinsight state and is not read-only.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Creates a model form inside the authenticated customer's private Realinsight environment after explicit approval."
+        "read_only_justification": "Changes Realinsight data or connection state after explicit user approval.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
       }
     },
     "validate_update_model_form": {
@@ -387,9 +471,9 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
       }
     },
     "update_model_form": {
@@ -399,9 +483,9 @@
         "destructiveHint": true
       },
       "justifications": {
-        "read_only_justification": "Creates or changes private Realinsight state and is not read-only.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Can overwrite model form metadata or replace map content after explicit approval and conflict-token validation."
+        "read_only_justification": "Changes Realinsight data or connection state after explicit user approval.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Can overwrite or remove existing configuration or record values after approval."
       }
     },
     "download_model_form_template": {
@@ -411,9 +495,9 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
       }
     },
     "stage_model_form_template_file": {
@@ -423,9 +507,9 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Creates or changes private Realinsight state and is not read-only.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Creates a short-lived private upload session but does not replace the template until a separate approved call."
+        "read_only_justification": "Changes Realinsight data or connection state after explicit user approval.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
       }
     },
     "upload_model_form_template": {
@@ -435,9 +519,9 @@
         "destructiveHint": true
       },
       "justifications": {
-        "read_only_justification": "Creates or changes private Realinsight state and is not read-only.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Replaces the model form's current template file after explicit approval and conflict-token validation."
+        "read_only_justification": "Changes Realinsight data or connection state after explicit user approval.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Can overwrite or remove existing configuration or record values after approval."
       }
     },
     "validate_create_report": {
@@ -447,9 +531,9 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
       }
     },
     "validate_update_report": {
@@ -459,9 +543,9 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
       }
     },
     "validate_delete_report": {
@@ -471,9 +555,9 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Retrieves or computes information within the authenticated Realinsight environment without changing data.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Does not delete, overwrite, revoke access, or perform another irreversible action."
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
       }
     },
     "create_report": {
@@ -483,9 +567,9 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Creates or changes private Realinsight state and is not read-only.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Creates a report definition inside the authenticated customer's private Realinsight environment after explicit approval."
+        "read_only_justification": "Changes Realinsight data or connection state after explicit user approval.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
       }
     },
     "update_report": {
@@ -495,9 +579,9 @@
         "destructiveHint": true
       },
       "justifications": {
-        "read_only_justification": "Creates or changes private Realinsight state and is not read-only.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Can overwrite an existing report definition after explicit approval and conflict-token validation."
+        "read_only_justification": "Changes Realinsight data or connection state after explicit user approval.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Can overwrite or remove existing configuration or record values after approval."
       }
     },
     "delete_report": {
@@ -507,9 +591,69 @@
         "destructiveHint": true
       },
       "justifications": {
-        "read_only_justification": "Creates or changes private Realinsight state and is not read-only.",
-        "open_world_justification": "Operates only within authenticated private Realinsight customer data and does not publish to the public internet or third-party systems.",
-        "destructive_justification": "Soft-deletes an existing report definition after explicit approval and downstream-use validation."
+        "read_only_justification": "Changes Realinsight data or connection state after explicit user approval.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Can overwrite or remove existing configuration or record values after approval."
+      }
+    },
+    "import_report_into_composite": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Changes Realinsight data or connection state after explicit user approval.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Can overwrite or remove existing configuration or record values after approval."
+      }
+    },
+    "download_report_template": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
+      }
+    },
+    "stage_report_template_file": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Changes Realinsight data or connection state after explicit user approval.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
+      }
+    },
+    "upload_report_template": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Changes Realinsight data or connection state after explicit user approval.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Can overwrite or remove existing configuration or record values after approval."
+      }
+    },
+    "disconnect": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Changes Realinsight data or connection state after explicit user approval.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Revokes the active OAuth grant; the user must reconnect to restore access."
       }
     }
   },

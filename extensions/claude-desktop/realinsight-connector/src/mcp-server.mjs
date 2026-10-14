@@ -300,6 +300,9 @@ function to_mcp_tool_definition(tool) {
     title: tool.title,
     description: tool.description,
     inputSchema: tool.inputSchema,
+    ...(tool.outputSchema ? { outputSchema: tool.outputSchema } : {}),
+    ...(tool._meta ? { _meta: tool._meta } : {}),
+    ...(tool.icons ? { icons: tool.icons } : {}),
     annotations: {
       readOnlyHint: tool.readOnlyHint ?? true,
       destructiveHint: tool.destructiveHint ?? false,

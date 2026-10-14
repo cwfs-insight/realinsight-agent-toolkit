@@ -1,5 +1,9 @@
 # Record Writes
 
+`create_entity` creates a single entity together with initial fields. Use existing schema discovery for feature codes, parent feature requirements, and exact updateable field names. `dry_run` defaults to true. Validation returns the normalized initial values without saving or running creation/update hooks. For an approved save, pass the same feature, applicable parent, and values with `dry_run=false` and `approved=true`. Initial values are subject to normal field-edit permissions in addition to entity insert access. This requires `ri:entity.create`; existing-record edits still use `ri:record.write`.
+
+The create operation is non-idempotent. If a response is lost, search for the entity before retrying. Follow warnings from validation and saving, and summarize the resulting customer, entity, and applied fields.
+
 Use this only when write tools are available and the user asks to update Realinsight data.
 
 ## Preconditions

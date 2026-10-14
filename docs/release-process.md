@@ -35,7 +35,7 @@ The exporter should be allowlist-driven:
 2. Verify the target path is inside an allowed managed root.
 3. Refuse to overwrite repo-owned files unless a release flag explicitly permits it.
 4. Preserve or regenerate `.realinsight-managed-*.json` markers in managed folders.
-5. Write source commit, generated timestamp, package version, environment, and checksums into `RELEASE_MANIFEST.json`.
+5. Write source commit, generated timestamp, package version, environment, and checksums into `RELEASE_MANIFEST.json`. Use the exporter's explicit `--update-branding` flag when updating official target-owned brand assets.
 6. Run a dry-run diff before writing.
 7. Run contract smoke tests and package dry-run checks after writing.
 
@@ -115,3 +115,9 @@ Each documentation package should declare:
 - Visibility level.
 - How agents should discover it: MCP resource, CLI command, local file reference, or skill reference.
 - Redaction and secret-scan status.
+
+## 0.2.4 deployment checks
+
+Deploy the corresponding Core API before enabling the new connection and entity-creation tools. Existing OAuth grants do not automatically gain `ri:entity.create`; request fresh consent when creation is needed. Verify customer switching, permission denial, representative creation hooks, and rollback against test data before connector-store submission. Git publication and local package validation do not certify a deployed connector.
+
+Output schemas are advertised at tool discovery. Hosts control whether they load the entire inventory or defer tool search; measure context usage in each target host. MCP App UI requires a compatible host, while ordinary tools remain usable without the card.

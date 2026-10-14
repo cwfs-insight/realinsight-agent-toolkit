@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "realinsight-connector",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Connect AI agents to authenticated Realinsight tools and reusable workflow skills.",
   "author": {
     "name": "Realinsight",
@@ -16,5 +16,30 @@
     "agent-skills",
     "commercial-real-estate",
     "analytics"
-  ]
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Realinsight",
+        "shortDescription": "Work with your Realinsight customer data",
+        "longDescription": "View your connected customer and environment. Find and analyze Realinsight records, dashboards, and reports. Create entities with initial fields and make supported record and configuration updates after explicit approval.",
+        "developerName": "Realinsight",
+        "websiteURL": "https://www.realinsight.com",
+        "composerIcon": "./docs/assets/brand/realinsight-agent-icon-180.png",
+        "logo": "./docs/assets/brand/realinsight-agent-icon-180.png",
+        "category": "Business",
+        "capabilities": [
+          "Interactive",
+          "Read",
+          "Write"
+        ],
+        "defaultPrompt": [
+          "Show my connected Realinsight customer and environment.",
+          "Find a loan or property and show its key fields.",
+          "Validate creating a Realinsight entity with initial fields."
+        ],
+        "brandColor": "#075DC5"
+      }
+    }
+  }
 }

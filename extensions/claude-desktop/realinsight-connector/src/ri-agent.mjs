@@ -6,7 +6,8 @@ import { login, list_profiles, logout, status } from "./auth.mjs";
 import { get_children, get_latest_children } from "./child-tools.mjs";
 import { get_chart_of_accounts, get_coa_data, set_chart_of_accounts } from "./chart-of-accounts-tools.mjs";
 import { doctor } from "./doctor.mjs";
-import { run_entity_query, search_entities } from "./entity-tools.mjs";
+import { create_entity, run_entity_query, search_entities } from "./entity-tools.mjs";
+import { get_connection_context } from "./connection-tools.mjs";
 import { get_extended_data, set_extended_data } from "./extended-data-tools.mjs";
 import { format_error_message, HttpJsonError } from "./http.mjs";
 import { start_mcp_server } from "./mcp-server.mjs";
@@ -161,6 +162,17 @@ async function main() {
 
   if (command === "get-records" || command === "get_records") {
     await get_records(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "create-entity" || command === "create_entity") {
+    assert_write_tools_enabled();
+    await create_entity(parsed.positionals.slice(1), parsed.options);
+    return;
+  }
+
+  if (command === "connection-context" || command === "get_connection_context") {
+    await get_connection_context(parsed.positionals.slice(1), parsed.options);
     return;
   }
 
@@ -792,7 +804,9 @@ async function run_report_command(positionals, options) {
 
 function print_help() {
   const write_help = WRITE_TOOLS_ENABLED
-    ? `  ri-agent set-record ENTITY_ID --record-json JSON --approved [--update-fields A,B] [--table]
+    ? `  ri-agent connection-context [--profile NAME]
+  ri-agent create-entity FEATURE_CODE [--parent-id ID] --record-json JSON [--dry-run false --approved]
+  ri-agent set-record ENTITY_ID --record-json JSON --approved [--update-fields A,B] [--table]
   ri-agent set-chart-of-accounts [COA_ID] --request-json JSON --approved
   ri-agent set-realview [REALVIEW_ID] --request-json JSON --approved
   ri-agent set-extended-data [CONFIGURATION_ID] --request-json JSON --approved

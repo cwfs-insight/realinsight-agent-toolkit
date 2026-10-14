@@ -109,7 +109,13 @@ async function validate_openai_submission() {
   if (submission.schema_version !== 1) fail("openai", "submission schema_version must be 1.");
   if (!submission.app_info?.display_name) fail("openai", "submission display_name is missing.");
   if ((submission.app_info?.subtitle?.length ?? 0) > 30) fail("openai", "submission subtitle exceeds 30 characters.");
-  if (tool_names.length !== 42) fail("openai", `submission must describe 42 hosted tools; found ${tool_names.length}.`);
+  const { ALL_AGENT_TOOLS } = await import(pathToFileURL(path.join(REPO_ROOT, "packages/agent-toolkit/src/tool-definitions.mjs")).href);
+  const local_auth_tools = new Set(["auth_status", "list_profiles", "connect_realinsight", "switch_profile", "disconnect_realinsight", "request_realinsight_scopes"]);
+  const expected_names = new Set(ALL_AGENT_TOOLS.filter(tool => !local_auth_tools.has(tool.name)).map(tool => tool.name));
+  expected_names.add("disconnect");
+  const missing = [...expected_names].filter(name => !tool_names.includes(name));
+  const unexpected = tool_names.filter(name => !expected_names.has(name));
+  if (missing.length || unexpected.length) fail("openai", `submission inventory differs from runtime; missing: ${missing.join(", ") || "none"}; unexpected: ${unexpected.join(", ") || "none"}.`);
   if (submission.test_cases?.length !== 5) fail("openai", "submission must contain exactly five positive test cases.");
   if (submission.negative_test_cases?.length !== 3) fail("openai", "submission must contain exactly three negative test cases.");
 

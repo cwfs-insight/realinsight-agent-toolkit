@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Realinsight Connection</title>
+  <style>
+    :root { color-scheme: light dark; font-family: var(--font-sans, system-ui, sans-serif); background: var(--color-background-primary, Canvas); color: var(--color-text-primary, CanvasText); font-size: 14px; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 24px; }
+    main { max-width: 620px; margin: 0 auto; }
+    .brand { display: block; width: 202px; height: 33px; color: var(--color-text-primary, CanvasText); }
+    h1 { margin: 24px 0 6px; font-size: 22px; font-weight: 650; letter-spacing: -.02em; }
+    p { line-height: 1.5; }
+    .intro { margin: 0; }
+    .muted { color: var(--color-text-secondary, GrayText); }
+    .card { margin-top: 20px; padding: 24px; border: 1px solid var(--color-border-primary, #bdc7d2); border-radius: 16px; }
+    .card-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+    .eyebrow { font-size: 12px; font-weight: 600; }
+    .badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 6px; background: var(--color-background-secondary, #edf2f6); font-size: 12px; }
+    .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--color-text-secondary, GrayText); }
+    .badge[data-connected="true"]::before { background: #3498db; }
+    h2 { margin: 14px 0 4px; font-size: 28px; font-weight: 650; letter-spacing: -.025em; overflow-wrap: anywhere; }
+    #code { font-size: 12px; }
+    dl { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 14px 18px; margin: 24px 0 0; padding-top: 20px; border-top: 1px solid var(--color-border-primary, #bdc7d2); }
+    dt { color: var(--color-text-secondary, GrayText); }
+    dd { margin: 0; overflow-wrap: anywhere; line-height: 1.4; }
+    #server { font-size: 12px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+    button, select, input { font: inherit; min-height: 42px; border: 1px solid var(--color-border-primary, #bdc7d2); border-radius: 8px; background: var(--color-background-primary, Canvas); color: inherit; }
+    button { padding: 10px 16px; cursor: pointer; font-weight: 550; }
+    button.primary { background: #075dc5; color: white; border-color: #075dc5; }
+    button:hover:not(:disabled) { filter: brightness(.94); }
+    button:disabled, select:disabled, input:disabled { opacity: .5; cursor: default; }
+    button:focus-visible, select:focus-visible, input:focus-visible, summary:focus-visible { outline: 3px solid #3498db; outline-offset: 3px; }
+    select, input { display: block; width: 100%; margin-top: 8px; padding: 10px 12px; }
+    label { font-weight: 550; }
+    #switch-panel { margin-top: 24px; border-top: 1px solid var(--color-border-primary, #bdc7d2); padding-top: 20px; }
+    h3 { margin: 0 0 8px; font-size: 16px; }
+    [hidden] { display: none !important; }
+    .hint { font-size: 12px; }
+    details { margin-top: 20px; font-size: 12px; }
+    summary { cursor: pointer; padding: 4px 0; }
+    #scopes { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; padding: 0; margin-bottom: 0; }
+    #scopes li { padding: 4px 8px; border-radius: 5px; background: var(--color-background-secondary, #edf2f6); overflow-wrap: anywhere; }
+    #status { min-height: 20px; margin: 18px 0 0; font-size: 12px; }
+    @media (max-width: 400px) { body { padding: 16px; } .card { padding: 18px; } dl { grid-template-columns: 1fr; gap: 6px; } dd { margin-bottom: 10px; } .actions > button { flex: 1; } h2 { font-size: 24px; } }
+  </style>
+</head>
+<body>
+<main>
+  <!-- Official header SVG paths from https://www.realinsight.com/. -->
+  <svg class="brand" role="img" aria-label="Realinsight" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 246 40" width="202" height="33">
+<g fill-rule="evenodd">
+									<path fill="currentColor" d="M.26.006c5.419 0 10.833-.015 16.25.003l2.322.01c2.521.012 4.97.473 7.255 1.564 3.834 1.828 6.05 4.869 6.706 9.09.355 2.29.262 4.557-.378 6.779-.948 3.268-2.983 5.644-5.946 7.25-.491.27-1 .474-1.53.724-.122.055-.216.101-.379.173l-.238.105.147.217Q29.237 32.95 34 39.988h-.263c-3.024 0-6.05-.009-9.075.012-.201 0-.339-.03-.449-.087s-.21-.152-.32-.319l-1.975-2.991-1.98-2.987q-1.981-2.986-3.955-5.976a1.3 1.3 0 0 0-.455-.452 1.15 1.15 0 0 0-.545-.133h-.088c-1.133.03-2.265.01-3.411.01h-.395v-7.438c.134-.007.26-.014.391-.014 2.116 0 4.235.008 6.353-.009 1.046-.007 2.079-.178 3.06-.586l.194-.085c1.067-.48 1.888-1.144 2.45-1.993.561-.849.855-1.868.887-3.044a8.2 8.2 0 0 0-.112-1.639l-.045-.23c-.384-1.814-1.497-3.03-3.135-3.725l-.16-.066a8.1 8.1 0 0 0-2.774-.573 67 67 0 0 0-2.034-.02l-5.978-.01q-2.988 0-5.978-.007c-1.33 0-2.664-.029-4-.045H.207c-.05 0-.101-.004-.168-.01L0 7.565V.02A3 3 0 0 1 .26.007"/>
+									<path fill="currentColor" d="m8.337 19.646.004.084c.006.165.011.397.016.686.01.579.02 1.384.027 2.342a1211 1211 0 0 1 .012 13.968c-.006.97-.013 1.791-.023 2.388q-.007.451-.015.718l-.005.119H.005V19.646zm.006-9.393q.007.087.013.205c.011.208.02.484.029.807.015.645.023 1.471.025 2.303q.003 1.167-.019 2.333a33 33 0 0 1-.026.845q-.007.156-.016.258c-2.755.033-5.518.008-8.34.026v-6.777z"/>
+								</g>
+    <g transform="translate(46 6)">
+<path fill="currentColor" d="M133.91.12c3.269-.415 6.336.207 8.94 2.391.168.14.333.29.565.49h.005c-.805 1.008-1.565 1.95-2.336 2.922-.296-.238-.548-.443-.8-.643-1.715-1.373-3.696-1.895-5.845-1.629-2.22.275-3.858 1.535-4.874 3.477-1.523 2.903-1.499 5.867.12 8.724 1.168 2.049 3.04 3.105 5.419 3.23 1.779.1 3.432-.293 4.953-1.246.338-.21.516-.443.503-.878-.033-1.133-.01-2.268-.01-3.472-.258-.02-.473-.041-.688-.043h-3.916c-.219 0-.435-.018-.678-.031v-3.264c.465-.13 8.212-.153 8.878-.024.01.187.029.384.029.58 0 2.655-.005 5.317.01 7.972.017.365-.15.714-.446.929-2.542 2.073-5.432 3.132-8.744 3.03-2.243-.07-4.293-.69-6.096-2.03-2.116-1.574-3.39-3.693-3.966-6.237-.698-3.082-.403-6.055 1.146-8.841 1.71-3.071 4.324-4.964 7.832-5.406m-26.997.093c3.297-.489 6.255.327 8.878 2.38.092.075.206.127.326.206-.697 1.032-1.329 1.97-2.004 2.964-.196-.13-.359-.237-.52-.35-1.14-.803-2.355-1.445-3.735-1.731-1.035-.216-2.061-.238-3.067.14-1.382.517-2.006 1.722-1.627 3.113.136.495.408.897.845 1.154.486.285.992.57 1.53.747 1.236.406 2.51.7 3.741 1.12.919.313 1.837.68 2.685 1.153 1.793 1.003 2.696 2.567 2.738 4.635.033 1.686-.336 3.217-1.465 4.52-.984 1.133-2.257 1.815-3.71 2.092-4.157.791-7.768-.362-10.886-3.157-.028-.024-.038-.07-.091-.169v-.009c.722-.897 1.435-1.78 2.184-2.712.205.167.374.304.537.444 1.299 1.087 2.723 1.922 4.417 2.235 1.2.22 2.39.271 3.55-.178.8-.308 1.39-.826 1.644-1.673.36-1.187-.043-2.251-1.11-2.873-.992-.582-2.111-.835-3.202-1.159a62 62 0 0 1-3.71-1.212 5.6 5.6 0 0 1-2.117-1.415c-.778-.804-1.184-1.784-1.325-2.88-.247-1.961.104-3.763 1.462-5.274 1.077-1.2 2.462-1.877 4.032-2.11M45.568.207c1.09.038.858-.083 1.25.798q4.537 10.27 9.067 20.536c.09.202.163.407.263.649-.539.154-1.045.089-1.537.051-.121-.009-.261-.227-.328-.382a635 635 0 0 1-1.724-3.96c-.242-.56-.485-1.115-.739-1.699H39.537c-.866 1.984-1.743 4.006-2.628 6.037h-1.643l-.009-.005c.223-.522.402-.953.589-1.373C38.8 14.161 41.76 7.47 44.706.77c.183-.414.408-.58.86-.562m118.36.206c.125.491.172 20.723.06 21.74-.412.14-2.712.177-3.645.052-.005-.729-.012-1.47-.012-2.213v-6.787c-.488-.127-8.837-.172-9.876-.056-.038.728-.01 1.47-.014 2.213v6.787c-.482.145-2.893.172-3.657.052V.434h3.633c.038 1.507.013 3.002.018 4.49.005 1.476 0 2.956 0 4.422.482.125 8.768.171 9.88.055.034-1.48.011-2.974.016-4.463V.443c1.235-.084 2.425-.038 3.597-.029m1.195.107c.47-.14 16.028-.185 16.87-.06.128.426.16 2.624.043 3.497-.707.078-1.438.024-2.16.038h-4.386v18.15c-.484.153-2.965.187-3.774.051V3.977h-6.593a75 75 0 0 1 0-3.456M57.977.471c.5-.121.992-.088 1.545-.017V20.73c.86 0 1.667.009 2.473.013h9.754v1.423c-.498.13-13.112.15-13.772.024zM9.055.4c1.409 0 2.742.308 3.997.953 2.59 1.33 3.443 4.024 3.125 6.208-.393 2.717-2.07 4.259-4.58 5.052-.422.135-.866.218-1.367.339.243.513.617.907.92 1.34.306.436.624.854.937 1.279l.976 1.326c.327.44.649.882.978 1.32q.49.664.974 1.327l.941 1.275c.323.438.642.876 1.036 1.422-.708 0-1.314.03-1.907-.018-.15-.009-.302-.247-.42-.4a1858 1858 0 0 1-3.967-5.402c-.698-.952-1.4-1.896-2.089-2.848-.15-.204-.29-.349-.586-.349-2.08.015-4.159.01-6.237.014-.042 0-.081.015-.215.046h.004v8.906c-.544.116-1.034.098-1.567.024V.457C.184.434.34.4.494.4zm68.523.09c.015.015.034.028.038.046.015.08.033.16.033.238v21.161c0 .08-.022.154-.042.294-1.193.07-2.38.039-3.61.02V.424h3.507zm6.127-.094c.402-.013.631.15.856.453 2.14 2.913 4.293 5.822 6.444 8.73l3.914 5.293c.118.158.248.304.464.575V.439h3.503c.027.022.046.033.055.046a.2.2 0 0 1 .033.051c.018.16.047.318.047.482q0 10.502-.01 20.997c0 .056-.037.111-.07.205-.145.013-.304.037-.458.042-.675.004-1.35-.024-2.019.009-.412.018-.68-.122-.918-.453-.876-1.223-1.78-2.424-2.673-3.631q-4.046-5.464-8.084-10.93c-.078-.106-.172-.204-.355-.413V22.22l-.009.009h-3.597V.457c.178-.018.332-.052.49-.052.797-.004 1.594.02 2.387-.009m38.75 21.833h-3.662V.434h3.662zM33.917.443l.005-.004v1.46H20.778c-.145.472-.18 7.682-.044 8.547h11.844V11.9l-.042.045a.1.1 0 0 1-.046.035.6.6 0 0 1-.24.031l-11.431.02c-.018 0-.038.009-.06.013-.132.434-.182 7.274-.061 8.688.735.028 1.48.009 2.224.013h11.14v1.48H19.148c-.117-.456-.166-20.768-.052-21.707.015-.014.024-.032.039-.045A.2.2 0 0 1 19.18.44c.056-.016.118-.034.178-.034h14.18c.099 0 .201.018.378.038m6.303 14.187h10.896c-1.812-4.173-3.594-8.295-5.43-12.53-1.85 4.244-3.65 8.366-5.467 12.53M2.06 1.924c-.154 0-.31.03-.468.05v9.725c.18.013.299.027.416.027 2.2 0 4.402.02 6.603-.01.651-.013 1.3-.09 1.937-.228 2.258-.477 3.715-1.909 4.028-4.034.314-2.08-.529-4.047-2.749-4.962-.974-.402-2-.556-3.044-.565-2.243-.018-4.485-.009-6.723-.004M186.897.38c1.74 0 3.103 1.35 3.103 3.077a3.04 3.04 0 0 1-.906 2.19 3.06 3.06 0 0 1-2.206.877 3.076 3.076 0 0 1-3.087-3.05 3.06 3.06 0 0 1 .898-2.193 3.08 3.08 0 0 1 2.198-.9m.013.293a2.8 2.8 0 0 0-1.977.815 2.77 2.77 0 0 0-.814 1.973 2.79 2.79 0 0 0 2.749 2.776 2.835 2.835 0 0 0 2.837-2.769c.014-1.516-1.259-2.79-2.795-2.8zm.116 1.355q.458 0 .718.218.26.225.258.617c0 .18-.051.345-.163.479a.83.83 0 0 1-.434.29l.718 1.214v.024h-.257l-.693-1.19v.008h-.83v1.19h-.242V2.03zm-.687 1.46h.745a.68.68 0 0 0 .488-.173.6.6 0 0 0 .18-.449.59.59 0 0 0-.191-.466.8.8 0 0 0-.54-.166h-.682zm-2.06 23.905v.455c-.16.149-182.823.21-184.246.075-.01-.155-.024-.32-.033-.528z"/>
+    </g>
+  </svg>
+  <h1>Your connection</h1>
+  <p class="intro muted">Your tools use the customer and server shown here.</p>
+  <section class="card" aria-label="Current connection">
+    <div class="card-header">
+      <span class="eyebrow muted">Current customer</span>
+      <span id="connection-state" class="badge">Checking connection</span>
+    </div>
+    <h2 id="customer">Waiting for your connection</h2>
+    <div id="code" class="muted"></div>
+    <dl>
+      <dt>Signed in as</dt><dd id="user">—</dd>
+      <dt>Environment</dt><dd id="environment">—</dd>
+      <dt>Server</dt><dd id="server">—</dd>
+      <dt>Access</dt><dd id="access">—</dd>
+    </dl>
+    <details><summary>Granted permissions</summary><ul id="scopes"></ul></details>
+    <div class="actions">
+      <button id="change" class="primary" disabled>Change customer</button>
+      <button id="refresh" disabled>Refresh</button>
+    </div>
+    <div id="switch-panel" hidden>
+      <h3 id="switch-title">Change customer</h3>
+      <p id="switch-help" class="muted">Reconnect Realinsight in your host and choose the customer during sign-in.</p>
+      <div id="local-switch" hidden>
+        <p><label for="profile">Connection</label><select id="profile"><option value="">Sign in to another customer</option></select></p>
+        <p id="new-customer"><label for="customer-code">Customer code</label><input id="customer-code" autocomplete="off" aria-describedby="customer-help"><span id="customer-help" class="hint muted">Sign-in opens in your browser on the current server.</span></p>
+      </div>
+      <p class="hint muted">Start a new conversation after switching so previous customer data stays separate.</p>
+      <div class="actions"><button id="disconnect" class="primary">Disconnect and reconnect</button><button id="cancel">Cancel</button></div>
+    </div>
+    <p id="status" class="muted" role="status" aria-live="polite">Open this view in a compatible MCP App host.</p>
+  </section>
+</main>
+<script>
+  const elements = Object.fromEntries(Array.from(document.querySelectorAll('[id]')).map(element => [element.id, element]));
+  const pending = new Map();
+  let nextId = 0;
+  let connected = false;
+  let hostCapabilities = {};
+  let busy = false;
+  let current = null;
+  let transport = 'hosted';
+  let pendingLocalLogin = false;
+  let localProfile;
+  const sizeObserver = new ResizeObserver(() => {
+    if (connected) notify('ui/notifications/size-changed', { height: Math.ceil(document.querySelector('main').getBoundingClientRect().height + 48) });
+  });
+  sizeObserver.observe(document.querySelector('main'));
+  function notify(method, params) { window.parent.postMessage({ jsonrpc: '2.0', method, params }, '*'); }
+  function request(method, params) {
+    return new Promise((resolve, reject) => {
+      const id = ++nextId;
+      const timeout = setTimeout(() => { pending.delete(id); reject(new Error('The host did not respond. Try refreshing your connection.')); }, 30000);
+      pending.set(id, { resolve, reject, timeout });
+      window.parent.postMessage({ jsonrpc: '2.0', id, method, params }, '*');
+    });
+  }
+  function setStatus(message) { elements.status.textContent = message; }
+  function buttons() {
+    const canCallTools = connected && Boolean(hostCapabilities.serverTools);
+    elements.refresh.disabled = !canCallTools || busy;
+    elements.change.disabled = !canCallTools || busy || !current;
+    elements.disconnect.disabled = !canCallTools || busy;
+    elements.cancel.disabled = busy;
+    elements.profile.disabled = busy;
+    elements['customer-code'].disabled = busy;
+    document.querySelector('.card').setAttribute('aria-busy', String(busy));
+  }
+  function render(context) {
+    current = context;
+    elements['connection-state'].textContent = context ? 'Connected' : 'Not connected';
+    elements['connection-state'].dataset.connected = String(Boolean(context));
+    elements.change.textContent = transport === 'local' ? 'Switch connection' : 'Change customer';
+    elements.customer.textContent = context?.customer_name || (context ? context.customer_code : 'Connection unavailable');
+    elements.code.textContent = context?.customer_code ? `Customer code: ${context.customer_code}` : '';
+    elements.environment.textContent = context?.environment || '—';
+    elements.user.textContent = context?.user_name || '—';
+    elements.server.textContent = context?.base_url || '—';
+    const write = context?.write_tools_enabled && (context.credential_type === 'session' || context.scopes?.some(scope => scope.endsWith('.write') || scope === 'ri:entity.create'));
+    elements.access.textContent = context ? (write ? 'Read and approved write actions' : 'Read access') : '—';
+    elements.scopes.replaceChildren(...(context?.scopes || []).map(scope => { const item = document.createElement('li'); item.textContent = scope; return item; }));
+    buttons();
+  }
+  async function updateModelContext(text) {
+    if (!hostCapabilities.updateModelContext?.text) return;
+    try {
+      await request('ui/update-model-context', { content: [{ type: 'text', text }] });
+    }
+    catch (error) { setStatus(`The connection view updated, but the conversation context could not be updated: ${error.message}`); }
+  }
+  async function applyResult(result) {
+    if (result?.isError) throw new Error(result.structuredContent?.error || result.content?.find(item => item.type === 'text')?.text || 'Reconnect Realinsight in your host.');
+    const context = result?.structuredContent?.items?.[0];
+    if (context?.customer_code && context.base_url) {
+      transport = context.transport || 'hosted';
+      render(context);
+      setStatus(hostCapabilities.serverTools ? 'Connection verified.' : 'This host can display the connection. Refresh and switching require tool-call support in the host.');
+      await updateModelContext(`The verified Realinsight connection is ${context.customer_name || context.customer_code} (${context.customer_code}) in ${context.environment}, at ${context.base_url}, as ${context.user_name}. Granted scopes: ${(context.scopes || []).join(', ')}. Use this connection for subsequent calls; previous connection context is stale.`);
+    } else {
+      throw new Error('The host did not return a verified Realinsight connection. Refresh or reconnect.');
+    }
+  }
+  async function callTool(name, args = {}) {
+    if (!connected || !hostCapabilities.serverTools) throw new Error('This host cannot run connection actions. Manage your Realinsight connection in the host settings.');
+    const result = await request('tools/call', { name, arguments: args });
+    if (result?.isError) throw new Error(result.structuredContent?.error || result.content?.find(item => item.type === 'text')?.text || 'The action failed.');
+    return result;
+  }
+  async function refresh() {
+    busy = true; buttons(); setStatus('Checking your connection…');
+    try {
+      if (pendingLocalLogin) {
+        const auth = (await callTool('auth_status')).structuredContent;
+        if (auth?.status !== 'connected') throw new Error('Finish the Realinsight browser sign-in, then refresh this view.');
+        pendingLocalLogin = false;
+      }
+      await applyResult(await callTool('get_connection_context', transport === 'local' && localProfile ? { profile: localProfile } : {}));
+    }
+    catch (error) { render(null); setStatus(error.message); }
+    finally { busy = false; buttons(); }
+  }
+  elements.refresh.addEventListener('click', refresh);
+  elements.profile.addEventListener('change', () => { elements['new-customer'].hidden = Boolean(elements.profile.value); });
+  elements.change.addEventListener('click', async () => {
+    busy = true; buttons();
+    elements['switch-panel'].hidden = false;
+    elements['local-switch'].hidden = transport !== 'local';
+    elements['switch-title'].textContent = transport === 'local' ? 'Switch connection' : 'Change customer';
+    elements.disconnect.textContent = transport === 'local' ? 'Switch connection' : 'Disconnect and reconnect';
+    elements['switch-help'].textContent = transport === 'local' ? 'Choose a saved connection to switch customer or server. A new sign-in uses the current server.' : 'Changing customer disconnects this connection. Reconnect Realinsight in your host and choose the customer during sign-in.';
+    if (transport === 'local') {
+      try {
+        const result = (await callTool('list_profiles')).structuredContent;
+        elements.profile.replaceChildren(new Option('Sign in to another customer', ''), ...(result?.profiles || []).map(profile => new Option(`${profile.customer_name || profile.name} · ${profile.base_url}`, profile.name)));
+      }
+      catch (error) { setStatus(error.message); }
+    }
+    busy = false; buttons();
+    elements['new-customer'].hidden = Boolean(elements.profile.value);
+    (transport === 'local' ? elements.profile : elements.disconnect).focus();
+  });
+  elements.cancel.addEventListener('click', () => { elements['switch-panel'].hidden = true; elements.change.focus(); });
+  elements.disconnect.addEventListener('click', async () => {
+    busy = true; buttons();
+    try {
+      if (transport === 'local') {
+        const profile = elements.profile.value;
+        const customer_code = elements['customer-code'].value.trim();
+        if (!profile && !customer_code) throw new Error('Choose a connection or enter a customer code.');
+        const result = (await callTool('switch_profile', profile ? { profile, reauthorize: false } : { customer_code, force_login: true, wait_for_approval: false })).structuredContent;
+        localProfile = undefined;
+        if (result?.status === 'authorization_pending') {
+          pendingLocalLogin = true; render(null); setStatus('Finish the Realinsight browser sign-in, then refresh this view.');
+          await updateModelContext('Realinsight is awaiting a new customer sign-in. Previous customer context is stale. Wait for approval and verify the connection before further calls.');
+        } else await applyResult(await callTool('get_connection_context'));
+        elements['switch-panel'].hidden = true;
+        return;
+      }
+      await callTool('disconnect');
+      render(null); elements['switch-panel'].hidden = true;
+      setStatus('Disconnected. Reconnect Realinsight in your host, choose the customer, then refresh this view.');
+      await updateModelContext('Realinsight was disconnected. Previous customer context is stale. Reconnect and verify the customer before further calls.');
+      // The host owns OAuth. A fresh call starts its authentication flow where supported.
+      await applyResult(await callTool('get_connection_context'));
+    }
+    catch (error) { setStatus(error.message); }
+    finally { busy = false; buttons(); }
+  });
+  function applyHostContext(context) {
+    for (const [key, value] of Object.entries(context?.styles?.variables || {})) {
+      if (key.startsWith('--') && typeof value === 'string') document.documentElement.style.setProperty(key, value);
+    }
+    if (context?.theme === 'light' || context?.theme === 'dark') {
+      document.documentElement.style.colorScheme = context.theme;
+      document.documentElement.dataset.theme = context.theme;
+    }
+  }
+  window.addEventListener('message', async event => {
+    if (event.source !== window.parent || event.data?.jsonrpc !== '2.0') return;
+    const message = event.data;
+    if (message.method === 'ui/notifications/tool-input') localProfile = message.params?.arguments?.profile;
+    if (message.method === 'ui/resource-teardown') {
+      sizeObserver.disconnect();
+      for (const entry of pending.values()) { clearTimeout(entry.timeout); entry.reject(new Error('The connection view was closed.')); }
+      pending.clear(); connected = false;
+      window.parent.postMessage({ jsonrpc: '2.0', id: message.id, result: {} }, '*');
+      return;
+    }
+    if (pending.has(message.id)) {
+      const entry = pending.get(message.id); pending.delete(message.id); clearTimeout(entry.timeout);
+      if (message.error) entry.reject(new Error(message.error.message)); else entry.resolve(message.result);
+    }
+    if (message.method === 'ui/notifications/tool-result') {
+      try { await applyResult(message.params); } catch (error) { render(null); setStatus(error.message); }
+    }
+    if (message.method === 'ui/notifications/host-context-changed') applyHostContext(message.params);
+  });
+  (async () => {
+    if (window.parent === window) return;
+    try {
+      const result = await request('ui/initialize', { appInfo: { name: 'Realinsight Connection', version: '0.2.4' }, appCapabilities: { availableDisplayModes: ['inline', 'fullscreen'] }, protocolVersion: '2026-01-26' });
+      hostCapabilities = result.hostCapabilities || {};
+      applyHostContext(result.hostContext); connected = true; buttons();
+      notify('ui/notifications/initialized', {});
+      if (!hostCapabilities.serverTools) setStatus('This host can display the connection. Refresh and switching require tool-call support in the host.');
+      else if (!current) setStatus('Waiting for the host to supply your current connection.');
+    }
+    catch (error) { setStatus(error.message); }
+  })();
+</script>
+</body>
+</html>

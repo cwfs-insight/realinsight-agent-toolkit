@@ -1,6 +1,6 @@
 import { option_bool, option_bool_if_present, option_value } from "./args.mjs";
 import { load_fresh_profile_by_name } from "./auth.mjs";
-import { post_agent_read_json, request_agent_json } from "./http.mjs";
+import { post_agent_json, post_agent_read_json, request_agent_json } from "./http.mjs";
 import {
   optional_boolean,
   optional_integer,
@@ -8,7 +8,39 @@ import {
   optional_string_array,
   required_string,
   JsonRpcError,
+  is_plain_object,
 } from "./json-rpc.mjs";
+
+export async function agent_create_entity(input) {
+  const feature_code = required_string(input, "feature_code", "create_entity requires feature_code.");
+  const record = input.record ?? {};
+  const dry_run = optional_boolean(input, "dry_run") ?? true;
+  const approved = optional_boolean(input, "approved") === true;
+  if (!is_plain_object(record) || Object.keys(record).length > 100) throw new JsonRpcError(-32602, "record must contain at most 100 named initial fields.");
+  if (!dry_run && !approved) throw new JsonRpcError(-32602, "Creation requires approved=true after explicit user approval.");
+  const { profile } = await load_fresh_profile_by_name(optional_string(input, "profile"));
+  // Mutations must never use the safe-read retry path: a lost response could create a duplicate.
+  return await post_agent_json(profile, "/agent/entities/create", {
+    feature_code, parent_id: optional_string(input, "parent_id"), record, dry_run, approved,
+  });
+}
+
+export async function create_entity(positionals, options) {
+  let record;
+  try {
+    record = JSON.parse(option_value(options, "record-json", "{}"));
+  }
+  catch {
+    throw new JsonRpcError(-32602, "record-json must be a JSON object.");
+  }
+  const payload = await agent_create_entity({
+    feature_code: option_value(options, "feature-code", positionals[0]),
+    parent_id: option_value(options, "parent-id", undefined),
+    dry_run: option_bool(options, "dry-run", true), approved: option_bool(options, "approved", false),
+    profile: option_value(options, "profile", undefined), record,
+  });
+  console.log(JSON.stringify(payload, null, 2));
+}
 
 export async function search_entities(positionals, options) {
   const payload = await agent_search_entities({

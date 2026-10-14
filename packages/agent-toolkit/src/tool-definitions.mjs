@@ -1,11 +1,13 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { CONNECTION_UI_META, CONNECTION_ICON } from "./mcp-app-resources.mjs";
 
-const AGENT_TOOL_PAYLOAD_SCHEMAS = JSON.parse(fs.readFileSync(
+const AGENT_TOOL_SCHEMAS = JSON.parse(fs.readFileSync(
   new URL("./generated/agent-tool-payload-schemas.json", import.meta.url),
   "utf8",
-)).payloads;
+));
+const AGENT_TOOL_PAYLOAD_SCHEMAS = AGENT_TOOL_SCHEMAS.payloads;
 
 export const DEFAULT_BASE_URL = "https://www.realinsight.cloud/api/v1";
 export const DEFAULT_CLIENT_ID = "realinsight-agent-toolkit";
@@ -17,6 +19,7 @@ export const DEFAULT_SCOPE = [
   "ri:schema.read",
   "ri:entity.search",
   "ri:entity.read",
+  "ri:entity.create",
   "ri:record.read",
   "ri:record.write",
   "ri:structure.read",
@@ -41,6 +44,7 @@ export const CUSTOMER_SWITCH_SCOPE = "ri:customer.switch";
 export const SCHEMA_READ_SCOPE = "ri:schema.read";
 export const ENTITY_SEARCH_SCOPE = "ri:entity.search";
 export const ENTITY_READ_SCOPE = "ri:entity.read";
+export const ENTITY_CREATE_SCOPE = "ri:entity.create";
 export const RECORD_READ_SCOPE = "ri:record.read";
 export const RECORD_WRITE_SCOPE = "ri:record.write";
 export const STRUCTURE_READ_SCOPE = "ri:structure.read";
@@ -55,6 +59,7 @@ export const EXTENDED_DATA_WRITE_SCOPE = "ri:extended_data.write";
 export const REPORT_WRITE_SCOPE = "ri:reports.write";
 export const WRITE_TOOLS_ENABLED = parse_env_bool(process.env.RI_AGENT_ENABLE_WRITE_TOOLS, true);
 const WRITE_TOOL_NAMES = new Set([
+  "create_entity",
   "set_record",
   "set_chart_of_accounts",
   "set_realview",
@@ -87,7 +92,8 @@ export const MCP_SUPPORTED_PROTOCOL_VERSIONS = [
 export const MCP_SERVER_INFO = {
   name: "realinsight-agent-toolkit",
   title: "Realinsight Agent Toolkit",
-  version: "0.2.3",
+  version: "0.2.4",
+  icons: [CONNECTION_ICON],
 };
 export const MCP_INSTRUCTIONS = [
   "Realinsight is a commercial real estate asset management and servicing platform.",
@@ -130,7 +136,41 @@ export const MCP_INSTRUCTIONS = [
   "Every tool call can include a profile name; otherwise the active local ri-agent auth profile is used.",
 ].join("\n");
 
-const ALL_AGENT_TOOLS = [
+const TOOL_DEFINITIONS = [
+  {
+    name: "get_connection_context",
+    title: "Realinsight Connection",
+    cli: "ri-agent connection-context",
+    route: "GET /agent/context",
+    scope: PROFILE_READ_SCOPE,
+    description: "Show the customer, environment, user, and granted permissions bound to the active connection. Verify this context before writes or after switching customers.",
+    inputSchema: { type: "object", additionalProperties: false, properties: { profile: { type: "string", description: "Optional local authentication profile." } } },
+    _meta: CONNECTION_UI_META,
+    icons: [CONNECTION_ICON],
+  },
+  {
+    name: "create_entity",
+    title: "Create Realinsight Entity",
+    cli: "ri-agent create-entity FEATURE_CODE --record-json JSON",
+    route: "POST /agent/entities/create",
+    scope: ENTITY_CREATE_SCOPE,
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: false,
+    description: "Validate or create one entity and its initial field values in a single call. Discover the exact feature, parent requirements, and updateable fields with existing schema tools. Start with dry_run=true (default). After explicit user approval of customer, feature, parent, and values, submit dry_run=false, approved=true. Never retry a creation whose outcome is unknown; search for it first.",
+    inputSchema: {
+      type: "object", additionalProperties: false,
+      properties: {
+        profile: { type: "string", description: "Optional local authentication profile." },
+        feature_code: { type: "string", description: "Exact feature code from schema discovery." },
+        parent_id: { type: "string", description: "Required active parent of the configured parent feature for a dependent. Omit for a master." },
+        record: { ...generated_payload_schema("record_values", "Up to 100 exact updateable field-name keys and their initial values."), maxProperties: 100 },
+        dry_run: { type: "boolean", default: true, description: "Validate without writing (default). Set false only for approved creation." },
+        approved: { type: "boolean", description: "True only after explicit user approval of this exact creation." },
+      }, required: ["feature_code"],
+    },
+  },
+
   {
     name: "get_tool_reference",
     title: "Get Realinsight Tool Reference",
@@ -2788,9 +2828,22 @@ const ALL_AGENT_TOOLS = [
   },
 ];
 
+export const ALL_AGENT_TOOLS = TOOL_DEFINITIONS.map((tool) => ({
+  ...tool,
+  ...(["auth_status", "list_profiles", "switch_profile", "disconnect_realinsight"].includes(tool.name) ? { _meta: { ui: { visibility: ["model", "app"] } } } : {}),
+  ...(AGENT_TOOL_SCHEMAS.outputs?.[tool.name] ? { outputSchema: local_output_schema(tool.name) } : {}),
+}));
+
 export const AGENT_TOOLS = ALL_AGENT_TOOLS.filter((tool) => (
   WRITE_TOOLS_ENABLED || !WRITE_TOOL_NAMES.has(tool.name)
 ));
+
+function local_output_schema(name) {
+  const schema = structuredClone(AGENT_TOOL_SCHEMAS.outputs[name]);
+  const file_type = { download_model_form_template: "ModelFormTemplateFileResponse", download_report_template: "ReportTemplateFileResponse" }[name];
+  if (file_type) schema.definitions[file_type].properties.local_file_path = { type: "string" };
+  return schema;
+}
 
 function model_form_map_schema(description) {
   return generated_payload_schema("model_form_map", description);

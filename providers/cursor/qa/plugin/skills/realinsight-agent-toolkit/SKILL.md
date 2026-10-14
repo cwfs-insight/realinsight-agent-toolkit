@@ -11,6 +11,8 @@ This is a usage playbook. It assumes the toolkit or connector is already install
 
 ## Connection First
 
+Call `get_connection_context` to see the customer, environment, and permissions bound to the active credential, especially before writes or after switching. Compatible hosts can render a connection view with a Change customer button. Hosted switching disconnects the current grant and requires fresh host-managed sign-in; a browser customer change alone does not switch the connector. Use a fresh conversation after switching to avoid carrying another customer's data forward.
+
 Prefer MCP tools when they are available in the harness. Use the CLI only when the user or harness has direct terminal access.
 
 For local stdio MCP:
@@ -33,6 +35,8 @@ ri-agent tools
 Use `RI_AGENT_BASE_URL` or `--base-url` only when the user is working with a Realinsight-provided non-production environment.
 
 ## Choose The Path
+
+For entity creation, discover the exact feature, its parent requirements, and updateable fields with existing schema tools. Call `create_entity` with `feature_code`, applicable `parent_id`, initial `record` values, and `dry_run=true` (the default). Show the validated customer, feature, parent, and values for approval. Then use the same tool with `dry_run=false`, `approved=true`. Validation runs no add/update hooks; creation can still fail when current rules or hooks reject it. Never automatically retry an unknown creation outcome: search for the entity before deciding what to do next. See [record-writes.md](references/record-writes.md).
 
 Use the user's wording to choose the lightest useful tool family:
 

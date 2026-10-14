@@ -4,6 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { is_plain_object, JsonRpcError } from "./json-rpc.mjs";
+import { CONNECTION_UI_URI, connection_resource_entry, read_connection_resource } from "./mcp-app-resources.mjs";
 
 export const MCP_SKILLS_EXTENSION = "io.modelcontextprotocol/skills";
 export const REALINSIGHT_SKILL_NAME = "realinsight-agent-toolkit";
@@ -45,6 +46,7 @@ export async function list_mcp_resources(params) {
 
   return {
     resources: [
+      connection_resource_entry(),
       {
         uri: REALINSIGHT_SKILL_URI,
         name: REALINSIGHT_SKILL_NAME,
@@ -58,6 +60,7 @@ export async function list_mcp_resources(params) {
 
 export async function read_mcp_resource(params) {
   const uri = optional_string(params, "uri");
+  if (uri === CONNECTION_UI_URI) return { contents: [await read_connection_resource()] };
   const catalog = await load_catalog();
   const file = catalog.files_by_uri.get(uri);
 

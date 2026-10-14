@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.4
+
+- Added a branded MCP App connection view showing the authenticated customer, user, server, permissions, and connection switching controls.
+- Added `create_entity` to validate or create an entity and its initial fields in one call, with parent/field security checks and explicit approval for creation.
+- Added shared output schemas, accurate local file-download results, and clearer Core validation errors.
+- Updated connector metadata and bundled branding across production, dev, and QA distributions.
+
+
 ## 0.2.3
 
 - Added draft SEP-2640 MCP skill discovery for the public Realinsight Agent Toolkit skill through `skills/list`, `skills/get`, and lazy `resources/read`, with complete SHA-256 resource manifests on stdio and hosted-compatible clients.

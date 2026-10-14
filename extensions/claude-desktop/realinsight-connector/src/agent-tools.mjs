@@ -9,7 +9,8 @@ import {
 } from "./auth-tools.mjs";
 import { agent_get_children, agent_get_latest_children } from "./child-tools.mjs";
 import { agent_get_chart_of_accounts, agent_get_coa_data, agent_set_chart_of_accounts } from "./chart-of-accounts-tools.mjs";
-import { agent_run_entity_query, agent_search_entities } from "./entity-tools.mjs";
+import { agent_create_entity, agent_run_entity_query, agent_search_entities } from "./entity-tools.mjs";
+import { agent_get_connection_context } from "./connection-tools.mjs";
 import { agent_get_extended_data, agent_set_extended_data } from "./extended-data-tools.mjs";
 import { JsonRpcError } from "./json-rpc.mjs";
 import {
@@ -60,6 +61,12 @@ export async function call_agent_tool(name, args) {
   let payload;
 
   switch (name) {
+    case "get_connection_context":
+      payload = await agent_get_connection_context(args);
+      break;
+    case "create_entity":
+      payload = await agent_create_entity(args);
+      break;
     case "auth_status":
       payload = await agent_auth_status(args);
       break;
