@@ -19,6 +19,8 @@ Model forms are best for transforming or presenting Realinsight data through an 
 
 ## Workflow
 
+Compatible MCP App hosts display a read-only model-form inspector alongside `get_model_form` results. Expand map nodes to inspect their field/layout mappings. Use Refresh to reload the hierarchy and selected node, or Keep updated to check for changes every 30 seconds while the view is visible. These actions require host tool-call support; otherwise the view is a snapshot of the returned data. The inspector displays configuration, not the workbook's rendered output.
+
 1. Search by `search_text` or `root_feature_code`, unless the user already supplied a model form id.
 2. Call `get_model_form` for summary context, including root dataset, template summary, map counts, assignment state, and the latest `conflict_token`.
 3. Call `get_model_form` again with `sections=map_tree` only when the hierarchy matters.
