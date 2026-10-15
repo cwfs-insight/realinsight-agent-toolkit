@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Realinsight Model Form Inspector</title>
+  <style>
+    :root { color-scheme: light dark; font-family: var(--font-sans, system-ui, sans-serif); background: var(--color-background-primary, Canvas); color: var(--color-text-primary, CanvasText); font-size: 14px; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 24px; }
+    main { max-width: 1000px; margin: auto; }
+    .brand { width: 170px; height: 28px; display: block; }
+    h1 { font-size: 24px; letter-spacing: -.02em; margin: 20px 0 6px; overflow-wrap: anywhere; }
+    h2 { font-size: 16px; margin: 0; }
+    h3 { font-size: 14px; margin: 22px 0 10px; }
+    p { line-height: 1.5; }
+    .muted, dt { color: var(--color-text-secondary, GrayText); }
+    .intro { margin: 0; }
+    .toolbar, .heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+    .toolbar { margin: 20px 0 10px; }
+    .badge { font-size: 12px; background: var(--color-background-secondary, light-dark(#edf2f6, #242b35)); border-radius: 5px; padding: 5px 8px; }
+    button { font: inherit; color: inherit; background: var(--color-background-primary, Canvas); border: 1px solid var(--color-border-primary, light-dark(#d1d5db, #42474e)); border-radius: 8px; min-height: 40px; padding: 8px 14px; cursor: pointer; }
+    button:disabled { opacity: .5; cursor: default; }
+    button:focus-visible, summary:focus-visible, input:focus-visible, .table-wrap:focus-visible { outline: 3px solid #3498db; outline-offset: 3px; }
+    label { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; }
+    input { accent-color: #075dc5; width: 16px; height: 16px; }
+    #status { font-size: 12px; min-height: 18px; margin: 6px 0 18px; }
+    .overview { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; border-top: 1px solid var(--color-border-primary, light-dark(#d1d5db, #42474e)); padding-top: 18px; margin: 20px 0; }
+    .overview dt { font-size: 12px; margin-bottom: 6px; }
+    dd { margin: 0; overflow-wrap: anywhere; }
+    .workspace { display: grid; grid-template-columns: minmax(240px, 2fr) minmax(0, 3fr); border: 1px solid var(--color-border-primary, light-dark(#d1d5db, #42474e)); border-radius: 12px; overflow: hidden; }
+    .pane { min-width: 0; padding: 20px; }
+    .structure { border-right: 1px solid var(--color-border-primary, light-dark(#d1d5db, #42474e)); }
+    .scroll { max-height: 480px; overflow: auto; padding: 4px; }
+    #tree { margin-top: 16px; }
+    #tree ul { list-style: none; margin: 0; padding-left: 14px; }
+    #tree > ul { padding-left: 0; }
+    #tree summary, .leaf { padding: 10px 8px; border-radius: 6px; cursor: pointer; overflow-wrap: anywhere; }
+    #tree summary:hover, .leaf:hover { background: var(--color-background-secondary, light-dark(#edf2f6, #242b35)); }
+    #tree [aria-current="true"] { background: var(--color-background-secondary, light-dark(#edf2f6, #242b35)); box-shadow: inset 3px 0 #3498db; }
+    #tree small { display: block; color: var(--color-text-secondary, GrayText); font-size: 12px; margin-top: 4px; }
+    .leaf { width: 100%; text-align: left; border: 0; background: transparent; }
+    .node-meta { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 10px 14px; margin: 18px 0; font-size: 12px; }
+    .table-wrap { overflow: auto; max-height: 320px; }
+    table { width: 100%; min-width: 440px; border-collapse: collapse; font-size: 12px; }
+    th:nth-child(n+2), td:nth-child(n+2) { white-space: nowrap; }
+    th { text-align: left; font-weight: 550; color: var(--color-text-secondary, GrayText); }
+    td, th { padding: 10px 8px; vertical-align: top; border-bottom: 1px solid var(--color-border-primary, light-dark(#d1d5db, #42474e)); overflow-wrap: anywhere; }
+    .empty { padding: 22px 0; font-size: 13px; }
+    #warnings { padding-left: 20px; font-size: 12px; }
+    footer { margin-top: 14px; font-size: 12px; line-height: 1.5; }
+    [hidden] { display: none !important; }
+    @media (max-width: 640px) { body { padding: 16px; } .workspace { grid-template-columns: 1fr; } .structure { border-right: 0; border-bottom: 1px solid var(--color-border-primary, light-dark(#d1d5db, #42474e)); } .structure .scroll { max-height: 260px; } .overview { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body>
+<main>
+<!-- Official header SVG paths from https://www.realinsight.com/. -->
+  <svg class="brand" role="img" aria-label="Realinsight" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 246 40" width="202" height="33">
+<g fill-rule="evenodd">
+									<path fill="currentColor" d="M.26.006c5.419 0 10.833-.015 16.25.003l2.322.01c2.521.012 4.97.473 7.255 1.564 3.834 1.828 6.05 4.869 6.706 9.09.355 2.29.262 4.557-.378 6.779-.948 3.268-2.983 5.644-5.946 7.25-.491.27-1 .474-1.53.724-.122.055-.216.101-.379.173l-.238.105.147.217Q29.237 32.95 34 39.988h-.263c-3.024 0-6.05-.009-9.075.012-.201 0-.339-.03-.449-.087s-.21-.152-.32-.319l-1.975-2.991-1.98-2.987q-1.981-2.986-3.955-5.976a1.3 1.3 0 0 0-.455-.452 1.15 1.15 0 0 0-.545-.133h-.088c-1.133.03-2.265.01-3.411.01h-.395v-7.438c.134-.007.26-.014.391-.014 2.116 0 4.235.008 6.353-.009 1.046-.007 2.079-.178 3.06-.586l.194-.085c1.067-.48 1.888-1.144 2.45-1.993.561-.849.855-1.868.887-3.044a8.2 8.2 0 0 0-.112-1.639l-.045-.23c-.384-1.814-1.497-3.03-3.135-3.725l-.16-.066a8.1 8.1 0 0 0-2.774-.573 67 67 0 0 0-2.034-.02l-5.978-.01q-2.988 0-5.978-.007c-1.33 0-2.664-.029-4-.045H.207c-.05 0-.101-.004-.168-.01L0 7.565V.02A3 3 0 0 1 .26.007"/>
+									<path fill="currentColor" d="m8.337 19.646.004.084c.006.165.011.397.016.686.01.579.02 1.384.027 2.342a1211 1211 0 0 1 .012 13.968c-.006.97-.013 1.791-.023 2.388q-.007.451-.015.718l-.005.119H.005V19.646zm.006-9.393q.007.087.013.205c.011.208.02.484.029.807.015.645.023 1.471.025 2.303q.003 1.167-.019 2.333a33 33 0 0 1-.026.845q-.007.156-.016.258c-2.755.033-5.518.008-8.34.026v-6.777z"/>
+								</g>
+    <g transform="translate(46 6)">
+<path fill="currentColor" d="M133.91.12c3.269-.415 6.336.207 8.94 2.391.168.14.333.29.565.49h.005c-.805 1.008-1.565 1.95-2.336 2.922-.296-.238-.548-.443-.8-.643-1.715-1.373-3.696-1.895-5.845-1.629-2.22.275-3.858 1.535-4.874 3.477-1.523 2.903-1.499 5.867.12 8.724 1.168 2.049 3.04 3.105 5.419 3.23 1.779.1 3.432-.293 4.953-1.246.338-.21.516-.443.503-.878-.033-1.133-.01-2.268-.01-3.472-.258-.02-.473-.041-.688-.043h-3.916c-.219 0-.435-.018-.678-.031v-3.264c.465-.13 8.212-.153 8.878-.024.01.187.029.384.029.58 0 2.655-.005 5.317.01 7.972.017.365-.15.714-.446.929-2.542 2.073-5.432 3.132-8.744 3.03-2.243-.07-4.293-.69-6.096-2.03-2.116-1.574-3.39-3.693-3.966-6.237-.698-3.082-.403-6.055 1.146-8.841 1.71-3.071 4.324-4.964 7.832-5.406m-26.997.093c3.297-.489 6.255.327 8.878 2.38.092.075.206.127.326.206-.697 1.032-1.329 1.97-2.004 2.964-.196-.13-.359-.237-.52-.35-1.14-.803-2.355-1.445-3.735-1.731-1.035-.216-2.061-.238-3.067.14-1.382.517-2.006 1.722-1.627 3.113.136.495.408.897.845 1.154.486.285.992.57 1.53.747 1.236.406 2.51.7 3.741 1.12.919.313 1.837.68 2.685 1.153 1.793 1.003 2.696 2.567 2.738 4.635.033 1.686-.336 3.217-1.465 4.52-.984 1.133-2.257 1.815-3.71 2.092-4.157.791-7.768-.362-10.886-3.157-.028-.024-.038-.07-.091-.169v-.009c.722-.897 1.435-1.78 2.184-2.712.205.167.374.304.537.444 1.299 1.087 2.723 1.922 4.417 2.235 1.2.22 2.39.271 3.55-.178.8-.308 1.39-.826 1.644-1.673.36-1.187-.043-2.251-1.11-2.873-.992-.582-2.111-.835-3.202-1.159a62 62 0 0 1-3.71-1.212 5.6 5.6 0 0 1-2.117-1.415c-.778-.804-1.184-1.784-1.325-2.88-.247-1.961.104-3.763 1.462-5.274 1.077-1.2 2.462-1.877 4.032-2.11M45.568.207c1.09.038.858-.083 1.25.798q4.537 10.27 9.067 20.536c.09.202.163.407.263.649-.539.154-1.045.089-1.537.051-.121-.009-.261-.227-.328-.382a635 635 0 0 1-1.724-3.96c-.242-.56-.485-1.115-.739-1.699H39.537c-.866 1.984-1.743 4.006-2.628 6.037h-1.643l-.009-.005c.223-.522.402-.953.589-1.373C38.8 14.161 41.76 7.47 44.706.77c.183-.414.408-.58.86-.562m118.36.206c.125.491.172 20.723.06 21.74-.412.14-2.712.177-3.645.052-.005-.729-.012-1.47-.012-2.213v-6.787c-.488-.127-8.837-.172-9.876-.056-.038.728-.01 1.47-.014 2.213v6.787c-.482.145-2.893.172-3.657.052V.434h3.633c.038 1.507.013 3.002.018 4.49.005 1.476 0 2.956 0 4.422.482.125 8.768.171 9.88.055.034-1.48.011-2.974.016-4.463V.443c1.235-.084 2.425-.038 3.597-.029m1.195.107c.47-.14 16.028-.185 16.87-.06.128.426.16 2.624.043 3.497-.707.078-1.438.024-2.16.038h-4.386v18.15c-.484.153-2.965.187-3.774.051V3.977h-6.593a75 75 0 0 1 0-3.456M57.977.471c.5-.121.992-.088 1.545-.017V20.73c.86 0 1.667.009 2.473.013h9.754v1.423c-.498.13-13.112.15-13.772.024zM9.055.4c1.409 0 2.742.308 3.997.953 2.59 1.33 3.443 4.024 3.125 6.208-.393 2.717-2.07 4.259-4.58 5.052-.422.135-.866.218-1.367.339.243.513.617.907.92 1.34.306.436.624.854.937 1.279l.976 1.326c.327.44.649.882.978 1.32q.49.664.974 1.327l.941 1.275c.323.438.642.876 1.036 1.422-.708 0-1.314.03-1.907-.018-.15-.009-.302-.247-.42-.4a1858 1858 0 0 1-3.967-5.402c-.698-.952-1.4-1.896-2.089-2.848-.15-.204-.29-.349-.586-.349-2.08.015-4.159.01-6.237.014-.042 0-.081.015-.215.046h.004v8.906c-.544.116-1.034.098-1.567.024V.457C.184.434.34.4.494.4zm68.523.09c.015.015.034.028.038.046.015.08.033.16.033.238v21.161c0 .08-.022.154-.042.294-1.193.07-2.38.039-3.61.02V.424h3.507zm6.127-.094c.402-.013.631.15.856.453 2.14 2.913 4.293 5.822 6.444 8.73l3.914 5.293c.118.158.248.304.464.575V.439h3.503c.027.022.046.033.055.046a.2.2 0 0 1 .033.051c.018.16.047.318.047.482q0 10.502-.01 20.997c0 .056-.037.111-.07.205-.145.013-.304.037-.458.042-.675.004-1.35-.024-2.019.009-.412.018-.68-.122-.918-.453-.876-1.223-1.78-2.424-2.673-3.631q-4.046-5.464-8.084-10.93c-.078-.106-.172-.204-.355-.413V22.22l-.009.009h-3.597V.457c.178-.018.332-.052.49-.052.797-.004 1.594.02 2.387-.009m38.75 21.833h-3.662V.434h3.662zM33.917.443l.005-.004v1.46H20.778c-.145.472-.18 7.682-.044 8.547h11.844V11.9l-.042.045a.1.1 0 0 1-.046.035.6.6 0 0 1-.24.031l-11.431.02c-.018 0-.038.009-.06.013-.132.434-.182 7.274-.061 8.688.735.028 1.48.009 2.224.013h11.14v1.48H19.148c-.117-.456-.166-20.768-.052-21.707.015-.014.024-.032.039-.045A.2.2 0 0 1 19.18.44c.056-.016.118-.034.178-.034h14.18c.099 0 .201.018.378.038m6.303 14.187h10.896c-1.812-4.173-3.594-8.295-5.43-12.53-1.85 4.244-3.65 8.366-5.467 12.53M2.06 1.924c-.154 0-.31.03-.468.05v9.725c.18.013.299.027.416.027 2.2 0 4.402.02 6.603-.01.651-.013 1.3-.09 1.937-.228 2.258-.477 3.715-1.909 4.028-4.034.314-2.08-.529-4.047-2.749-4.962-.974-.402-2-.556-3.044-.565-2.243-.018-4.485-.009-6.723-.004M186.897.38c1.74 0 3.103 1.35 3.103 3.077a3.04 3.04 0 0 1-.906 2.19 3.06 3.06 0 0 1-2.206.877 3.076 3.076 0 0 1-3.087-3.05 3.06 3.06 0 0 1 .898-2.193 3.08 3.08 0 0 1 2.198-.9m.013.293a2.8 2.8 0 0 0-1.977.815 2.77 2.77 0 0 0-.814 1.973 2.79 2.79 0 0 0 2.749 2.776 2.835 2.835 0 0 0 2.837-2.769c.014-1.516-1.259-2.79-2.795-2.8zm.116 1.355q.458 0 .718.218.26.225.258.617c0 .18-.051.345-.163.479a.83.83 0 0 1-.434.29l.718 1.214v.024h-.257l-.693-1.19v.008h-.83v1.19h-.242V2.03zm-.687 1.46h.745a.68.68 0 0 0 .488-.173.6.6 0 0 0 .18-.449.59.59 0 0 0-.191-.466.8.8 0 0 0-.54-.166h-.682zm-2.06 23.905v.455c-.16.149-182.823.21-184.246.075-.01-.155-.024-.32-.033-.528z"/>
+    </g>
+  </svg>
+  <div class="heading"><h1 id="name">Model form inspector</h1><span class="badge">Read only</span></div>
+  <p id="description" class="intro muted">Inspect a model form's structure and mappings alongside your conversation.</p>
+  <div class="toolbar">
+    <button id="refresh" disabled>Refresh</button>
+    <label title="Check for changes every 30 seconds while this view is visible."><input id="auto" type="checkbox" checked disabled>Keep updated</label>
+  </div>
+  <p id="status" class="muted" role="status" aria-live="polite">Waiting for the model form…</p>
+  <section id="content" hidden aria-label="Model form configuration">
+    <dl id="overview" class="overview"></dl>
+    <ul id="warnings" hidden></ul>
+    <div class="workspace">
+      <section class="pane structure" aria-label="Map hierarchy">
+        <div class="heading"><h2>Map structure</h2><span id="counts" class="muted badge"></span></div>
+        <nav id="tree" class="scroll" aria-label="Model form map nodes"></nav>
+      </section>
+      <section class="pane" aria-label="Selected map node">
+        <h2 id="node-name">Select a map node</h2>
+        <p id="node-description" class="muted"></p>
+        <dl id="node-meta" class="node-meta"></dl>
+        <div id="mappings"></div>
+      </section>
+    </div>
+  </section>
+  <footer class="muted">Configuration overview only. Continue making changes through the conversation or Realinsight. <span id="checked"></span></footer>
+</main>
+<script>
+  const el = Object.fromEntries(Array.from(document.querySelectorAll('[id]')).map(element => [element.id, element]));
+  const pending = new Map();
+  const expanded = new Set();
+  let nextId = 0, epoch = 0;
+  let capabilities = {}, connected = false, busy = false, visible = true, reload = false;
+  let target = null, customer = '', customerName = '', inspection = null, nodes = [], selected = '', detail = null, treeToken = '';
+  const notify = (method, params) => window.parent.postMessage({ jsonrpc: '2.0', method, params }, '*');
+  const canCall = () => connected && Boolean(capabilities.serverTools);
+  const status = text => { el.status.textContent = text; };
+  const sizeObserver = new ResizeObserver(() => {
+    if (connected) notify('ui/notifications/size-changed', { height: Math.ceil(document.querySelector('main').getBoundingClientRect().height + 48) });
+  });
+  sizeObserver.observe(document.querySelector('main'));
+  const visibilityObserver = new IntersectionObserver(entries => {
+    const wasVisible = visible;
+    visible = entries[0].isIntersecting;
+    if (visible && !wasVisible) check();
+  });
+  visibilityObserver.observe(document.querySelector('main'));
+  function request(method, params) {
+    return new Promise((resolve, reject) => {
+      const id = ++nextId;
+      const timeout = setTimeout(() => { pending.delete(id); reject(new Error('The host did not respond. Try Refresh.')); }, 30000);
+      pending.set(id, { resolve, reject, timeout });
+      window.parent.postMessage({ jsonrpc: '2.0', id, method, params }, '*');
+    });
+  }
+  function controls() {
+    el.refresh.disabled = !canCall() || !target || busy;
+    el.auto.disabled = !canCall() || !target;
+    el.content.setAttribute('aria-busy', String(busy));
+    for (const button of el.tree.querySelectorAll('button')) button.disabled = busy;
+  }
+  function unpack(result) {
+    if (result?.isError) throw new Error(result.content?.find(item => item.type === 'text')?.text || 'Unable to read this model form.');
+    const payload = result?.structuredContent;
+    if (payload?.is_truncated) throw new Error('This result is incomplete. Refresh to load the focused model form view.');
+    const value = payload?.items?.[0];
+    if (!value?.model_form?.model_form_id) throw new Error('The host did not return a model form configuration.');
+    if (target && value.model_form_id !== target.model_form_id) throw new Error('The model form changed. Reopen its inspector.');
+    const code = payload.provenance?.customer_code;
+    if (customer && code && code !== customer) throw new Error('The customer connection changed. Reopen the model form in the new connection.');
+    customer ||= code || '';
+    customerName = payload.provenance?.customer_name || customerName;
+    return { value, warnings: payload.warnings || [] };
+  }
+  async function read(sections, node_id) {
+    if (!canCall()) throw new Error('This host does not support refreshing app views. Ask the agent to read the model form again.');
+    return unpack(await request('tools/call', { name: 'get_model_form', arguments: { ...target, ...(sections ? { sections } : {}), ...(node_id ? { node_id } : {}) } }));
+  }
+  function clear() {
+    inspection = null; nodes = []; selected = ''; detail = null; treeToken = '';
+    el.content.hidden = true; el.name.textContent = 'Model form inspector';
+    el.description.textContent = 'Inspect a model form\'s structure and mappings alongside your conversation.';
+    el.checked.textContent = '';
+    status('Waiting for the model form…');
+  }
+  function accept({ value, warnings }) {
+    const changed = inspection && inspection.model_form.conflict_token !== value.model_form.conflict_token;
+    if (changed) { nodes = []; detail = null; treeToken = ''; }
+    inspection = value;
+    if (value.map_tree) {
+      nodes = value.map_tree.nodes || [];
+      treeToken = value.model_form.conflict_token;
+      if (!nodes.some(node => node.node_id === selected)) selected = value.map_tree.root_node_id || nodes[0]?.node_id || '';
+      if (selected) expanded.add(value.map_tree.root_node_id);
+    }
+    if (value.node && (!selected || value.node.node_id === selected)) { selected = value.node.node_id; detail = value.node; }
+    if (value.node && detail?.node_id !== selected) detail = null;
+    el.warnings.replaceChildren(...warnings.map(text => make('li', text)));
+    el.warnings.hidden = warnings.length === 0;
+    render();
+  }
+  function make(tag, text, className) {
+    const element = document.createElement(tag);
+    if (text !== undefined) element.textContent = text;
+    if (className) element.className = className;
+    return element;
+  }
+  function properties(element, pairs) {
+    const entries = pairs.map(([label, value]) => [make('dt', label), make('dd', value === undefined || value === null || value === '' ? '—' : String(value))]);
+    element.replaceChildren(...(element === el.overview ? entries.map(pair => { const group = document.createElement('div'); group.append(...pair); return group; }) : entries.flat()));
+  }
+  function render() {
+    if (!inspection) return;
+    const model = inspection.model_form;
+    el.content.hidden = false;
+    el.name.textContent = model.process_name || 'Unnamed model form';
+    el.description.textContent = model.process_description || 'Model form configuration';
+    properties(el.overview, [
+      ['Customer', customerName || customer || 'Current connection'], ['Root dataset', model.root_feature_code],
+      ['Template', model.template_name || model.template?.template_name], ['Template type', model.template_type || model.template?.template_type],
+      ['Availability', model.active ? 'Active' : 'Inactive'], ['Assignment', model.global_assignment ? 'Global' : 'Assigned users']
+    ]);
+    el.counts.textContent = `${model.map_node_count ?? nodes.length} nodes · ${model.map_item_count ?? 0} mappings`;
+    renderTree(); renderDetail(); controls();
+  }
+  function renderTree() {
+    const focused = el.tree.contains(document.activeElement) ? document.activeElement.dataset.nodeId : null;
+    const scrollTop = el.tree.scrollTop;
+    if (!nodes.length) { el.tree.replaceChildren(make('p', inspection.model_form.map_id ? 'Map structure has not been loaded.' : 'No map configured.', 'muted empty')); return; }
+    const byParent = new Map();
+    const ids = new Set(nodes.map(node => node.node_id));
+    for (const node of nodes) {
+      const key = ids.has(node.parent_node_id) ? node.parent_node_id : '';
+      if (!byParent.has(key)) byParent.set(key, []);
+      byParent.get(key).push(node);
+    }
+    const visited = new Set();
+    function branch(parent) {
+      const list = document.createElement('ul');
+      for (const node of byParent.get(parent) || []) {
+        if (visited.has(node.node_id)) continue;
+        visited.add(node.node_id);
+        const row = document.createElement('li');
+        const hasChildren = byParent.has(node.node_id);
+        const container = hasChildren ? document.createElement('details') : row;
+        const control = document.createElement(hasChildren ? 'summary' : 'button');
+        if (!hasChildren) { control.type = 'button'; control.className = 'leaf'; }
+        control.append(make('span', node.map_name || node.feature_code || 'Map node'), make('small', [node.feature_code, node.sheet && `Sheet: ${node.sheet}`, `${node.map_item_count ?? 0} mappings`].filter(Boolean).join(' · ')));
+        control.dataset.nodeId = node.node_id;
+        if (node.node_id === selected) control.setAttribute('aria-current', 'true');
+        control.addEventListener('click', event => { event.stopPropagation(); if (!busy) selectNode(node.node_id); });
+        container.append(control);
+        if (hasChildren) {
+          container.open = expanded.has(node.node_id);
+          container.addEventListener('toggle', () => { if (container.open) expanded.add(node.node_id); else expanded.delete(node.node_id); });
+          container.append(branch(node.node_id)); row.append(container);
+        }
+        list.append(row);
+      }
+      return list;
+    }
+    el.tree.replaceChildren(branch(''));
+    el.tree.scrollTop = scrollTop;
+    if (focused) el.tree.querySelector(`[data-node-id="${CSS.escape(focused)}"]`)?.focus({ preventScroll: true });
+  }
+  function renderDetail() {
+    const node = detail?.node_id === selected ? detail : nodes.find(item => item.node_id === selected);
+    el['node-name'].textContent = node?.map_name || node?.feature_code || 'Select a map node';
+    el['node-description'].textContent = node?.map_description || '';
+    if (!node) { el['node-meta'].replaceChildren(); el.mappings.replaceChildren(); return; }
+    properties(el['node-meta'], [['Dataset', node.feature_code], ['Relationship', node.relationship || 'Root'], ['Worksheet', node.sheet], ['Repeating', detail?.node_id === selected ? detail.multi_entity_direction || 'No' : 'Select to inspect'], ['Filters', node.filter_count ?? 0], ['Sorts', node.sort_count ?? 0]]);
+    el.mappings.replaceChildren();
+    if (!detail || detail.node_id !== selected) { el.mappings.append(make('p', canCall() ? 'Select this node to load its field mappings.' : 'Ask the agent to read this node to inspect its mappings.', 'muted empty')); return; }
+    el.mappings.append(make('h3', 'Field and layout mappings'));
+    const items = detail.map_items || [];
+    if (!items.length) { el.mappings.append(make('p', 'No mappings on this node.', 'muted empty')); return; }
+    const wrap = make('div', undefined, 'table-wrap');
+    wrap.tabIndex = 0; wrap.setAttribute('role', 'region'); wrap.setAttribute('aria-label', 'Field mappings');
+    const table = document.createElement('table');
+    const head = document.createElement('thead'), row = document.createElement('tr');
+    for (const label of ['Field / layout item', 'Type', 'Usage', 'Cell']) { const th = make('th', label); th.scope = 'col'; row.append(th); }
+    head.append(row); table.append(head);
+    const body = document.createElement('tbody');
+    for (const item of [...items].sort((a, b) => a.map_order - b.map_order)) {
+      const tr = document.createElement('tr');
+      for (const value of [item.schema_code || item.item_type, item.item_type, item.usage, item.cell]) tr.append(make('td', value || '—'));
+      body.append(tr);
+    }
+    table.append(body); wrap.append(table); el.mappings.append(wrap);
+  }
+  function verified() {
+    el.checked.textContent = `Last checked ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}.`;
+    status(canCall() ? (el.auto.checked ? 'Checks for changes every 30 seconds while visible.' : 'Updates paused. Use Refresh for the latest configuration.') : 'Read-only snapshot. This host does not support Refresh; ask the agent to read the model form again.');
+  }
+  function failed(error) { clear(); reload = false; el.auto.checked = false; status(`Unable to refresh. ${error.message}`); }
+  async function refresh(checkOnly = false) {
+    if (busy || !target || !canCall()) return;
+    const version = epoch;
+    busy = true; controls();
+    if (!checkOnly) status('Refreshing model form…');
+    try {
+      if (checkOnly || inspection?.model_form.unsupported_detail_reason) {
+        const overview = await read();
+        if (version !== epoch) return;
+        if (overview.value.model_form.unsupported_detail_reason) { accept(overview); verified(); status(overview.value.model_form.unsupported_detail_reason); return; }
+        if (overview.value.model_form.conflict_token === treeToken) { verified(); return; }
+      }
+      const tree = await read('map_tree');
+      if (version !== epoch) return;
+      accept(tree);
+      if (selected) {
+        const result = await read('node', selected);
+        if (version !== epoch) return;
+        // A concurrent edit between reads must not mix two revisions of the map.
+        if (result.value.model_form.conflict_token !== treeToken) throw new Error('The model form changed while loading. Use Refresh to read it again.');
+        accept(result);
+      }
+      verified();
+    } catch (error) { if (version === epoch) failed(error); }
+    finally { busy = false; controls(); if (reload) { reload = false; refresh(); } }
+  }
+  async function selectNode(id) {
+    if (busy) return;
+    selected = id; renderDetail();
+    if (!canCall()) { renderTree(); return; }
+    detail = null;
+    const version = epoch;
+    busy = true; controls();
+    try {
+      const result = await read('node', id);
+      if (version !== epoch) return;
+      const changed = result.value.model_form.conflict_token !== treeToken;
+      accept(result);
+      if (changed) reload = true;
+      else verified();
+    } catch (error) { if (version === epoch) failed(error); }
+    finally { busy = false; controls(); if (reload) { reload = false; refresh(); } }
+  }
+  el.refresh.addEventListener('click', () => refresh());
+  el.auto.addEventListener('change', () => { if (el.auto.checked) refresh(true); else verified(); });
+  const check = () => { if (visible && document.visibilityState !== 'hidden' && el.auto.checked) refresh(true); };
+  const timer = setInterval(check, 30000);
+  document.addEventListener('visibilitychange', check);
+  window.addEventListener('focus', check);
+  function hostContext(context) {
+    for (const [key, value] of Object.entries(context?.styles?.variables || {})) if (key.startsWith('--') && typeof value === 'string') document.documentElement.style.setProperty(key, value);
+    if (context?.theme === 'light' || context?.theme === 'dark') document.documentElement.style.colorScheme = context.theme;
+  }
+  window.addEventListener('message', event => {
+    if (event.source !== window.parent || event.data?.jsonrpc !== '2.0') return;
+    const message = event.data;
+    if (pending.has(message.id)) {
+      const entry = pending.get(message.id); pending.delete(message.id); clearTimeout(entry.timeout);
+      if (message.error) entry.reject(new Error(message.error.message)); else entry.resolve(message.result);
+    }
+    if (message.method === 'ui/notifications/host-context-changed') hostContext(message.params);
+    if (message.method === 'ui/notifications/tool-input') {
+      const args = message.params?.arguments;
+      if (args?.model_form_id) {
+        if (target?.model_form_id !== args.model_form_id || target?.profile !== args.profile) { ++epoch; clear(); customer = ''; customerName = ''; expanded.clear(); }
+        target = { model_form_id: args.model_form_id, ...(args.profile ? { profile: args.profile } : {}) };
+        controls();
+      }
+    }
+    if (message.method === 'ui/notifications/tool-result') {
+      ++epoch;
+      try {
+        const result = unpack(message.params);
+        target ||= { model_form_id: result.value.model_form_id };
+        accept(result); verified();
+        if (canCall()) { if (busy) reload = true; else refresh(); }
+      } catch (error) { failed(error); }
+    }
+    if (message.method === 'ui/resource-teardown') {
+      ++epoch; connected = false; clearInterval(timer); sizeObserver.disconnect(); visibilityObserver.disconnect();
+      document.removeEventListener('visibilitychange', check); window.removeEventListener('focus', check);
+      for (const entry of pending.values()) { clearTimeout(entry.timeout); entry.reject(new Error('The inspector was closed.')); }
+      pending.clear(); reload = false; controls();
+      window.parent.postMessage({ jsonrpc: '2.0', id: message.id, result: {} }, '*');
+    }
+  });
+  (async () => {
+    if (window.parent === window) return;
+    try {
+      const result = await request('ui/initialize', { appInfo: { name: 'Realinsight Model Form Inspector', version: '0.2.4' }, appCapabilities: { availableDisplayModes: ['inline', 'fullscreen'] }, protocolVersion: '2026-01-26' });
+      capabilities = result.hostCapabilities || {}; connected = true; hostContext(result.hostContext); controls();
+      notify('ui/notifications/initialized', {});
+      if (inspection) { verified(); refresh(); }
+    } catch (error) { status(error.message); }
+  })();
+</script>
+</body>
+</html>

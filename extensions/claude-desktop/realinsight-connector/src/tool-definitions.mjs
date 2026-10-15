@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { CONNECTION_UI_META, CONNECTION_ICON } from "./mcp-app-resources.mjs";
+import { CONNECTION_UI_META, CONNECTION_ICON, MODEL_FORM_UI_META } from "./mcp-app-resources.mjs";
 
 const AGENT_TOOL_SCHEMAS = JSON.parse(fs.readFileSync(
   new URL("./generated/agent-tool-payload-schemas.json", import.meta.url),
@@ -1992,6 +1992,8 @@ const TOOL_DEFINITIONS = [
   {
     name: "get_model_form",
     title: "Get Realinsight Model Form",
+    _meta: MODEL_FORM_UI_META,
+    icons: [CONNECTION_ICON],
     cli: "ri-agent get-model-form MODEL_FORM_ID [--sections template,map_tree,used_fields]",
     route: "GET /agent/model-forms/configurations/{model_form_id}",
     scope: MODEL_FORMS_READ_SCOPE,
