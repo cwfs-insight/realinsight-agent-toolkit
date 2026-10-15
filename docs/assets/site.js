@@ -85,11 +85,11 @@ function remote_guide(harness_key, harness, environment, surface) {
   if (harness_key === "chatgpt") {
     return {
       title: `Connect ChatGPT to ${environment.label}`,
-      summary: "Use a remote custom MCP connector. This repository does not document a local Node path for ChatGPT.",
+      summary: "Use a custom remote MCP connection while public directory review is pending. A Realinsight account and a workspace that permits custom MCP connections are required.",
       steps: [
         "In the ChatGPT workspace connector settings, add a custom MCP connector.",
         "Use the exact endpoint below and keep the connector’s OAuth flow enabled.",
-        "Complete the Realinsight browser sign-in, then make a small schema or tool-reference request to verify access.",
+        "Complete Realinsight sign-in, confirm the intended customer and requested access, then verify the customer and server URL with connection context where available.",
       ],
       codeLabel: "Remote MCP endpoint",
       code: render_copy_template("chatgpt_remote_desktop", environment),

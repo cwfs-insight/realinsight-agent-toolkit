@@ -15,21 +15,26 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Realinsight Connector",
-    "shortDescription": "Connect Codex to Realinsight tools and skills",
-    "longDescription": "Work with the hosted Realinsight Streamable HTTP MCP server through secure customer-scoped authentication. View your current customer and environment, discover schema, search and read records, analyze dashboards and reports, and create entities with initial fields or update supported data and configuration after explicit approval.",
+    "shortDescription": "Work with Realinsight data",
+    "longDescription": "Connect to the hosted Realinsight Streamable HTTP MCP server. For Realinsight users working with commercial real estate data. Verify your connected customer, server URL, user, and granted access. Find loan and property records, inspect fields, and analyze dashboards and reports. Where enabled, validate entity creation with initial fields before approving a write, or make supported record and configuration updates after explicit approval. Requires a Realinsight account and appropriate permissions; availability depends on your deployment and granted scopes. Does not send email, search the public web, or administer user access.",
     "developerName": "Realinsight",
-    "category": "Developer Tools",
+    "websiteURL": "https://www.realinsight.com",
+    "supportURL": "https://www.realinsight.com/contact-us/",
+    "composerIcon": "./assets/realinsight-agent-icon-180.png",
+    "logo": "./assets/realinsight-agent-icon-180.png",
+    "category": "Business & Operations",
     "capabilities": [
       "Interactive",
       "Read",
       "Write"
     ],
     "defaultPrompt": [
-      "Search Realinsight for a loan or property and show key fields.",
-      "Find the Realinsight feature and fields for this request.",
-      "Use Realinsight records to answer my portfolio question."
+      "Show my connected Realinsight customer, server URL, and granted access.",
+      "Find a loan or property and show its key fields.",
+      "Validate creating a Realinsight entity with initial fields."
     ],
-    "brandColor": "#075DC5"
+    "brandColor": "#3498DB",
+    "brandColorDark": "#3498DB"
   },
   "mcpServers": "./.mcp.json"
 }

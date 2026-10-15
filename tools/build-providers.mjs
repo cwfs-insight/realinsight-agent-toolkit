@@ -104,7 +104,7 @@ async function render_codex_provider(env) {
           installation: "AVAILABLE",
           authentication: "ON_INSTALL",
         },
-        category: "Developer Tools",
+        category: manifest.interface.category,
       },
     ],
   });

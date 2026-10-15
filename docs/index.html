@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Choose a harness, transport, and Realinsight environment to get safe, repository-backed Agent Toolkit installation directions.">
+    <meta name="description" content="Connect your agent app to Realinsight to find records, analyze portfolio data, and prepare approved updates. Start with the installation and sign-in guide.">
     <meta name="theme-color" content="#10233f">
     <title>Realinsight Agent Toolkit — Install Guide</title>
     <link rel="icon" type="image/svg+xml" href="./assets/brand/realinsight-agent-favicon.svg">
@@ -22,6 +22,7 @@
         <a href="./agent-install.md">Agent guide</a>
         <a href="./auth.md">Authentication</a>
         <a href="./security.md">Security</a>
+        <a href="https://www.realinsight.com/contact-us/">Support</a>
         <a href="https://github.com/cwfs-insight/realinsight-agent-toolkit">GitHub</a>
       </nav>
     </header>
@@ -30,11 +31,12 @@
       <section class="hero">
         <div class="hero-copy">
           <p class="eyebrow">Realinsight Agent Toolkit</p>
-          <h1>Connect your agent.<br>Keep the path clear.</h1>
+          <h1>Your Realinsight data.<br>In your agent.</h1>
           <p class="lede">
-            Pick your agent harness, native app or CLI, connection type, and Realinsight environment.
-            This guide turns checked-in repository settings into one safe install path.
+            Find loan and property records, analyze dashboards and reports, and prepare updates for your approval.
+            Connect with your Realinsight account and the access your organization grants you.
           </p>
+          <p><a class="hero-link" href="#installer-title">Set up your connection ↓</a></p>
         </div>
         <div class="hero-panel" aria-hidden="true">
           <div class="orbit orbit-one"></div>
@@ -54,7 +56,7 @@
         <div class="section-heading">
           <div>
             <p class="eyebrow">Install builder</p>
-            <h2 id="installer-title">Make four choices</h2>
+            <h2 id="installer-title">Set up your connection</h2>
           </div>
         </div>
 
@@ -126,26 +128,35 @@
         <div class="section-heading">
           <div>
             <p class="eyebrow">What happens next</p>
-            <h2 id="principles-title">One connection, normal safeguards</h2>
+            <h2 id="principles-title">Start with a question</h2>
           </div>
         </div>
         <div class="principle-grid">
           <article>
             <span>01</span>
-            <h3>Connect</h3>
-            <p>The harness reaches the selected checked-in MCP endpoint or launches the local Node source.</p>
+            <h3>Find a record</h3>
+            <p>“Find a loan or property and show its key fields.” Results use your connected customer and Realinsight permissions.</p>
           </article>
           <article>
             <span>02</span>
-            <h3>Authenticate</h3>
-            <p>Remote MCP uses OAuth. Local MCP stores an isolated profile outside the repository.</p>
+            <h3>Analyze your portfolio</h3>
+            <p>“Show my available dashboards and summarize a selected analytic.” Results depend on your accessible reports and available data.</p>
           </article>
           <article>
             <span>03</span>
-            <h3>Ask</h3>
-            <p>The toolkit uses the signed-in user’s Realinsight customer context, permissions, and scopes.</p>
+            <h3>Prepare an update</h3>
+            <p>“Validate creating an entity with these initial fields.” Where enabled, creation starts with a dry run. Actual writes require your explicit approval.</p>
           </article>
         </div>
+      </section>
+
+      <section class="connection-help" aria-labelledby="connection-title">
+        <p class="eyebrow">Your connection</p>
+        <h2 id="connection-title">Check the customer and server before you act.</h2>
+        <p>Sign in through Realinsight, confirm the customer and requested permissions, then ask for your connection context. The server URL identifies the deployment. Production is the default; approved QA testers use a separate QA connection.</p>
+        <p>A hosted installation has a fixed endpoint. To change customers, disconnect and reconnect through your agent app and choose the intended customer during sign-in. A different browser login does not retarget an existing connection. Local toolkit users can authorize and switch separate saved profiles.</p>
+        <p>To revoke access, use the hosted disconnect tool after approval or the <a href="https://www.realinsight.cloud/api/v1/oauth/connections">Realinsight Connection Manager</a>. Your host may also require removing its saved connection. Data already returned to your conversation is not removed by disconnecting.</p>
+        <p>Tool availability depends on your deployment, permissions, and scopes. The connector does not send email, search the public web, or administer user access. Read the <a href="./auth.md">authentication guide</a> and <a href="./security.md">security guidance</a>, or visit <a href="https://www.realinsight.com/contact-us/">Realinsight technical support</a>.</p>
       </section>
 
       <section class="agent-readable">
@@ -172,7 +183,7 @@
         <img src="./assets/brand/realinsight-logo-white.svg" alt="" width="202" height="25">
         <span>Agent Toolkit</span>
       </a>
-      <span>Native desktop first · CLI included · Production default</span>
+      <span><a href="https://www.realinsight.com">Realinsight</a> · <a href="https://www.realinsight.com/contact-us/">Support</a> · Production default</span>
     </footer>
 
     <noscript>

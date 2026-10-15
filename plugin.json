@@ -21,24 +21,82 @@
     "com.openai": {
       "interface": {
         "displayName": "Realinsight",
-        "shortDescription": "Work with your Realinsight customer data",
-        "longDescription": "View your connected customer and environment. Find and analyze Realinsight records, dashboards, and reports. Create entities with initial fields and make supported record and configuration updates after explicit approval.",
+        "shortDescription": "Work with Realinsight data",
+        "longDescription": "For Realinsight users working with commercial real estate data. Verify your connected customer, server URL, user, and granted access. Find loan and property records, inspect fields, and analyze dashboards and reports. Where enabled, validate entity creation with initial fields before approving a write, or make supported record and configuration updates after explicit approval. Requires a Realinsight account and appropriate permissions; availability depends on your deployment and granted scopes. Does not send email, search the public web, or administer user access.",
         "developerName": "Realinsight",
         "websiteURL": "https://www.realinsight.com",
+        "supportURL": "https://www.realinsight.com/contact-us/",
         "composerIcon": "./docs/assets/brand/realinsight-agent-icon-180.png",
         "logo": "./docs/assets/brand/realinsight-agent-icon-180.png",
-        "category": "Business",
+        "category": "Business & Operations",
         "capabilities": [
           "Interactive",
           "Read",
           "Write"
         ],
         "defaultPrompt": [
-          "Show my connected Realinsight customer and environment.",
+          "Show my connected Realinsight customer, server URL, and granted access.",
           "Find a loan or property and show its key fields.",
           "Validate creating a Realinsight entity with initial fields."
         ],
-        "brandColor": "#075DC5"
+        "brandColor": "#3498DB",
+        "brandColorDark": "#3498DB"
+      },
+      "review": {
+        "test_cases": {
+          "positive": [
+            {
+              "description": "Verify the authenticated connection before using customer data.",
+              "prompt": "Show my connected Realinsight customer, server URL, user, and granted access.",
+              "tools_triggered": "get_connection_context",
+              "expected_behavior": "Returns the authenticated customer, base URL, user, scopes, and capabilities. The deployment is identified by the server URL."
+            },
+            {
+              "description": "Find a sample loan in the authenticated customer.",
+              "prompt": "Find the sample loan named Riverfront Center and show its key fields.",
+              "tools_triggered": "search_entities, get_records",
+              "expected_behavior": "Returns the seeded sample loan and permitted field values within the connected customer. Clarifies ambiguity rather than selecting an unrelated record."
+            },
+            {
+              "description": "Retrieve the latest servicing child record for the sample loan.",
+              "prompt": "For the Riverfront Center sample loan, show the latest servicing record using the documented servicing date field.",
+              "tools_triggered": "get_latest_children, get_records",
+              "expected_behavior": "Returns at most one latest servicing child per supplied sample parent, using the documented child type and date field, and only permitted record values."
+            },
+            {
+              "description": "Read a sample portfolio analytic.",
+              "prompt": "Show my available dashboards, select the sample portfolio analytic, and summarize its cached rows and columns.",
+              "tools_triggered": "list_dashboard_pages, get_dashboard_page, get_analytic_data",
+              "expected_behavior": "Returns bounded customer-scoped cached analytic data with column metadata and any truncation or freshness warnings, then summarizes the available sample rows."
+            },
+            {
+              "description": "Validate entity creation with an initial integer field without saving.",
+              "prompt": "Discover an allowed feature and editable integer field for the reviewer sample data, then validate creating a sample entity with that field set to 7. Use a dry run only; do not save.",
+              "tools_triggered": "search_features, search_fields, get_entity_structure, create_entity",
+              "expected_behavior": "Discovers valid feature, field, and required parent references in the reviewer sample data. Calls create_entity with dry_run=true and reports normalized initial values or validation errors. Creates no entity."
+            }
+          ],
+          "negative": [
+            {
+              "description": "Do not trigger for unrelated email requests.",
+              "prompt": "Send an email to the borrower asking for the missing documents.",
+              "expected_behavior": "The plugin should not be invoked because it cannot send email or messages."
+            },
+            {
+              "description": "Do not trigger for public web research.",
+              "prompt": "Search the web for today's commercial mortgage rates and breaking market news.",
+              "expected_behavior": "The plugin should not be invoked because it only accesses authenticated Realinsight data and does not search the public web."
+            },
+            {
+              "description": "Do not perform unsupported identity administration.",
+              "prompt": "Reset another user's password and grant them administrator access.",
+              "expected_behavior": "The plugin should not be invoked because user credential and permission administration are outside its supported tools."
+            }
+          ]
+        }
+      },
+      "publication": {
+        "release_notes": "Initial public-directory submission candidate based on toolkit 0.2.4. Packages the production hosted MCP connection and Realinsight workflow skill, with listing metadata and official branding. Production deployment and reviewer validation remain release prerequisites."
       }
     }
   }

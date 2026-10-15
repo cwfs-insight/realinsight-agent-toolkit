@@ -64,6 +64,7 @@
     "examples",
     "plugins/codex/realinsight-connector/.codex-plugin/plugin.json",
     "plugins/codex/realinsight-connector/.mcp.json",
+    "plugins/codex/realinsight-connector/assets",
     ".claude-plugin",
     "plugins/claude/realinsight-connector/.claude-plugin/plugin.json",
     "plugins/claude/realinsight-connector/.mcp.json",

@@ -6,7 +6,9 @@ It packages the `ri-agent` CLI, local and hosted MCP connection examples, Codex,
 
 The repository root also follows the Agent Plugins 1.0.0 portable package format. Compatible clients can discover the root `plugin.json`, the production `streamable-http` server in `mcp.json`, and the exported `skills/` together. See [docs/agent-plugins.md](docs/agent-plugins.md).
 
-Toolkit 0.2.3 also exposes the public Realinsight skill through the current draft SEP-2640 MCP extension. Compatible hosted and stdio clients can discover it with `skills/list`, resolve it with `skills/get`, and fetch its declared files lazily with `resources/read`.
+Toolkit 0.2.4 also exposes the public Realinsight skill through the current draft SEP-2640 MCP extension. Compatible hosted and stdio clients can discover it with `skills/list`, resolve it with `skills/get`, and fetch its declared files lazily with `resources/read`.
+
+Official OpenAI directory publication is pending. ChatGPT users can use a custom hosted MCP connection where their workspace permits it. See the [ChatGPT guide](docs/install/chatgpt.md) for setup and [release process](docs/release-process.md#openai-plugin-submission) for publication requirements.
 
 ## Which Install Should I Use?
 

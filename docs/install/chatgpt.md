@@ -12,15 +12,17 @@ The supported repository-backed ChatGPT path is a remote Realinsight MCP connect
 
 In the ChatGPT workspace connector settings, add a custom MCP connector with the selected endpoint. Keep OAuth enabled and complete the normal Realinsight browser sign-in. Realinsight APIs remain the permission and customer-data trust boundary.
 
-Verify the connection with a small `get_tool_reference` or schema request.
+Verify the connection with connection context where available: check the customer, server URL, user, and granted access. A small `get_tool_reference` or schema request can also confirm basic access. Custom MCP availability and menu labels depend on your workspace and client.
+
+The server URL identifies the deployment. Hosted installations have fixed endpoints; keep production and approved QA testing in separate connections. To change customers, disconnect and reconnect through ChatGPT and choose the intended customer during Realinsight sign-in. See [authentication](../auth.md) for revocation and local-profile differences.
 
 ## Published app path
 
-Publishing uses the OpenAI Platform plugin submission portal. Create a **With MCP** submission, enter the production Realinsight MCP URL as a universal server, configure OAuth and reviewer credentials, verify the MCP domain, scan the tools, and upload the bundled Realinsight skill. The same submission can contain the MCP server and skill; custom UI is optional.
+Official OpenAI directory publication has not occurred. Use a custom MCP connection while review is pending.
 
-The bundled Realinsight skill remains useful in Codex, Claude, and other skill-aware distributions. OpenAI can also import a static skill snapshot from an MCP server through its supported subset of the draft Skills extension, but direct upload is the stable packaging path until we intentionally add that extension.
+Publishing uses the [OpenAI plugin submission flow](https://developers.openai.com/plugins/deploy/submission). Upload a ZIP containing root `plugin.json`, `mcp.json`, bundled `skills/`, and referenced assets. Use **With MCP** with the production universal server. Complete OAuth, domain verification, automated scans, review information, and policy attestations. Approval and the final publish action are separate steps.
 
-Use `chatgpt-app-submission.json` as the review-form import artifact. Before submission, supply public website, support, privacy, and terms URLs; a verified publisher identity; domain-verification token; reviewer credentials that do not require MFA; and a final review of every tool annotation and response shape.
+Listing and five positive/three negative review cases import from `extensions.com.openai` in `plugin.json`. `chatgpt-app-submission.json` is a legacy annotation and case worksheet, not the current portal import format. Reviewer sign-in instructions and credentials belong only in the secure portal, outside Git and the ZIP. See [release process](../release-process.md#openai-plugin-submission) for package preparation and remaining gates.
 
 ## No local package path
 

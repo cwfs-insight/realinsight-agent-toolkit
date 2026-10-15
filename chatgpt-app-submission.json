@@ -4,7 +4,7 @@
   "app_info": {
     "display_name": "Realinsight",
     "subtitle": "Work with Realinsight data",
-    "description": "Find and analyze your Realinsight records, dashboards, reports, and configuration. View your connected customer and environment, switch connections, and create entities with initial fields or make supported updates after explicit approval.",
+    "description": "For Realinsight users working with commercial real estate data. Verify your connected customer, server URL, user, and granted access. Find loan and property records, inspect fields, and analyze dashboards and reports. Where enabled, validate entity creation with initial fields before approving a write, or make supported record and configuration updates after explicit approval. Requires a Realinsight account and appropriate permissions; availability depends on your deployment and granted scopes. Does not send email, search the public web, or administer user access.",
     "category": "BUSINESS"
   },
   "tools": {
@@ -659,44 +659,34 @@
   },
   "test_cases": [
     {
-      "description": "Find a named loan in the authenticated customer.",
-      "user_prompt": "Find the loan named Riverfront Center and show me the matching Realinsight records.",
-      "file_attachment_urls": null,
+      "description": "Verify the authenticated connection before using customer data.",
+      "user_prompt": "Show my connected Realinsight customer, server URL, user, and granted access.",
+      "tools_triggered": "get_connection_context",
+      "expected_output": "Returns the authenticated customer, base URL, user, scopes, and capabilities. The deployment is identified by the server URL."
+    },
+    {
+      "description": "Find a sample loan in the authenticated customer.",
+      "user_prompt": "Find the sample loan named Riverfront Center and show its key fields.",
       "tools_triggered": "search_entities",
-      "expected_output": "Returns bounded matching entities in the signed-in customer's Realinsight data so the user can select or inspect the correct loan.",
-      "expected_output_url": null
+      "expected_output": "Returns the seeded sample loan and permitted field values within the connected customer. Clarifies ambiguity rather than selecting an unrelated record."
     },
     {
-      "description": "Retrieve the latest servicing child record for known loans.",
-      "user_prompt": "For these loan records, show me the latest servicing record for each one.",
-      "file_attachment_urls": null,
+      "description": "Retrieve the latest servicing child record for the sample loan.",
+      "user_prompt": "For the Riverfront Center sample loan, show the latest servicing record using the documented servicing date field.",
       "tools_triggered": "get_latest_children",
-      "expected_output": "Returns at most one latest matching child reference per supplied parent using the requested child date or order field.",
-      "expected_output_url": null
+      "expected_output": "Returns at most one latest servicing child per supplied sample parent, using the documented child type and date field, and only permitted record values."
     },
     {
-      "description": "Read a selected cached portfolio analytic.",
-      "user_prompt": "Open the selected portfolio analytic and summarize the current cached rows and columns.",
-      "file_attachment_urls": null,
+      "description": "Read a sample portfolio analytic.",
+      "user_prompt": "Show my available dashboards, select the sample portfolio analytic, and summarize its cached rows and columns.",
       "tools_triggered": "get_analytic_data",
-      "expected_output": "Returns a bounded customer-scoped analytic result with column metadata and available cached rows for summarization.",
-      "expected_output_url": null
+      "expected_output": "Returns bounded customer-scoped cached analytic data with column metadata and any truncation or freshness warnings, then summarizes the available sample rows."
     },
     {
-      "description": "Create an approved LIST report after validation.",
-      "user_prompt": "Using the report design we just validated, create the approved loan maturity LIST report in my agent folder.",
-      "file_attachment_urls": null,
-      "tools_triggered": "create_report",
-      "expected_output": "Creates the validated private report after explicit approval and summarizes its name, grain, saved configuration, and warnings.",
-      "expected_output_url": null
-    },
-    {
-      "description": "Apply an approved model form map update with conflict protection.",
-      "user_prompt": "Apply the approved map patch to this model form using the latest conflict token.",
-      "file_attachment_urls": null,
-      "tools_triggered": "update_model_form",
-      "expected_output": "Updates only the approved model form metadata or map sections after authorization and conflict-token checks, then summarizes the changes.",
-      "expected_output_url": null
+      "description": "Validate entity creation with an initial integer field without saving.",
+      "user_prompt": "Discover an allowed feature and editable integer field for the reviewer sample data, then validate creating a sample entity with that field set to 7. Use a dry run only; do not save.",
+      "tools_triggered": "create_entity",
+      "expected_output": "Discovers valid feature, field, and required parent references in the reviewer sample data. Calls create_entity with dry_run=true and reports normalized initial values or validation errors. Creates no entity."
     }
   ],
   "negative_test_cases": [

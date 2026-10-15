@@ -25,7 +25,7 @@ The checked-in native packages remain intentional compatibility layers:
 | Client family | Portable root | Native distribution retained |
 | --- | --- | --- |
 | VS Code, Cursor, GitHub Copilot, Kiro | Use the repository root when the client accepts an Agent Plugins source. | Cursor provider bundles remain available for environment-specific installs. |
-| ChatGPT and Codex | The standard registry lists skills plus stdio and Streamable HTTP support. | Public OpenAI distribution still uses the [OpenAI plugin package and universal directory](https://developers.openai.com/plugins/build/plugins), so `.codex-plugin/` assets and submission metadata remain required. |
+| ChatGPT and Codex | OpenAI accepts the portable root package with `extensions.com.openai` listing and review metadata. | The [Codex compatibility format](https://developers.openai.com/plugins/build/plugins) remains available for native marketplaces. It is not required inside a portable submission ZIP. |
 | Claude and Claude Code | Claude is not currently listed as an Agent Plugins 1.0.0 client. | Use the checked-in `.claude-plugin/` marketplace packages or Claude Desktop MCPB. |
 
 Format conformance therefore means the same portable directory can be loaded by conforming clients; it does not guarantee that every client exposes the same install button or public marketplace path.
@@ -43,5 +43,7 @@ npm run validate:providers
 The portable validator enforces the closed 1.0.0 manifest and MCP shapes, canonical schema identifiers, remote URL and literal-header rules, package path containment, and Agent Skills frontmatter and directory naming. Provider validation additionally pins the production server name and URL and keeps all release versions aligned.
 
 Agent Plugins 1.0.0 does not define portable OAuth or credential-reference fields. Authentication remains client-managed: the client connects to the hosted MCP endpoint, follows its OAuth discovery flow, and stores and refreshes credentials itself. The package does not contain access tokens, refresh tokens, OAuth client secrets, or credential-bearing HTTP headers.
+
+OpenAI additionally documents per-server `extensions.com.openai.auth` in `mcp.json`. The repository's pinned 1.0.0 remote-server validator currently permits only `type`, `url`, and `headers`; it does not validate that extension. Before portal setup, resolve that schema/validator compatibility and confirm the saved OAuth registration and scope settings. Do not mislabel the protected server as unauthenticated or embed a bearer token to bypass setup. See [submission preparation](release-process.md#openai-plugin-submission).
 
 The 1.0.0 specification currently identifies itself as a working draft and current published release. The manifest schemas are pinned to the canonical 1.0.0 identifiers so clients can validate the package deterministically; future incompatible changes require an explicit package and validator update.

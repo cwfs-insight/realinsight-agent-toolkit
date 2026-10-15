@@ -75,7 +75,7 @@ footer {
 
 nav {
   display: flex;
-  gap: 26px;
+  gap: 20px;
 }
 
 nav a,
@@ -98,6 +98,12 @@ nav a:hover,
   align-items: center;
   gap: 70px;
   padding-block: 80px;
+}
+
+.hero-link {
+  color: var(--ink);
+  font-weight: 700;
+  text-underline-offset: 4px;
 }
 
 .eyebrow {
@@ -394,6 +400,20 @@ pre {
   gap: 70px;
   border-radius: 24px;
   background: var(--sand);
+}
+
+.connection-help {
+  max-width: 800px;
+  margin-bottom: 90px;
+}
+
+.connection-help p:not(.eyebrow) {
+  color: var(--ink-soft);
+}
+
+.connection-help h2 {
+  font-size: clamp(1.7rem, 3vw, 2.4rem);
+  line-height: 1.2;
 }
 
 .agent-readable p:last-child {
