@@ -60,7 +60,7 @@
     </g>
   </svg>
   <h1>Your connection</h1>
-  <p class="intro muted">Your tools use the customer and server shown here.</p>
+  <p class="intro muted">Verify the current customer before using Realinsight tools.</p>
   <section class="card" aria-label="Current connection">
     <div class="card-header">
       <span class="eyebrow muted">Current customer</span>
@@ -75,12 +75,12 @@
     </dl>
     <details><summary>Granted permissions</summary><ul id="scopes"></ul></details>
     <div class="actions">
-      <button id="change" class="primary" disabled>Change customer</button>
+      <button id="change" class="primary" hidden disabled>Switch connection</button>
       <button id="refresh" disabled>Refresh</button>
     </div>
     <div id="switch-panel" hidden>
-      <h3 id="switch-title">Change customer</h3>
-      <p id="switch-help" class="muted">Reconnect Realinsight in your host and choose the customer during sign-in.</p>
+      <h3 id="switch-title">Switch connection</h3>
+      <p id="switch-help" class="muted">Choose a saved connection, or select a server and sign in to a new connection.</p>
       <div id="local-switch" hidden>
         <p><label for="profile">Connection</label><select id="profile"><option value="">Sign in to a new connection</option></select></p>
         <div id="new-connection">
@@ -88,7 +88,7 @@
         </div>
       </div>
       <p class="hint muted">Start a new conversation after switching so previous customer data stays separate.</p>
-      <div class="actions"><button id="disconnect" class="primary">Disconnect and reconnect</button><button id="cancel">Cancel</button></div>
+      <div class="actions"><button id="disconnect" class="primary">Switch connection</button><button id="cancel">Cancel</button></div>
     </div>
     <p id="status" class="muted" role="status" aria-live="polite">Open this view in a compatible MCP App host.</p>
   </section>
@@ -101,6 +101,7 @@
   let hostCapabilities = {};
   let busy = false;
   let current = null;
+  let currentVerified = false;
   let transport = 'hosted';
   let pendingLocalLogin = false;
   let localProfile;
@@ -121,18 +122,20 @@
   function buttons() {
     const canCallTools = connected && Boolean(hostCapabilities.serverTools);
     elements.refresh.disabled = !canCallTools || busy;
-    elements.change.disabled = !canCallTools || busy || !current;
-    elements.disconnect.disabled = !canCallTools || busy;
+    elements.change.disabled = !canCallTools || busy || !currentVerified;
+    elements.disconnect.disabled = !canCallTools || busy || (transport === 'hosted' && !currentVerified);
     elements.cancel.disabled = busy;
     elements.profile.disabled = busy;
     elements['base-url'].disabled = busy;
     document.querySelector('.card').setAttribute('aria-busy', String(busy));
   }
-  function render(context) {
+  function render(context, verified = false) {
     current = context;
-    elements['connection-state'].textContent = context ? 'Connected' : 'Not connected';
-    elements['connection-state'].dataset.connected = String(Boolean(context));
-    elements.change.textContent = transport === 'local' ? 'Switch connection' : 'Change customer';
+    currentVerified = Boolean(context) && verified;
+    elements['connection-state'].textContent = context ? (currentVerified ? 'Connected' : 'Not verified') : 'Not connected';
+    elements['connection-state'].dataset.connected = String(currentVerified);
+    elements.change.hidden = transport !== 'local';
+    if (transport !== 'local') elements['switch-panel'].hidden = true;
     elements.customer.textContent = context?.customer_name || (context ? context.customer_code : 'Connection unavailable');
     elements.code.textContent = context?.customer_code ? `Customer code: ${context.customer_code}` : '';
     elements.user.textContent = context?.user_name || '—';
@@ -149,12 +152,17 @@
     }
     catch (error) { setStatus(`The connection view updated, but the conversation context could not be updated: ${error.message}`); }
   }
-  async function applyResult(result) {
+  async function applyResult(result, verified = true) {
     if (result?.isError) throw new Error(result.structuredContent?.error || result.content?.find(item => item.type === 'text')?.text || 'Reconnect Realinsight in your host.');
     const context = result?.structuredContent?.items?.[0];
     if (context?.customer_code && context.base_url) {
       transport = context.transport || 'hosted';
-      render(context);
+      render(context, verified);
+      if (!verified) {
+        setStatus('Saved connection snapshot. Checking the current connection requires tool-call support in the host.');
+        if (connected && hostCapabilities.serverTools && !busy) await refresh();
+        return;
+      }
       setStatus(hostCapabilities.serverTools ? 'Connection verified.' : 'This host can display the connection. Refresh and switching require tool-call support in the host.');
       await updateModelContext(`The verified Realinsight connection is ${context.customer_name || context.customer_code} (${context.customer_code}) at ${context.base_url}, as ${context.user_name}. Granted scopes: ${(context.scopes || []).join(', ')}. Use this connection for subsequent calls; previous connection context is stale.`);
     } else {
@@ -177,58 +185,48 @@
       }
       await applyResult(await callTool('get_connection_context', transport === 'local' && localProfile ? { profile: localProfile } : {}));
     }
-    catch (error) { render(null); setStatus(error.message); }
+    catch (error) {
+      render(null); setStatus(error.message);
+      await updateModelContext('The Realinsight connection could not be verified. Previous customer context is stale. Reconnect and verify the current customer before further calls.');
+    }
     finally { busy = false; buttons(); }
   }
   elements.refresh.addEventListener('click', refresh);
   elements.profile.addEventListener('change', () => { elements['new-connection'].hidden = Boolean(elements.profile.value); });
   elements.change.addEventListener('click', async () => {
+    if (transport !== 'local') return;
     busy = true; buttons();
     elements['switch-panel'].hidden = false;
-    elements['local-switch'].hidden = transport !== 'local';
-    elements['switch-title'].textContent = transport === 'local' ? 'Switch connection' : 'Change customer';
-    elements.disconnect.textContent = transport === 'local' ? 'Switch connection' : 'Disconnect and reconnect';
-    elements['switch-help'].textContent = transport === 'local' ? 'Choose a saved connection, or select a server and sign in to a new connection.' : 'Changing customer disconnects this connection. Reconnect Realinsight in your host and choose the customer during sign-in.';
-    if (transport === 'local') {
-      try {
-        const result = (await callTool('list_profiles')).structuredContent;
-        const profiles = result?.profiles || [];
-        elements.profile.replaceChildren(new Option('Sign in to a new connection', ''), ...profiles.map(profile => new Option(`${profile.customer_name || profile.name} · ${profile.base_url}`, profile.name)));
-        const urls = new Set([current.base_url, 'https://www.realinsight.cloud/api/v1', 'https://www.ri2-qa.com/api/v1', 'https://www.ri2-dev.com/api/v1', ...profiles.map(profile => profile.base_url)].filter(Boolean).map(url => url.replace(/\/+$/, '')));
-        elements['base-url'].replaceChildren(...Array.from(urls, url => new Option(url, url)));
-        elements['base-url'].value = current.base_url.replace(/\/+$/, '');
-      }
-      catch (error) { setStatus(error.message); }
+    elements['local-switch'].hidden = false;
+    try {
+      const result = (await callTool('list_profiles')).structuredContent;
+      const profiles = result?.profiles || [];
+      elements.profile.replaceChildren(new Option('Sign in to a new connection', ''), ...profiles.map(profile => new Option(`${profile.customer_name || profile.name} · ${profile.base_url}`, profile.name)));
+      const urls = new Set([current.base_url, 'https://www.realinsight.cloud/api/v1', 'https://www.ri2-qa.com/api/v1', 'https://www.ri2-dev.com/api/v1', ...profiles.map(profile => profile.base_url)].filter(Boolean).map(url => url.replace(/\/+$/, '')));
+      elements['base-url'].replaceChildren(...Array.from(urls, url => new Option(url, url)));
+      elements['base-url'].value = current.base_url.replace(/\/+$/, '');
     }
-    busy = false; buttons();
+    catch (error) { setStatus(error.message); }
+    finally { busy = false; buttons(); }
     elements['new-connection'].hidden = Boolean(elements.profile.value);
-    (transport === 'local' ? elements.profile : elements.disconnect).focus();
+    elements.profile.focus();
   });
   elements.cancel.addEventListener('click', () => { elements['switch-panel'].hidden = true; elements.change.focus(); });
   elements.disconnect.addEventListener('click', async () => {
+    if (transport !== 'local') return;
     busy = true; buttons();
     try {
-      if (transport === 'local') {
-        const profile = elements.profile.value;
-        const base_url = elements['base-url'].value;
-        if (!profile && !base_url) throw new Error('Choose a connection or select a server.');
-        // Keep each new authorization separate, including the same customer on another server.
-        const result = (await callTool('switch_profile', profile ? { profile, reauthorize: false } : { profile: `connection-${Date.now()}`, base_url, force_login: true, wait_for_approval: false })).structuredContent;
-        localProfile = undefined;
-        if (result?.status === 'authorization_pending') {
-          pendingLocalLogin = true; render(null); setStatus('Finish the Realinsight browser sign-in, then refresh this view.');
-          await updateModelContext('Realinsight is awaiting a new customer sign-in. Previous customer context is stale. Wait for approval and verify the connection before further calls.');
-        } else await applyResult(await callTool('get_connection_context'));
-        elements['switch-panel'].hidden = true;
-        return;
-      }
-      await callTool('disconnect');
-      render(null); elements['switch-panel'].hidden = true;
-      setStatus('Disconnected. Reconnect Realinsight in your host, choose the customer, then refresh this view.');
-      await updateModelContext('Realinsight was disconnected. Previous customer context is stale. Reconnect and verify the customer before further calls.');
-      // The host owns OAuth. A fresh call starts its authentication flow where supported.
-      try { await applyResult(await callTool('get_connection_context')); }
-      catch (error) { setStatus(`Disconnected. Reconnect Realinsight in your host settings and choose the customer during sign-in. ${error.message}`); }
+      const profile = elements.profile.value;
+      const base_url = elements['base-url'].value;
+      if (!profile && !base_url) throw new Error('Choose a connection or select a server.');
+      // Keep each new authorization separate, including the same customer on another server.
+      const result = (await callTool('switch_profile', profile ? { profile, reauthorize: false } : { profile: `connection-${Date.now()}`, base_url, force_login: true, wait_for_approval: false })).structuredContent;
+      localProfile = undefined;
+      if (result?.status === 'authorization_pending') {
+        pendingLocalLogin = true; render(null); setStatus('Finish the Realinsight browser sign-in, then refresh this view.');
+        await updateModelContext('Realinsight is awaiting a new customer sign-in. Previous customer context is stale. Wait for approval and verify the connection before further calls.');
+      } else await applyResult(await callTool('get_connection_context'));
+      elements['switch-panel'].hidden = true;
     }
     catch (error) { setStatus(error.message); }
     finally { busy = false; buttons(); }
@@ -258,7 +256,7 @@
       if (message.error) entry.reject(new Error(message.error.message)); else entry.resolve(message.result);
     }
     if (message.method === 'ui/notifications/tool-result') {
-      try { await applyResult(message.params); } catch (error) { render(null); setStatus(error.message); }
+      try { await applyResult(message.params, false); } catch (error) { render(null); setStatus(error.message); }
     }
     if (message.method === 'ui/notifications/host-context-changed') applyHostContext(message.params);
   });
@@ -269,7 +267,8 @@
       hostCapabilities = result.hostCapabilities || {};
       applyHostContext(result.hostContext); connected = true; buttons();
       notify('ui/notifications/initialized', {});
-      if (!hostCapabilities.serverTools) setStatus('This host can display the connection. Refresh and switching require tool-call support in the host.');
+      if (!hostCapabilities.serverTools) setStatus('Saved connection snapshot. This host cannot verify the current connection or change customers from the card.');
+      else if (current && !busy) await refresh();
       else if (!current) setStatus('Waiting for the host to supply your current connection.');
     }
     catch (error) { setStatus(error.message); }

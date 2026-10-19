@@ -69,6 +69,11 @@ async function handle_mcp_line(line) {
   }
 
   if (Array.isArray(message)) {
+    if (message.some((item) => item?.params?._meta?.["io.modelcontextprotocol/protocolVersion"] === MCP_MODERN_PROTOCOL_VERSION)) {
+      write_json_rpc(build_error_response(null, -32600, "Modern MCP requests must contain one JSON-RPC message."));
+      return;
+    }
+
     for (const item of message) {
       await handle_mcp_message(item);
     }
@@ -85,10 +90,8 @@ async function handle_mcp_message(message) {
     return;
   }
 
-  if (!message.method) return;
-
-  if (typeof message.method !== "string") {
-    if (message.id !== undefined) write_json_rpc(build_error_response(message.id, -32600, "Invalid Request"));
+  if (typeof message.method !== "string" || !message.method) {
+    write_json_rpc(build_error_response(message.id ?? null, -32600, "Invalid Request"));
     return;
   }
 
@@ -99,7 +102,7 @@ async function handle_mcp_message(message) {
 
   try {
     const is_modern_request = validate_protocol_request(message);
-    const result = add_modern_result_metadata(
+    const result = add_result_metadata(
       await handle_mcp_request(message, is_modern_request),
       message.method,
       is_modern_request,
@@ -152,6 +155,8 @@ async function handle_mcp_request(message, is_modern_request) {
       return await list_mcp_resources(message.params);
     case "resources/read":
       return await read_mcp_resource(message.params);
+    case "resources/templates/list":
+      return { resourceTemplates: [] };
     case "prompts/list":
       return { prompts: [] };
     default:
@@ -160,13 +165,23 @@ async function handle_mcp_request(message, is_modern_request) {
 }
 
 function validate_protocol_request(message) {
+  if (message.params !== undefined && !is_plain_object(message.params)) {
+    throw new JsonRpcError(-32602, "MCP request params must be an object.");
+  }
+  if (message.params?._meta !== undefined && !is_plain_object(message.params._meta)) {
+    throw new JsonRpcError(-32602, "params._meta must be an object.");
+  }
+
   const metadata = is_plain_object(message.params?._meta)
     ? message.params._meta
     : null;
   const requested_version = metadata?.["io.modelcontextprotocol/protocolVersion"];
 
-  if (requested_version === undefined) return false;
-  if (typeof requested_version !== "string" || !MCP_SUPPORTED_PROTOCOL_VERSIONS.includes(requested_version)) {
+  if (requested_version === undefined && !Object.hasOwn(metadata ?? {}, "io.modelcontextprotocol/clientCapabilities")) return false;
+  if (typeof requested_version !== "string" || !requested_version) {
+    throw new JsonRpcError(-32602, "params._meta.io.modelcontextprotocol/protocolVersion must be a string.");
+  }
+  if (!MCP_SUPPORTED_PROTOCOL_VERSIONS.includes(requested_version)) {
     throw new JsonRpcError(-32022, "Unsupported protocol version", {
       supported: MCP_SUPPORTED_PROTOCOL_VERSIONS,
       requested: requested_version ?? null,
@@ -184,8 +199,14 @@ function validate_protocol_request(message) {
   return true;
 }
 
-function add_modern_result_metadata(result, method, is_modern_request) {
-  if (!is_modern_request || !is_plain_object(result)) return result;
+function add_result_metadata(result, method, is_modern_request) {
+  if (!is_plain_object(result)) return result;
+
+  if (method === "server/discover" || method.endsWith("/list") || method === "resources/read") {
+    result = { ...result, ttlMs: 300000, cacheScope: "private" };
+  }
+
+  if (!is_modern_request) return result;
 
   const modern_result = {
     ...result,
@@ -195,11 +216,6 @@ function add_modern_result_metadata(result, method, is_modern_request) {
       "io.modelcontextprotocol/serverInfo": MCP_SERVER_INFO,
     },
   };
-
-  if (method === "server/discover" || method.endsWith("/list")) {
-    modern_result.ttlMs = 300000;
-    modern_result.cacheScope = "private";
-  }
 
   return modern_result;
 }

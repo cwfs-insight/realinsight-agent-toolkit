@@ -11,7 +11,7 @@ This is a usage playbook. It assumes the toolkit or connector is already install
 
 ## Connection First
 
-Call `get_connection_context` to see the customer, environment, and permissions bound to the active credential, especially before writes or after switching. Compatible hosts can render a connection view with a Change customer button. Hosted switching disconnects the current grant and requires fresh host-managed sign-in; a browser customer change alone does not switch the connector. Use a fresh conversation after switching to avoid carrying another customer's data forward.
+Call `get_connection_context` to see the customer, server, and permissions bound to the active credential, especially before writes or after switching. Compatible hosts can render a connection view; only local stdio connections show switching controls. For hosted switching, use the host's Reconnect or Authenticate control, then select “Use a different Realinsight account or customer” on the approval page. A browser customer change alone does not switch the connector. Use a fresh conversation after switching to avoid carrying another customer's data forward.
 
 Prefer MCP tools when they are available in the harness. Use the CLI only when the user or harness has direct terminal access.
 
@@ -22,7 +22,7 @@ For local stdio MCP:
 3. If not connected, call `connect_realinsight`.
 4. If the user wants to switch customer context, call `switch_profile`. Use an existing profile when known; otherwise pass `customer_code` only when it is the user's Realinsight login/company code. If only a customer number or uncertain identifier is known, omit it so the user can type the customer code on the Realinsight login screen.
 5. If a tool reports insufficient scopes, call `request_realinsight_scopes` with the needed access. The helper adds those scopes to the selected profile's existing scope set before consent.
-6. Use local `disconnect_realinsight` only when the user asks to log out, rotate credentials, or reconnect as a different Realinsight customer/user. Hosted HTTP MCP exposes `disconnect` instead; it revokes the current grant and the user may still need to reconnect Realinsight in the host.
+6. Use local `disconnect_realinsight` only when the user asks to log out, rotate credentials, or reconnect as a different Realinsight customer/user. Hosted HTTP MCP exposes `disconnect` for explicit logout/disconnect requests or a confirmed customer change; the host owns reconnecting. Hosted customer changes use the host's native sign-in flow; do not start a separate CLI login as a desktop recovery flow.
 
 For CLI use:
 
