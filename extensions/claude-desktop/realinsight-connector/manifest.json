@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "realinsight-connector",
   "display_name": "Realinsight Connector",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Use Realinsight commercial real estate data and analytics from Claude Desktop.",
   "long_description": "Connect Claude Desktop to Realinsight through a local MCP server. The extension opens a browser-based Realinsight login, supports SSO/MFA through the normal Realinsight flow, and exposes read-only schema, entity, record, dashboard, analytic, and workbench tools by default.",
   "author": {
@@ -49,6 +49,42 @@
     }
   },
   "tools": [
+    {
+      "name": "search_integrators",
+      "description": "Find import definitions by name, target feature, or folder before deciding whether to reuse or create one."
+    },
+    {
+      "name": "get_integrator",
+      "description": "Read a compact overview, mapping summaries, and conflict token. Request sections=source,match_levels,map,map_item,definition for focused detail. map_item requires map_id; summary and map support pagination. definition is the complete PascalCase configuration for explicit replacement or copying."
+    },
+    {
+      "name": "get_integrator_options",
+      "description": "Discover allowed configuration choices: dictionary match hierarchy (sections=match_levels with feature_code), active folders, or configured SQL connections with listener readiness. Folder and connection lists support filters and independent cursors; connection secrets are omitted. Suggested match keys do not prove uniqueness. Use get_fields for exact writable fields and allowed codes."
+    },
+    {
+      "name": "validate_integrator",
+      "description": "Validate without saving or queueing. Supply definition for creation/explicit replacement, or integrator_id plus expected_conflict_token and focused changes/map_patch. Returns can_save/errors, can_run/run_errors, and warnings without echoing the definition. staged_file_id derives source columns from proposed Excel settings; otherwise supply source_columns when available. Validation does not simulate posting or prove key uniqueness."
+    },
+    {
+      "name": "set_integrator",
+      "description": "Save only after validation and explicit approval. Use the same configuration request as validate_integrator plus approved=true and change_reason. Creates require definition; updates require the latest conflict token. Prefer changes/map_patch to preserve omitted settings; definition explicitly replaces all settings/maps. The response includes a compact overview, new conflict token, and audit operation id."
+    },
+    {
+      "name": "stage_integrator_source_file",
+      "description": "Stage an approved temporary upload before inspecting or importing CSV or Excel. Files are customer/user-bound, expire after three days, and are limited to 25 MiB. CSV becomes worksheet Source with text-preserving values."
+    },
+    {
+      "name": "inspect_integrator_source",
+      "description": "Preview sheets, headers, sample rows, distinct values, and blank/duplicate composite keys. Use sheet_name or one-based sheet_index. Source columns are Excel letters, including CSV. Checks cover at most 5000 data rows and do not prove full-source uniqueness."
+    },
+    {
+      "name": "run_integrator",
+      "description": "Queue asynchronous scan_headers, scan_values, query, test_connection, or apply after explicit approval of the exact source/SQL and mode. Query suppresses Realinsight posting but SQL may have source-side effects. Apply can insert/update and trigger post-save actions. Requires the current conflict token. Never automatically retry; poll get_integrator_run with the returned run_handle."
+    },
+    {
+      "name": "get_integrator_run",
+      "description": "Pass run_handle back unchanged to follow SQL extraction through downstream scanning/posting. Status includes available_sections and scan_columns; page logs, headers, values, or SQL rows using section/cursor. Extraction completion alone is not import completion. Results belong to the initiating user/customer."
+    },
     {
       "name": "get_connection_context",
       "description": "Show the customer, environment, user, and granted permissions bound to the active connection. Verify this context before writes or after switching customers."
@@ -99,7 +135,7 @@
     },
     {
       "name": "search_entities",
-      "description": "Find concrete Realinsight entity ids using generic top-toolbar style search or explicit searchable fields. Use one candidate or clue per call, make separate bounded calls for alternatives, and prefer exact field-targeted search once the field and expected value are known."
+      "description": "Find concrete Realinsight entity ids using generic search or explicit searchable fields. Use one candidate per call and prefer exact field-targeted search when possible. Soft-deleted entities are excluded; business-inactive entities remain searchable. For extraction destinations or ambiguous/incomplete matches, use search_features.status_schema_code, get_fields allowed values/classification_code, and get_records to compare candidate statuses before choosing. Status does not override user intent or other identity evidence."
     },
     {
       "name": "run_entity_query",

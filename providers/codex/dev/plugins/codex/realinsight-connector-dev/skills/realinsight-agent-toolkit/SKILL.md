@@ -47,6 +47,7 @@ Use the user's wording to choose the lightest useful tool family:
 - Chart of Accounts questions: use `get_chart_of_accounts` for account configuration/layout and `get_coa_data` for record-bound accounts values.
 - RealVIEW questions: use `get_realviews` only for explicit configuration inspection or changes; use `execute_realview` for requested values or to verify a saved definition against entities found with normal entity tools.
 - Extended Data configuration questions: only when the user explicitly asks about custom fields or system-field overlays, use `get_extended_data`. Keep this separate from `search_fields`/`get_fields`, which return the merged runtime field catalog used by ordinary record, report, and model-form work.
+- Source import and integrator questions: read `references/integrators.md`; discover existing definitions, inspect source keys, build and validate mappings, then queue approved scans/queries/imports and poll through completion.
 - Runtime output questions: current report/model-form execution job tools are not exposed yet. Inspect definitions and cached outputs when available, and tell the user when an output must be run or refreshed in Realinsight.
 
 ## Tool Discovery For Large Harnesses
@@ -61,6 +62,7 @@ When the harness supports tool search, search by family instead of loading or re
 - Chart of Accounts and COA Data: search for `Realinsight chart of accounts configuration COAData`; use `get_chart_of_accounts` for configuration/layout, `get_coa_data` for a record-bound data id, and `set_chart_of_accounts` only after dry-run validation and approval.
 - RealVIEW configuration and execution: search for `Realinsight RealVIEW configuration maps execute entities`; start with `get_realviews`, find matching root entities with normal entity tools, then use `execute_realview`; use `set_realview` only after dry-run validation and approval.
 - Extended Data configuration: search for `Realinsight Extended Data custom field configuration`; use `get_extended_data` for persisted definitions and `set_extended_data` only after dry-run validation and approval.
+- Integrator configuration and execution: search for `Realinsight integrator mapping Excel CSV SQL scan run`; start with `search_integrators`, `get_integrator`, and `get_integrator_options`.
 - Reference/schema fallback: search for `Realinsight tool reference schema` or call `get_tool_reference` when this skill or its reference files are unavailable.
 
 Keep these common entry tools visible or easy to discover: `get_tool_reference`, `search_features`, `search_fields`, `get_fields`, `search_entities`, `run_entity_query`, `get_records`, `get_entity_structure`, `search_reports`, `search_report_folders`, `get_report`, `search_model_forms`, `search_model_form_folders`, `get_model_form`, `get_chart_of_accounts`, `get_coa_data`, `get_realviews`, and `get_extended_data`.
@@ -89,6 +91,7 @@ Read only the reference files needed for the user's request:
 - `references/model-form-configuration.md`: inspecting model forms, templates, flat maps, map nodes/items, markers, used fields, approval-gated create/copy/update, and Excel template download/upload.
 - `references/model-form-map-layout.md`: model-form markers, repeating blocks, multi-entity layout, and stub/insert behavior.
 - `references/deal-model-form-patterns.md`: deal-centered model-form map traversal through components, capital stack, collateral, loans, and child datasets.
+- `references/integrators.md`: deciding which import definitions are needed, inspecting Excel/CSV/SQL sources, matching keys, mapping values/references/COA data, and asynchronous scans/query/apply.
 - `references/record-writes.md`: approval-gated record update workflow when write tools are enabled.
 
 Reusable helper scripts are available under `scripts/` for common local file workflows. For model-form Excel template edits, prefer `scripts/model_form_template_roundtrip.py` or `scripts/model_form_template_roundtrip.ts` instead of writing signed download/upload glue from scratch.

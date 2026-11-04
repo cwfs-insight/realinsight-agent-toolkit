@@ -34,6 +34,9 @@ const SCOPES = [
   "ri:extended_data.read",
   "ri:extended_data.write",
   "ri:reports.write",
+  "ri:integrators.read",
+  "ri:integrators.write",
+  "ri:integrators.run",
 ];
 
 let base_url = "";
@@ -67,6 +70,7 @@ async function main() {
     run_build_url_smoke(build_url);
     await run_doctor_smoke(config_path);
     await run_tool_call_smoke(call_agent_tool, temp_dir);
+    await run_integrator_smoke(call_agent_tool, temp_dir, config_path);
     await run_mcp_smoke(config_path, MCP_INSTRUCTIONS);
     run_result_limit_smoke(enforce_tool_result_limit);
 
@@ -605,6 +609,42 @@ async function run_tool_call_smoke(call_agent_tool, temp_dir) {
   assert(model_form_upload_result.items[0].model_form.template_file_name === "loan-model.xlsx", "upload_model_form_template did not consume staged file handle");
 }
 
+async function run_integrator_smoke(call_agent_tool, temp_dir, config_path) {
+  const source = path.join(temp_dir, "integrator-source.csv");
+  await fs.writeFile(source, 'Loan ID,Balance\n00123,123.45\n');
+  const staged = await call_agent_tool("stage_integrator_source_file", { file_path: source, approved: true });
+  assert(staged.items[0].staged_file_id === "integrator-source-1", "integrator source upload lost staged id");
+  assert(staged.items[0].file_length > 0, "integrator source was not uploaded");
+  const preview = await call_agent_tool("inspect_integrator_source", { staged_file_id: "integrator-source-1", key_columns: ["A"] });
+  assert(preview.items[0].rows[0][0] === "00123", "integrator preview lost source identifier");
+  const definition = { ProcessType: "DICTIONARY", ProcessTypeCode: "Loan", ProcessName: "Loan import", DataSourceType: "SQL", DataSourceSQL: { ConnectionId: "connection-1", SQLStmtType: "SQL", SQLSelect: "select loan_id, balance from loans" }, MatchLevels: [{ MatchLevel: 1, EntityTypeFeatureCode: "Loan", MatchType: "SCHEMA", NewEntityAction: "MATCH", MatchMap: [{ SchemaCode: "Loan.LoanID", SourceColumnName: "loan_id" }] }], Map: [{ TargetSchemaCode: "Loan.Balance", SourceColumnName: "balance", IgnoreValues: [{ IgnoreValue: "N/A" }] }] };
+  const options = await call_agent_tool("get_integrator_options", { feature_code: "Loan", sections: "match_levels,connections", connection_cursor: "25" });
+  assert(options.items[0].connections.items[0].connection_id === "connection-1", "integrator options lost connection selection");
+  const detail = await call_agent_tool("get_integrator", { integrator_id: "integrator-1", sections: "map_item", map_id: "map-1" });
+  assert(detail.items[0].map_item.SourceColumnName === "balance", "focused integrator read lost selected mapping");
+  const validation = await call_agent_tool("validate_integrator", { definition });
+  assert(validation.items[0].can_run === true && !validation.items[0].integrator, "integrator validation did not return concise readiness");
+  await assert_rejects(() => call_agent_tool("set_integrator", { definition }), "requires approved=true");
+  const saved = await call_agent_tool("set_integrator", { definition, approved: true });
+  assert(saved.items[0].saved === true, "integrator save did not preserve response");
+  const args = { integrator_id: "integrator-1", expected_conflict_token: "integrator-conflict-1", mode: "query", approved: true };
+  await assert_rejects(() => call_agent_tool("run_integrator", { ...args, approved: false }), "requires approved=true");
+  await assert_rejects(() => call_agent_tool("run_integrator", { ...args, expected_conflict_token: undefined }), "expected_conflict_token");
+  const queued = await call_agent_tool("run_integrator", args);
+  assert(queued.items[0].run_handle === "sql:integrator-run-1" && queued.items[0].is_complete === false, "integrator queue did not return async source handle");
+  const status = await call_agent_tool("get_integrator_run", { run_handle: queued.items[0].run_handle });
+  assert(status.items[0].phase === "posting" && status.items[0].is_complete === false, "integrator status lost downstream posting state");
+  const cli = await run_node_cli(["integrators", "status", "sql:integrator-run-1"], config_path);
+  assert(cli.stdout.includes('"phase": "posting"'), "integrator CLI did not preserve async status");
+  const request_file = path.join(temp_dir, "integrator-definition.json");
+  await fs.writeFile(request_file, JSON.stringify({ definition }));
+  const saved_cli = await run_node_cli(["integrators", "set", "--request-file", request_file, "--approved"], config_path);
+  assert(saved_cli.stdout.includes('"saved": true'), "integrator CLI did not send explicit approval");
+  const count = requests.filter((request) => request.path === "/agent/integrators/run").length;
+  await assert_rejects(() => call_agent_tool("run_integrator", { ...args, mode: "apply" }), "uncertain_queue_result");
+  assert(requests.filter((request) => request.path === "/agent/integrators/run").length === count + 1, "integrator queue was retried after an uncertain failure");
+}
+
 async function run_mcp_smoke(config_path, mcp_instructions) {
   const child = spawn(NODE_BIN, ["./src/ri-agent.mjs", "mcp"], {
     cwd: TOOLKIT_ROOT,
@@ -761,8 +801,10 @@ async function run_mcp_smoke(config_path, mcp_instructions) {
     "delete_report",
     "disconnect_realinsight",
     "import_report_into_composite",
+    "run_integrator",
     "set_chart_of_accounts",
     "set_extended_data",
+    "set_integrator",
     "set_realview",
     "set_record",
     "update_model_form",
@@ -782,7 +824,8 @@ async function run_mcp_smoke(config_path, mcp_instructions) {
   assert(discover_response?.instructions === mcp_instructions, "mcp server/discover instructions drifted from initialize instructions");
   assert(discover_response?.resultType === "complete", "mcp server/discover resultType missing");
   assert(discover_response?._meta?.["io.modelcontextprotocol/serverInfo"]?.name === "realinsight-agent-toolkit", "mcp server/discover serverInfo metadata missing");
-  assert(discover_response?._meta?.["io.modelcontextprotocol/serverInfo"]?.version === "0.2.4", "mcp server/discover version was not bumped");
+  const package_version = JSON.parse(await fs.readFile(path.join(TOOLKIT_ROOT, "package.json"), "utf8")).version;
+  assert(discover_response?._meta?.["io.modelcontextprotocol/serverInfo"]?.version === package_version, "mcp server/discover version differs from package version");
   assert(discover_response?.capabilities?.extensions?.["io.modelcontextprotocol/skills"], "mcp server/discover skills extension capability missing");
   assert(discover_response?.capabilities?.resources, "mcp server/discover resources capability missing");
   const modern_tools_response = responses.find((response) => response.id === 5)?.result;
@@ -878,6 +921,56 @@ async function handle_request(request, response) {
       });
       return;
     }
+  }
+
+  if (request.method === "POST" && url.pathname === "/integrator-source-upload") {
+    assert(body.__raw_text.includes("00123"), "source upload did not include the CSV bytes");
+    write_json(response, 200, { staged_file_id: "integrator-source-1", file_name: "integrator-source.csv", file_length: 32 });
+    return;
+  }
+  if (request.method === "POST" && url.pathname === "/agent/integrators/sources/stage") {
+    assert(body.approved === true && body.file_name === "integrator-source.csv", "source staging lost exact approved file name");
+    write_json(response, 200, agent_result("stage_integrator_source_file", "ri:integrators.write", [{ staged_file_id: "integrator-source-1", file_name: body.file_name, upload_url: `${base_url}/integrator-source-upload` }]));
+    return;
+  }
+  if (request.method === "POST" && url.pathname === "/agent/integrators/sources/inspect") {
+    assert(body.staged_file_id === "integrator-source-1" && body.key_columns[0] === "A", "source inspection lost key columns");
+    write_json(response, 200, agent_result("inspect_integrator_source", "ri:integrators.read", [{ rows: [["00123", "123.45"]], columns: [{ source_column: "A", header: "Loan ID" }] }]));
+    return;
+  }
+  if (request.method === "POST" && url.pathname === "/agent/integrators/options") {
+    assert(body.sections === "match_levels,connections" && body.connection_cursor === "25", "integrator options lost selectors/cursor");
+    write_json(response, 200, agent_result("get_integrator_options", "ri:integrators.read", [{ connections: { items: [{ connection_id: "connection-1" }] } }]));
+    return;
+  }
+  if (request.method === "GET" && url.pathname === "/agent/integrators/integrator-1") {
+    assert(url.searchParams.get("sections") === "map_item" && url.searchParams.get("map_id") === "map-1", "integrator read lost focused selectors");
+    write_json(response, 200, agent_result("get_integrator", "ri:integrators.read", [{ map_item: { SourceColumnName: "balance" } }]));
+    return;
+  }
+  if (request.method === "POST" && url.pathname === "/agent/integrators/validate") {
+    assert(body.definition.MatchLevels[0].NewEntityAction === "MATCH" && !("approved" in body), "integrator validation lost input or requested approval");
+    write_json(response, 200, agent_result("validate_integrator", "ri:integrators.write", [{ can_save: true, can_run: true, errors: [], run_errors: [], warnings: [] }]));
+    return;
+  }
+  if (request.method === "POST" && url.pathname === "/agent/integrators/set") {
+    assert(body.definition.MatchLevels[0].NewEntityAction === "MATCH", "integrator save lost match-only behavior");
+    assert(body.definition.Map[0].IgnoreValues[0].IgnoreValue === "N/A", "integrator save lost ignored values");
+    assert(body.approved === true && !("dry_run" in body), "integrator write lost approval or retained dry_run");
+    write_json(response, 200, agent_result("set_integrator", "ri:integrators.write", [{ saved: true, integrator: { integrator_id: "integrator-1", conflict_token: "integrator-conflict-1", definition: body.definition }, validation: { can_save: true, can_run: true } }]));
+    return;
+  }
+  if (request.method === "POST" && url.pathname === "/agent/integrators/run") {
+    assert(body.expected_conflict_token === "integrator-conflict-1" && body.approved === true, "integrator run lost approval/conflict token");
+    if (body.mode === "apply") { write_json(response, 503, { error: "uncertain_queue_result", error_description: "uncertain_queue_result" }); return; }
+    assert(body.mode === "query", "integrator query mode was changed");
+    write_json(response, 200, agent_result("run_integrator", "ri:integrators.run", [{ run_handle: "sql:integrator-run-1", status: "INIT", phase: "source", is_complete: false }]));
+    return;
+  }
+  if (request.method === "POST" && url.pathname === "/agent/integrators/runs/get") {
+    assert(body.run_handle === "sql:integrator-run-1" && !("run_kind" in body), "integrator poll lost its source handle");
+    write_json(response, 200, agent_result("get_integrator_run", "ri:integrators.read", [{ run_handle: body.run_handle, phase: "posting", status: "RUNNING", host_job_id: "integrator-host-1", is_complete: false }]));
+    return;
   }
 
   if (request.method === "GET" && url.pathname === "/.well-known/oauth-protected-resource") {

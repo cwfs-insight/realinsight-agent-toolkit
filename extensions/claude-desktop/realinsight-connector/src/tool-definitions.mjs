@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { integrator_tool_definitions } from "./integrator-tool-definitions.mjs";
 import os from "node:os";
 import path from "node:path";
 import { CONNECTION_UI_META, CONNECTION_ICON, MODEL_FORM_UI_META } from "./mcp-app-resources.mjs";
@@ -32,6 +33,9 @@ export const DEFAULT_SCOPE = [
   "ri:extended_data.read",
   "ri:extended_data.write",
   "ri:reports.write",
+  "ri:integrators.read",
+  "ri:integrators.write",
+  "ri:integrators.run",
 ].join(" ");
 export const REFRESH_SKEW_MS = 2 * 60 * 1000;
 export const CONFIG_PATH = process.env.REALINSIGHT_AGENT_CONFIG
@@ -59,6 +63,9 @@ export const EXTENDED_DATA_WRITE_SCOPE = "ri:extended_data.write";
 export const REPORT_WRITE_SCOPE = "ri:reports.write";
 export const WRITE_TOOLS_ENABLED = parse_env_bool(process.env.RI_AGENT_ENABLE_WRITE_TOOLS, true);
 const WRITE_TOOL_NAMES = new Set([
+  "set_integrator",
+  "stage_integrator_source_file",
+  "run_integrator",
   "create_entity",
   "set_record",
   "set_chart_of_accounts",
@@ -92,7 +99,7 @@ export const MCP_SUPPORTED_PROTOCOL_VERSIONS = [
 export const MCP_SERVER_INFO = {
   name: "realinsight-agent-toolkit",
   title: "Realinsight Agent Toolkit",
-  version: "0.2.4",
+  version: "0.2.5",
   icons: [CONNECTION_ICON],
 };
 export const MCP_INSTRUCTIONS = [
@@ -100,6 +107,7 @@ export const MCP_INSTRUCTIONS = [
   "All Realinsight tool calls run through Core API using the authenticated Realinsight user and customer context.",
   "This server publishes skill://realinsight-agent-toolkit/SKILL.md through the draft io.modelcontextprotocol/skills extension. Clients that support MCP-served skills can discover it with skills/list and load its files lazily with resources/read.",
   "For harnesses that implement tool search, search by tool family first instead of loading every tool: schema features fields; entity search query records structure children; analytics dashboard workbench CSV; report configuration folders; model form configuration folders template map; chart of accounts configuration COAData; RealVIEW configuration execute; Extended Data custom field configuration; tool reference schema. Common always-useful entry tools are get_tool_reference, search_features, search_fields, get_fields, search_entities, run_entity_query, get_records, get_entity_structure, search_reports, search_report_folders, get_report, search_model_forms, search_model_form_folders, get_model_form, get_chart_of_accounts, get_realviews, and get_extended_data.",
+  "For source imports use the integrator tools: discover existing definitions, inspect source keys, get the match hierarchy, validate and save mappings, then queue approved scans/queries/apply and poll through downstream completion. Use get_tool_reference topic=integrators for the workflow.",
   "Each callable tool includes its complete input schema. If the Realinsight Agent Toolkit skill is unavailable, call get_tool_reference for compact workflow guidance and cross-tool sequencing.",
   "Choose the tool family from the shape of the user's question. For a named loan, deal, property, tenant, borrower, or other specific record, use schema/entity/record tools first. For broad portfolio, system, dashboard, saved-list, or operational-table questions, inspect curated dashboard/workbench/cache tools when they match the request.",
   "Do not default to dashboard/workbench tools only because a question is broad business data; use them when the user mentions an existing page/list/analytic/workbench, when tool evidence points to one, or when a curated cached table is the best source for a portfolio/system-wide population.",
@@ -137,6 +145,7 @@ export const MCP_INSTRUCTIONS = [
 ].join("\n");
 
 const TOOL_DEFINITIONS = [
+  ...integrator_tool_definitions(AGENT_TOOL_PAYLOAD_SCHEMAS),
   {
     name: "get_connection_context",
     title: "Realinsight Connection",
@@ -194,6 +203,7 @@ const TOOL_DEFINITIONS = [
             "chart_of_accounts",
             "realviews",
             "extended_data",
+        "integrators",
             "entities_records",
             "analytics_workbenches",
           ],
@@ -627,7 +637,7 @@ const TOOL_DEFINITIONS = [
     cli: "ri-agent search-entities QUERY [--schema-code FEATURE.FIELD|--schema-codes A.B,C.D|--feature-code FEATURE --field-names FieldA,FieldB]",
     route: "GET /agent/entities/search",
     scope: ENTITY_SEARCH_SCOPE,
-    description: "Find concrete Realinsight entity ids using generic top-toolbar style search or explicit searchable fields. Use one candidate or clue per call, make separate bounded calls for alternatives, and prefer exact field-targeted search once the field and expected value are known.",
+    description: "Find concrete Realinsight entity ids using generic search or explicit searchable fields. Use one candidate per call and prefer exact field-targeted search when possible. Soft-deleted entities are excluded; business-inactive entities remain searchable. For extraction destinations or ambiguous/incomplete matches, use search_features.status_schema_code, get_fields allowed values/classification_code, and get_records to compare candidate statuses before choosing. Status does not override user intent or other identity evidence.",
     inputSchema: {
       type: "object",
       additionalProperties: false,

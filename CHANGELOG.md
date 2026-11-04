@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.5
+
+- Added nine integrator tools with combined configuration-option discovery, focused configuration reads and mapping edits, separate read-only validation, and approved saves.
+- Added temporary Excel/CSV staging and bounded source previews for mapping and key checks.
+- Added approved asynchronous scan, SQL query, connection-test and import tools using the existing integrator runtime, with a single run handle for status and result polling.
+- Updated callable schemas, public workflow references and provider distributions. Integrator tools require a compatible Realinsight server and consent for the corresponding integrator scopes.
+
 ## 0.2.4
 
 - Added a branded MCP App connection view showing the authenticated customer, user, server, permissions, and connection switching controls.

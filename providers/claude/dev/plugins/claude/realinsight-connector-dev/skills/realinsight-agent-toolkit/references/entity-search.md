@@ -17,6 +17,16 @@ Use this when the agent needs to find Realinsight entities before reading record
 4. Use `get_entity_structure` when the next step needs parent, master, child, reference, or periodic context.
 5. Use `get_children` when the user asks for rows under the found entity, such as payment history or rent-roll rows.
 
+## Business Status And Target Selection
+
+Search excludes soft-deleted entities, but business-inactive and not-pursued records remain discoverable for historical questions. Before choosing an extraction destination, resolving same-name candidates, or relying on an incomplete match:
+
+1. Get the feature's `status_schema_code` from `search_features`. Do not guess a status field from its label.
+2. Load that field with `get_fields`. Allowed values include the writable `code`, display/description, and optional `classification_code` from the configured `CODE` parameter. Resolve customer-defined classifications using that field's allowed codes and metadata.
+3. Reuse any already-read status, or batch `get_records` for only the bounded candidate ids, declared status field, and identity fields needed to distinguish them. Do not add these reads to every routine search.
+4. For current work, prefer active or potential matches only when the other identity/relationship evidence agrees. Keep inactive matches available for past or dead-deal requests. Status must not override an exact user-selected entity or authorize substituting another target.
+5. A missing field, unset value, unknown classification, or `hide_from_selection` flag does not establish business activity. Ask when the intended target remains ambiguous, showing status and useful identifiers or location so same-name choices are distinguishable.
+
 ## Rules
 
 - Pass one actual candidate name, identifier, address, or field value per query. A multiword proper name is one candidate; do not combine alternative names or unrelated clues.

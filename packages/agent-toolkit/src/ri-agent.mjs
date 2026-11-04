@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { run_integrator_command } from "./integrator-tools.mjs";
 import { parse_args } from "./args.mjs";
 import { print_tools } from "./agent-tools.mjs";
 import { login, list_profiles, logout, status } from "./auth.mjs";
@@ -92,6 +93,11 @@ async function main() {
 
   if (command === "doctor") {
     await doctor(parsed.options);
+    return;
+  }
+
+  if (command === "integrators") {
+    await run_integrator_command(parsed.positionals.slice(1), parsed.options);
     return;
   }
 
@@ -833,6 +839,15 @@ Usage:
   ri-agent auth list [--json]
   ri-agent auth logout [--profile NAME]
   ri-agent doctor [--profile NAME] [--json]
+  ri-agent integrators search [--limit N] [--cursor CURSOR]
+  ri-agent integrators get INTEGRATOR_ID [--sections source,match_levels,map]
+  ri-agent integrators options --feature-code FEATURE_CODE [--sections match_levels,folders,connections]
+  ri-agent integrators stage-source ./source.csv --approved
+  ri-agent integrators inspect-source --staged-file-id ID [--sheet-name NAME]
+  ri-agent integrators validate --request-file ./definition.json
+  ri-agent integrators set --request-file ./definition.json --approved
+  ri-agent integrators run --request-file ./run.json --approved
+  ri-agent integrators status RUN_HANDLE [--section status|logs|headers|values|rows]
   ri-agent search-features QUERY [--profile NAME] [--limit N] [--type MASTER|DEPENDENT] [--include-virtuals] [--table]
   ri-agent search-fields QUERY [--profile NAME] [--feature-code CODE] [--limit N] [--postable-only] [--table]
   ri-agent get-fields FEATURE_CODE [--profile NAME] [--limit N] [--cursor CURSOR] [--postable-only] [--table]
