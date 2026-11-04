@@ -1,3 +1,4 @@
+import { call_integrator_tool } from "./integrator-tools.mjs";
 import { option_bool } from "./args.mjs";
 import {
   agent_auth_status,
@@ -61,6 +62,18 @@ export async function call_agent_tool(name, args) {
   let payload;
 
   switch (name) {
+    case "search_integrators":
+    case "get_integrator_folders":
+    case "get_integrator":
+    case "get_integrator_match_schema":
+    case "get_integrator_connections":
+    case "set_integrator":
+    case "stage_integrator_source_file":
+    case "inspect_integrator_source":
+    case "run_integrator":
+    case "get_integrator_run":
+      payload = await call_integrator_tool(name, args);
+      break;
     case "get_connection_context":
       payload = await agent_get_connection_context(args);
       break;

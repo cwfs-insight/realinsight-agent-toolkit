@@ -1531,6 +1531,12 @@
           ],
           "format": "double"
         },
+        "is_year": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
         "is_dictionary_value": {
           "type": [
             "boolean",
@@ -5981,6 +5987,1061 @@
       "additionalProperties": {},
       "x-runtime-defined-values": true,
       "description": "Field-name keys discovered from search_fields or get_fields. Values may be any JSON value accepted by that runtime field contract."
+    },
+    "integrator_search": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "search_text": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "feature_code": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "parent_folder_id": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "include_inactive": {
+          "type": "boolean"
+        },
+        "limit": {
+          "type": "integer",
+          "format": "int32",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "cursor": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      },
+      "required": []
+    },
+    "integrator_set": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "active": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "integrator_id": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "definition": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "ParentFolderId": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "ProcessType": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "ProcessTypeCode": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "ProcessName": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "ProcessDescription": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "DisableCREOpStmtDebtServiceCalc": {
+                  "type": "boolean"
+                },
+                "DataSourceType": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "DataSourceText": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "FileType": {
+                          "type": [
+                            "null",
+                            "string"
+                          ]
+                        },
+                        "Delimiter": {
+                          "type": [
+                            "null",
+                            "string"
+                          ]
+                        },
+                        "HasHeaderRow": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "DataSourceExcel": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "DataSheetType": {
+                          "type": [
+                            "null",
+                            "string"
+                          ]
+                        },
+                        "SheetIndex": {
+                          "type": "integer",
+                          "format": "int32"
+                        },
+                        "SheetName": {
+                          "type": [
+                            "null",
+                            "string"
+                          ]
+                        },
+                        "HeaderRange": {
+                          "type": [
+                            "null",
+                            "string"
+                          ]
+                        },
+                        "FirstDataRow": {
+                          "type": "integer",
+                          "format": "int32"
+                        },
+                        "LastDataRowType": {
+                          "type": [
+                            "null",
+                            "string"
+                          ]
+                        },
+                        "LastDataRowCheckColumn": {
+                          "type": [
+                            "null",
+                            "string"
+                          ]
+                        },
+                        "LastDataRowCheckValue": {
+                          "type": [
+                            "null",
+                            "string"
+                          ]
+                        },
+                        "LastDataRow": {
+                          "type": "integer",
+                          "format": "int32"
+                        },
+                        "LastDataRowBlanksToSkip": {
+                          "type": "integer",
+                          "format": "int32"
+                        },
+                        "CustomAsOfDateCell": {
+                          "type": [
+                            "null",
+                            "string"
+                          ]
+                        },
+                        "CustomMatchTypeOption": {
+                          "type": [
+                            "null",
+                            "string"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                },
+                "DataSourceSQL": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "ConnectionId": {
+                          "type": [
+                            "null",
+                            "string"
+                          ]
+                        },
+                        "SQLStmtType": {
+                          "type": [
+                            "null",
+                            "string"
+                          ]
+                        },
+                        "SQLSelect": {
+                          "type": [
+                            "null",
+                            "string"
+                          ]
+                        },
+                        "SubstitutionVariables": {
+                          "type": [
+                            "array",
+                            "null"
+                          ],
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                              "DataType": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "VariableName": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "DefaultValue": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              }
+                            }
+                          }
+                        },
+                        "CustomMatchTypeOption": {
+                          "type": [
+                            "null",
+                            "string"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                },
+                "Map": {
+                  "type": [
+                    "array",
+                    "null"
+                  ],
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "MapId": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "MapOrder": {
+                        "type": "integer",
+                        "format": "int32"
+                      },
+                      "TargetSchemaCode": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "SourceColumnName": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "SourceColumnDescription": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "ValidationErrorAction": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "NewReferenceAction": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "ReferenceKeySchemaCode": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "COAMap": {
+                        "oneOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                              "ChartOfAccountsId": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "isPeriodic": {
+                                "type": "boolean"
+                              },
+                              "LedgerCode": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "MatchAccountId": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "AccountIdSourceColumnName": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "AccountIdSourceColumnDescription": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "MatchAccountSubId": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "AccountSubIdSourceColumnName": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "AccountSubIdSourceColumnDescription": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "MatchXrefCode": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "MatchXrefValue": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "XrefSourceColumnName": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "XrefSourceColumnDescription": {
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "SingleMap": {
+                                "oneOf": [
+                                  {
+                                    "type": "null"
+                                  },
+                                  {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "ValueSourceColumnName": {
+                                        "type": [
+                                          "null",
+                                          "string"
+                                        ]
+                                      },
+                                      "ValueSourceColumnDescription": {
+                                        "type": [
+                                          "null",
+                                          "string"
+                                        ]
+                                      },
+                                      "AdjustmentSourceColumnName": {
+                                        "type": [
+                                          "null",
+                                          "string"
+                                        ]
+                                      },
+                                      "AdjustmentSourceColumnDescription": {
+                                        "type": [
+                                          "null",
+                                          "string"
+                                        ]
+                                      },
+                                      "NotesSourceColumnName": {
+                                        "type": [
+                                          "null",
+                                          "string"
+                                        ]
+                                      },
+                                      "NotesSourceColumnDescription": {
+                                        "type": [
+                                          "null",
+                                          "string"
+                                        ]
+                                      }
+                                    }
+                                  }
+                                ]
+                              },
+                              "PeriodicMap": {
+                                "oneOf": [
+                                  {
+                                    "type": "null"
+                                  },
+                                  {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "MonthsPerRow": {
+                                        "type": "integer",
+                                        "format": "int32"
+                                      },
+                                      "YearSourceColumnName": {
+                                        "type": [
+                                          "null",
+                                          "string"
+                                        ]
+                                      },
+                                      "YearSourceColumnDescription": {
+                                        "type": [
+                                          "null",
+                                          "string"
+                                        ]
+                                      },
+                                      "MonthSourceColumnName": {
+                                        "type": [
+                                          "null",
+                                          "string"
+                                        ]
+                                      },
+                                      "MonthSourceColumnDescription": {
+                                        "type": [
+                                          "null",
+                                          "string"
+                                        ]
+                                      },
+                                      "ValueSourceColumnName": {
+                                        "type": [
+                                          "null",
+                                          "string"
+                                        ]
+                                      },
+                                      "ValueSourceColumnDescription": {
+                                        "type": [
+                                          "null",
+                                          "string"
+                                        ]
+                                      }
+                                    }
+                                  }
+                                ]
+                              },
+                              "GeneralLedgerMap": {
+                                "oneOf": [
+                                  {
+                                    "type": "null"
+                                  },
+                                  {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "AmountSourceColumnName": {
+                                        "type": [
+                                          "null",
+                                          "string"
+                                        ]
+                                      },
+                                      "AmountSourceColumnDisplay": {
+                                        "type": [
+                                          "null",
+                                          "string"
+                                        ]
+                                      },
+                                      "NoteSourceColumnName": {
+                                        "type": [
+                                          "null",
+                                          "string"
+                                        ]
+                                      },
+                                      "NoteSourceColumnDisplay": {
+                                        "type": [
+                                          "null",
+                                          "string"
+                                        ]
+                                      },
+                                      "AccountOwnerReferenceSourceColumnName": {
+                                        "type": [
+                                          "null",
+                                          "string"
+                                        ]
+                                      },
+                                      "AccountOwnerReferenceSourceColumnDisplay": {
+                                        "type": [
+                                          "null",
+                                          "string"
+                                        ]
+                                      },
+                                      "AccountOwnerReferenceMatchFieldName": {
+                                        "type": [
+                                          "null",
+                                          "string"
+                                        ]
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "ValueXref": {
+                        "type": [
+                          "array",
+                          "null"
+                        ],
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "ValueCode": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "SourceValue": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "ParentValueCode": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "ParentSourceValue": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      "IgnoreValues": {
+                        "type": [
+                          "array",
+                          "null"
+                        ],
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "IgnoreValue": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "MatchLevels": {
+                  "type": [
+                    "array",
+                    "null"
+                  ],
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "MatchLevel": {
+                        "type": "integer",
+                        "format": "int32"
+                      },
+                      "EntityTypeFeatureCode": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "MatchType": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "MatchTypeOption": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "NewEntityAction": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "MatchMap": {
+                        "type": [
+                          "array",
+                          "null"
+                        ],
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "MapId": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "MapOrder": {
+                              "type": "integer",
+                              "format": "int32"
+                            },
+                            "SchemaCode": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "SourceColumnName": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "SourceColumnDescription": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "ValueXref": {
+                              "type": [
+                                "array",
+                                "null"
+                              ],
+                              "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                  "ValueCode": {
+                                    "type": [
+                                      "null",
+                                      "string"
+                                    ]
+                                  },
+                                  "SourceValue": {
+                                    "type": [
+                                      "null",
+                                      "string"
+                                    ]
+                                  },
+                                  "ParentValueCode": {
+                                    "type": [
+                                      "null",
+                                      "string"
+                                    ]
+                                  },
+                                  "ParentSourceValue": {
+                                    "type": [
+                                      "null",
+                                      "string"
+                                    ]
+                                  }
+                                }
+                              }
+                            },
+                            "ReferenceKeySchemaCode": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "ExtractFieldName": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "CustomLoaderOptions": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "CreateDealsOnLsfLoad": {
+                          "type": "boolean"
+                        },
+                        "DealIdPrefix": {
+                          "type": [
+                            "null",
+                            "string"
+                          ]
+                        },
+                        "CreateBondClassFromHistoryRecords": {
+                          "type": "boolean"
+                        },
+                        "DeleteOrphanedBondClassesDuringLoad": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "GroupOrder": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          ]
+        },
+        "expected_conflict_token": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "source_columns": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "change_reason": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "dry_run": {
+          "type": "boolean"
+        },
+        "approved": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "definition"
+      ]
+    },
+    "integrator_source_stage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "file_name": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "approved": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "file_name",
+        "approved"
+      ]
+    },
+    "integrator_source_inspect": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "staged_file_id": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "sheet_name": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "header_row": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "first_data_row": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "delimiter": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "value_columns": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 20
+        },
+        "key_columns": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 20
+        },
+        "limit": {
+          "type": "integer",
+          "format": "int32",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "cursor": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      },
+      "required": [
+        "staged_file_id"
+      ]
+    },
+    "integrator_run": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "integrator_id": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "expected_conflict_token": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "mode": {
+          "type": [
+            "null",
+            "string"
+          ],
+          "enum": [
+            "scan_headers",
+            "scan_values",
+            "query",
+            "test_connection",
+            "apply"
+          ]
+        },
+        "staged_file_id": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "delimiter": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "scan_column": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "variables": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "value": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              }
+            }
+          },
+          "maxItems": 20
+        },
+        "approved": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "integrator_id",
+        "expected_conflict_token",
+        "mode",
+        "approved"
+      ]
+    },
+    "integrator_run_get": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "run_id": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "run_kind": {
+          "type": [
+            "null",
+            "string"
+          ],
+          "enum": [
+            "sql",
+            "host"
+          ]
+        },
+        "section": {
+          "type": [
+            "null",
+            "string"
+          ],
+          "enum": [
+            "status",
+            "logs",
+            "headers",
+            "values",
+            "rows"
+          ]
+        },
+        "scan_column": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "limit": {
+          "type": "integer",
+          "format": "int32",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "cursor": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      },
+      "required": [
+        "run_id",
+        "run_kind"
+      ]
     }
   },
   "outputs": {
@@ -6254,6 +7315,12 @@
               ]
             },
             "extension_of_feature_code": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "status_schema_code": {
               "type": [
                 "null",
                 "string"
@@ -6580,6 +7647,12 @@
             },
             "hide_from_selection": {
               "type": "boolean"
+            },
+            "classification_code": {
+              "type": [
+                "null",
+                "string"
+              ]
             }
           }
         },
@@ -6885,6 +7958,12 @@
             },
             "hide_from_selection": {
               "type": "boolean"
+            },
+            "classification_code": {
+              "type": [
+                "null",
+                "string"
+              ]
             }
           }
         },
@@ -15304,6 +16383,12 @@
                 "number"
               ],
               "format": "double"
+            },
+            "is_year": {
+              "type": [
+                "boolean",
+                "null"
+              ]
             },
             "is_dictionary_value": {
               "type": [
@@ -31259,6 +32344,3852 @@
         "valid_topics"
       ],
       "additionalProperties": true
+    },
+    "search_integrators": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
+      "title": "AgentToolResultOfAgentIntegratorSummary",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/AgentIntegratorSummary"
+          }
+        },
+        "count": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "is_truncated": {
+          "type": "boolean"
+        },
+        "next_cursor": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "provenance": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/AgentToolProvenance"
+            }
+          ]
+        },
+        "warnings": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "limits": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/AgentToolLimits"
+            }
+          ]
+        },
+        "usage_guidance": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      },
+      "definitions": {
+        "AgentIntegratorSummary": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "integrator_id": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "name": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "description": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "feature_code": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "source_type": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "process_type": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "parent_folder_id": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "active": {
+              "type": "boolean"
+            },
+            "last_run_status": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        },
+        "AgentToolProvenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "tool": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "source": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "required_scope": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "customer_code": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "customer_name": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "generated_at_utc": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "AgentToolLimits": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "max_limit": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "default_limit": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_parent_ids": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_entity_ids": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_fields": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_all_limit": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "batch_hint": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "get_integrator_folders": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
+      "title": "AgentToolResultOfAgentIntegratorFolderSummary",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/AgentIntegratorFolderSummary"
+          }
+        },
+        "count": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "is_truncated": {
+          "type": "boolean"
+        },
+        "next_cursor": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "provenance": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/AgentToolProvenance"
+            }
+          ]
+        },
+        "warnings": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "limits": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/AgentToolLimits"
+            }
+          ]
+        },
+        "usage_guidance": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      },
+      "definitions": {
+        "AgentIntegratorFolderSummary": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "folder_id": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "name": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "description": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "parent_folder_id": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "is_integrator_group": {
+              "type": "boolean"
+            }
+          }
+        },
+        "AgentToolProvenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "tool": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "source": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "required_scope": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "customer_code": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "customer_name": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "generated_at_utc": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "AgentToolLimits": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "max_limit": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "default_limit": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_parent_ids": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_entity_ids": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_fields": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_all_limit": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "batch_hint": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "get_integrator": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
+      "title": "AgentToolResultOfAgentIntegratorDetail",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/AgentIntegratorDetail"
+          }
+        },
+        "count": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "is_truncated": {
+          "type": "boolean"
+        },
+        "next_cursor": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "provenance": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/AgentToolProvenance"
+            }
+          ]
+        },
+        "warnings": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "limits": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/AgentToolLimits"
+            }
+          ]
+        },
+        "usage_guidance": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      },
+      "definitions": {
+        "AgentIntegratorDetail": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "integrator_id": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "active": {
+              "type": "boolean"
+            },
+            "conflict_token": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "definition": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/definitions/AgentIntegratorDefinition"
+                }
+              ]
+            }
+          }
+        },
+        "AgentIntegratorDefinition": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "ParentFolderId": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "ProcessType": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "ProcessTypeCode": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "ProcessName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "ProcessDescription": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "DisableCREOpStmtDebtServiceCalc": {
+              "type": "boolean"
+            },
+            "DataSourceType": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "DataSourceText": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/definitions/AgentIntegratorDataSourceText"
+                }
+              ]
+            },
+            "DataSourceExcel": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/definitions/AgentIntegratorDataSourceExcel"
+                }
+              ]
+            },
+            "DataSourceSQL": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/definitions/AgentIntegratorDataSourceSQL"
+                }
+              ]
+            },
+            "Map": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "$ref": "#/definitions/AgentIntegratorMapItem"
+              }
+            },
+            "MatchLevels": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "$ref": "#/definitions/AgentIntegratorMatchMapLevel"
+              }
+            },
+            "CustomLoaderOptions": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/definitions/AgentIntegratorCustomLoaderOptions"
+                }
+              ]
+            },
+            "GroupOrder": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        },
+        "AgentIntegratorDataSourceText": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "FileType": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "Delimiter": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "HasHeaderRow": {
+              "type": "boolean"
+            }
+          }
+        },
+        "AgentIntegratorDataSourceExcel": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "DataSheetType": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "SheetIndex": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "SheetName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "HeaderRange": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "FirstDataRow": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "LastDataRowType": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "LastDataRowCheckColumn": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "LastDataRowCheckValue": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "LastDataRow": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "LastDataRowBlanksToSkip": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "CustomAsOfDateCell": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "CustomMatchTypeOption": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        },
+        "AgentIntegratorDataSourceSQL": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "ConnectionId": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "SQLStmtType": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "SQLSelect": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "SubstitutionVariables": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "$ref": "#/definitions/AgentIntegratorDataSourceSQLSubstitutionVariable"
+              }
+            },
+            "CustomMatchTypeOption": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        },
+        "AgentIntegratorDataSourceSQLSubstitutionVariable": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "DataType": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "VariableName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "DefaultValue": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        },
+        "AgentIntegratorMapItem": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "MapId": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "MapOrder": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "TargetSchemaCode": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "SourceColumnName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "SourceColumnDescription": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "ValidationErrorAction": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "NewReferenceAction": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "ReferenceKeySchemaCode": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "COAMap": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/definitions/AgentIntegratorMapItemCOA"
+                }
+              ]
+            },
+            "ValueXref": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "$ref": "#/definitions/AgentIntegratorMapItemValueXref"
+              }
+            },
+            "IgnoreValues": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "$ref": "#/definitions/AgentIntegratorMapItemIgnoreValue"
+              }
+            }
+          }
+        },
+        "AgentIntegratorMapItemCOA": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "ChartOfAccountsId": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "isPeriodic": {
+              "type": "boolean"
+            },
+            "LedgerCode": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "MatchAccountId": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "AccountIdSourceColumnName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "AccountIdSourceColumnDescription": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "MatchAccountSubId": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "AccountSubIdSourceColumnName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "AccountSubIdSourceColumnDescription": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "MatchXrefCode": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "MatchXrefValue": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "XrefSourceColumnName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "XrefSourceColumnDescription": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "SingleMap": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/definitions/AgentIntegratorMapItemCOASingle"
+                }
+              ]
+            },
+            "PeriodicMap": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/definitions/AgentIntegratorMapItemCOAPeriodic"
+                }
+              ]
+            },
+            "GeneralLedgerMap": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/definitions/AgentIntegratorMapItemGeneralLedgerMap"
+                }
+              ]
+            }
+          }
+        },
+        "AgentIntegratorMapItemCOASingle": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "ValueSourceColumnName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "ValueSourceColumnDescription": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "AdjustmentSourceColumnName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "AdjustmentSourceColumnDescription": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "NotesSourceColumnName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "NotesSourceColumnDescription": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        },
+        "AgentIntegratorMapItemCOAPeriodic": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "MonthsPerRow": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "YearSourceColumnName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "YearSourceColumnDescription": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "MonthSourceColumnName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "MonthSourceColumnDescription": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "ValueSourceColumnName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "ValueSourceColumnDescription": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        },
+        "AgentIntegratorMapItemGeneralLedgerMap": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "AmountSourceColumnName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "AmountSourceColumnDisplay": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "NoteSourceColumnName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "NoteSourceColumnDisplay": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "AccountOwnerReferenceSourceColumnName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "AccountOwnerReferenceSourceColumnDisplay": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "AccountOwnerReferenceMatchFieldName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        },
+        "AgentIntegratorMapItemValueXref": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "ValueCode": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "SourceValue": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "ParentValueCode": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "ParentSourceValue": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        },
+        "AgentIntegratorMapItemIgnoreValue": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "IgnoreValue": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        },
+        "AgentIntegratorMatchMapLevel": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "MatchLevel": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "EntityTypeFeatureCode": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "MatchType": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "MatchTypeOption": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "NewEntityAction": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "MatchMap": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "$ref": "#/definitions/AgentIntegratorMatchMapItem"
+              }
+            }
+          }
+        },
+        "AgentIntegratorMatchMapItem": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "MapId": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "MapOrder": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "SchemaCode": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "SourceColumnName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "SourceColumnDescription": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "ValueXref": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "$ref": "#/definitions/AgentIntegratorMapItemValueXref"
+              }
+            },
+            "ReferenceKeySchemaCode": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "ExtractFieldName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        },
+        "AgentIntegratorCustomLoaderOptions": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "CreateDealsOnLsfLoad": {
+              "type": "boolean"
+            },
+            "DealIdPrefix": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "CreateBondClassFromHistoryRecords": {
+              "type": "boolean"
+            },
+            "DeleteOrphanedBondClassesDuringLoad": {
+              "type": "boolean"
+            }
+          }
+        },
+        "AgentToolProvenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "tool": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "source": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "required_scope": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "customer_code": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "customer_name": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "generated_at_utc": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "AgentToolLimits": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "max_limit": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "default_limit": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_parent_ids": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_entity_ids": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_fields": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_all_limit": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "batch_hint": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "get_integrator_match_schema": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
+      "title": "AgentToolResultOfAgentIntegratorMatchSchema",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/AgentIntegratorMatchSchema"
+          }
+        },
+        "count": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "is_truncated": {
+          "type": "boolean"
+        },
+        "next_cursor": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "provenance": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/AgentToolProvenance"
+            }
+          ]
+        },
+        "warnings": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "limits": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/AgentToolLimits"
+            }
+          ]
+        },
+        "usage_guidance": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      },
+      "definitions": {
+        "AgentIntegratorMatchSchema": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "feature_code": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "levels": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "$ref": "#/definitions/AgentIntegratorMatchLevelSchema"
+              }
+            },
+            "match_types": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "type": "string"
+              }
+            },
+            "periodic_options": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "type": "string"
+              }
+            },
+            "new_entity_actions": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "type": "string"
+              }
+            },
+            "guidance": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        },
+        "AgentIntegratorMatchLevelSchema": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "feature_code": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "name": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "match_level": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "is_periodic": {
+              "type": "boolean"
+            },
+            "periodic_schema_code": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "suggested_keys": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "$ref": "#/definitions/AgentIntegratorKeyField"
+              }
+            }
+          }
+        },
+        "AgentIntegratorKeyField": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "schema_code": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "field_name": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "display": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "data_type": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        },
+        "AgentToolProvenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "tool": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "source": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "required_scope": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "customer_code": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "customer_name": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "generated_at_utc": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "AgentToolLimits": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "max_limit": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "default_limit": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_parent_ids": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_entity_ids": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_fields": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_all_limit": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "batch_hint": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "get_integrator_connections": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
+      "title": "AgentToolResultOfAgentIntegratorConnectionSummary",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/AgentIntegratorConnectionSummary"
+          }
+        },
+        "count": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "is_truncated": {
+          "type": "boolean"
+        },
+        "next_cursor": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "provenance": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/AgentToolProvenance"
+            }
+          ]
+        },
+        "warnings": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "limits": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/AgentToolLimits"
+            }
+          ]
+        },
+        "usage_guidance": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      },
+      "definitions": {
+        "AgentIntegratorConnectionSummary": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "connection_id": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "name": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "description": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "connection_type": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "credential_type": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "listener_id": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "listener_name": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "server": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "database_name": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "listener_ready": {
+              "type": "boolean"
+            }
+          }
+        },
+        "AgentToolProvenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "tool": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "source": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "required_scope": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "customer_code": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "customer_name": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "generated_at_utc": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "AgentToolLimits": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "max_limit": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "default_limit": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_parent_ids": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_entity_ids": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_fields": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_all_limit": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "batch_hint": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "set_integrator": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
+      "title": "AgentToolResultOfAgentIntegratorSetResult",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/AgentIntegratorSetResult"
+          }
+        },
+        "count": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "is_truncated": {
+          "type": "boolean"
+        },
+        "next_cursor": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "provenance": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/AgentToolProvenance"
+            }
+          ]
+        },
+        "warnings": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "limits": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/AgentToolLimits"
+            }
+          ]
+        },
+        "usage_guidance": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      },
+      "definitions": {
+        "AgentIntegratorSetResult": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "saved": {
+              "type": "boolean"
+            },
+            "integrator": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/definitions/AgentIntegratorDetail"
+                }
+              ]
+            },
+            "validation": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/definitions/AgentIntegratorValidation"
+                }
+              ]
+            },
+            "audit_operation_id": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        },
+        "AgentIntegratorDetail": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "integrator_id": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "active": {
+              "type": "boolean"
+            },
+            "conflict_token": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "definition": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/definitions/AgentIntegratorDefinition"
+                }
+              ]
+            }
+          }
+        },
+        "AgentIntegratorDefinition": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "ParentFolderId": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "ProcessType": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "ProcessTypeCode": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "ProcessName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "ProcessDescription": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "DisableCREOpStmtDebtServiceCalc": {
+              "type": "boolean"
+            },
+            "DataSourceType": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "DataSourceText": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/definitions/AgentIntegratorDataSourceText"
+                }
+              ]
+            },
+            "DataSourceExcel": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/definitions/AgentIntegratorDataSourceExcel"
+                }
+              ]
+            },
+            "DataSourceSQL": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/definitions/AgentIntegratorDataSourceSQL"
+                }
+              ]
+            },
+            "Map": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "$ref": "#/definitions/AgentIntegratorMapItem"
+              }
+            },
+            "MatchLevels": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "$ref": "#/definitions/AgentIntegratorMatchMapLevel"
+              }
+            },
+            "CustomLoaderOptions": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/definitions/AgentIntegratorCustomLoaderOptions"
+                }
+              ]
+            },
+            "GroupOrder": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        },
+        "AgentIntegratorDataSourceText": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "FileType": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "Delimiter": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "HasHeaderRow": {
+              "type": "boolean"
+            }
+          }
+        },
+        "AgentIntegratorDataSourceExcel": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "DataSheetType": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "SheetIndex": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "SheetName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "HeaderRange": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "FirstDataRow": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "LastDataRowType": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "LastDataRowCheckColumn": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "LastDataRowCheckValue": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "LastDataRow": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "LastDataRowBlanksToSkip": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "CustomAsOfDateCell": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "CustomMatchTypeOption": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        },
+        "AgentIntegratorDataSourceSQL": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "ConnectionId": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "SQLStmtType": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "SQLSelect": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "SubstitutionVariables": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "$ref": "#/definitions/AgentIntegratorDataSourceSQLSubstitutionVariable"
+              }
+            },
+            "CustomMatchTypeOption": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        },
+        "AgentIntegratorDataSourceSQLSubstitutionVariable": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "DataType": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "VariableName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "DefaultValue": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        },
+        "AgentIntegratorMapItem": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "MapId": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "MapOrder": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "TargetSchemaCode": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "SourceColumnName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "SourceColumnDescription": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "ValidationErrorAction": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "NewReferenceAction": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "ReferenceKeySchemaCode": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "COAMap": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/definitions/AgentIntegratorMapItemCOA"
+                }
+              ]
+            },
+            "ValueXref": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "$ref": "#/definitions/AgentIntegratorMapItemValueXref"
+              }
+            },
+            "IgnoreValues": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "$ref": "#/definitions/AgentIntegratorMapItemIgnoreValue"
+              }
+            }
+          }
+        },
+        "AgentIntegratorMapItemCOA": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "ChartOfAccountsId": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "isPeriodic": {
+              "type": "boolean"
+            },
+            "LedgerCode": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "MatchAccountId": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "AccountIdSourceColumnName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "AccountIdSourceColumnDescription": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "MatchAccountSubId": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "AccountSubIdSourceColumnName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "AccountSubIdSourceColumnDescription": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "MatchXrefCode": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "MatchXrefValue": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "XrefSourceColumnName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "XrefSourceColumnDescription": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "SingleMap": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/definitions/AgentIntegratorMapItemCOASingle"
+                }
+              ]
+            },
+            "PeriodicMap": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/definitions/AgentIntegratorMapItemCOAPeriodic"
+                }
+              ]
+            },
+            "GeneralLedgerMap": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/definitions/AgentIntegratorMapItemGeneralLedgerMap"
+                }
+              ]
+            }
+          }
+        },
+        "AgentIntegratorMapItemCOASingle": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "ValueSourceColumnName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "ValueSourceColumnDescription": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "AdjustmentSourceColumnName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "AdjustmentSourceColumnDescription": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "NotesSourceColumnName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "NotesSourceColumnDescription": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        },
+        "AgentIntegratorMapItemCOAPeriodic": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "MonthsPerRow": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "YearSourceColumnName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "YearSourceColumnDescription": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "MonthSourceColumnName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "MonthSourceColumnDescription": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "ValueSourceColumnName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "ValueSourceColumnDescription": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        },
+        "AgentIntegratorMapItemGeneralLedgerMap": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "AmountSourceColumnName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "AmountSourceColumnDisplay": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "NoteSourceColumnName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "NoteSourceColumnDisplay": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "AccountOwnerReferenceSourceColumnName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "AccountOwnerReferenceSourceColumnDisplay": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "AccountOwnerReferenceMatchFieldName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        },
+        "AgentIntegratorMapItemValueXref": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "ValueCode": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "SourceValue": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "ParentValueCode": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "ParentSourceValue": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        },
+        "AgentIntegratorMapItemIgnoreValue": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "IgnoreValue": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        },
+        "AgentIntegratorMatchMapLevel": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "MatchLevel": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "EntityTypeFeatureCode": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "MatchType": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "MatchTypeOption": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "NewEntityAction": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "MatchMap": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "$ref": "#/definitions/AgentIntegratorMatchMapItem"
+              }
+            }
+          }
+        },
+        "AgentIntegratorMatchMapItem": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "MapId": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "MapOrder": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "SchemaCode": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "SourceColumnName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "SourceColumnDescription": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "ValueXref": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "$ref": "#/definitions/AgentIntegratorMapItemValueXref"
+              }
+            },
+            "ReferenceKeySchemaCode": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "ExtractFieldName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        },
+        "AgentIntegratorCustomLoaderOptions": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "CreateDealsOnLsfLoad": {
+              "type": "boolean"
+            },
+            "DealIdPrefix": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "CreateBondClassFromHistoryRecords": {
+              "type": "boolean"
+            },
+            "DeleteOrphanedBondClassesDuringLoad": {
+              "type": "boolean"
+            }
+          }
+        },
+        "AgentIntegratorValidation": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "can_save": {
+              "type": "boolean"
+            },
+            "can_run": {
+              "type": "boolean"
+            },
+            "errors": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "$ref": "#/definitions/AgentIntegratorIssue"
+              }
+            },
+            "run_errors": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "$ref": "#/definitions/AgentIntegratorIssue"
+              }
+            },
+            "warnings": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "AgentIntegratorIssue": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "path": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "message": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        },
+        "AgentToolProvenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "tool": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "source": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "required_scope": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "customer_code": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "customer_name": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "generated_at_utc": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "AgentToolLimits": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "max_limit": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "default_limit": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_parent_ids": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_entity_ids": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_fields": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_all_limit": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "batch_hint": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "stage_integrator_source_file": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
+      "title": "AgentToolResultOfAgentIntegratorSourceFile",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/AgentIntegratorSourceFile"
+          }
+        },
+        "count": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "is_truncated": {
+          "type": "boolean"
+        },
+        "next_cursor": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "provenance": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/AgentToolProvenance"
+            }
+          ]
+        },
+        "warnings": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "limits": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/AgentToolLimits"
+            }
+          ]
+        },
+        "usage_guidance": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      },
+      "definitions": {
+        "AgentIntegratorSourceFile": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "staged_file_id": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "file_name": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "file_length": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "expires_at_utc": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "upload_url": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        },
+        "AgentToolProvenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "tool": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "source": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "required_scope": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "customer_code": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "customer_name": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "generated_at_utc": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "AgentToolLimits": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "max_limit": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "default_limit": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_parent_ids": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_entity_ids": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_fields": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_all_limit": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "batch_hint": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "inspect_integrator_source": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
+      "title": "AgentToolResultOfAgentIntegratorSourcePreview",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/AgentIntegratorSourcePreview"
+          }
+        },
+        "count": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "is_truncated": {
+          "type": "boolean"
+        },
+        "next_cursor": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "provenance": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/AgentToolProvenance"
+            }
+          ]
+        },
+        "warnings": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "limits": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/AgentToolLimits"
+            }
+          ]
+        },
+        "usage_guidance": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      },
+      "definitions": {
+        "AgentIntegratorSourcePreview": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "sheets": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "type": "string"
+              }
+            },
+            "sheet_name": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "columns": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "$ref": "#/definitions/AgentIntegratorSourceColumn"
+              }
+            },
+            "rows": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "values": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "$ref": "#/definitions/AgentIntegratorSourceValues"
+              }
+            },
+            "is_truncated": {
+              "type": "boolean"
+            },
+            "next_cursor": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "examined_rows": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "duplicate_key_rows": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "blank_key_rows": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "warnings": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "AgentIntegratorSourceColumn": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "source_column": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "header": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        },
+        "AgentIntegratorSourceValues": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "source_column": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "values": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "type": "string"
+              }
+            },
+            "is_truncated": {
+              "type": "boolean"
+            }
+          }
+        },
+        "AgentToolProvenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "tool": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "source": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "required_scope": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "customer_code": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "customer_name": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "generated_at_utc": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "AgentToolLimits": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "max_limit": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "default_limit": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_parent_ids": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_entity_ids": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_fields": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_all_limit": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "batch_hint": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "run_integrator": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
+      "title": "AgentToolResultOfAgentIntegratorRunResult",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/AgentIntegratorRunResult"
+          }
+        },
+        "count": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "is_truncated": {
+          "type": "boolean"
+        },
+        "next_cursor": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "provenance": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/AgentToolProvenance"
+            }
+          ]
+        },
+        "warnings": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "limits": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/AgentToolLimits"
+            }
+          ]
+        },
+        "usage_guidance": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      },
+      "definitions": {
+        "AgentIntegratorRunResult": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "run_id": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "run_kind": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "integrator_id": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "name": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "phase": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "status": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "completion_code": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "current_status": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "error": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "is_complete": {
+              "type": "boolean"
+            },
+            "host_job_id": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "logs": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "$ref": "#/definitions/AgentIntegratorRunLog"
+              }
+            },
+            "columns": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "$ref": "#/definitions/AgentIntegratorSourceColumn"
+              }
+            },
+            "rows": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "scan_columns": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "type": "string"
+              }
+            },
+            "is_truncated": {
+              "type": "boolean"
+            },
+            "next_cursor": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "warnings": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "AgentIntegratorRunLog": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "line": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "level": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "message": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        },
+        "AgentIntegratorSourceColumn": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "source_column": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "header": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        },
+        "AgentToolProvenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "tool": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "source": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "required_scope": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "customer_code": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "customer_name": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "generated_at_utc": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "AgentToolLimits": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "max_limit": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "default_limit": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_parent_ids": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_entity_ids": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_fields": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_all_limit": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "batch_hint": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "get_integrator_run": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
+      "title": "AgentToolResultOfAgentIntegratorRunResult",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/AgentIntegratorRunResult"
+          }
+        },
+        "count": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "is_truncated": {
+          "type": "boolean"
+        },
+        "next_cursor": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "provenance": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/AgentToolProvenance"
+            }
+          ]
+        },
+        "warnings": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "limits": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/AgentToolLimits"
+            }
+          ]
+        },
+        "usage_guidance": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      },
+      "definitions": {
+        "AgentIntegratorRunResult": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "run_id": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "run_kind": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "integrator_id": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "name": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "phase": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "status": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "completion_code": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "current_status": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "error": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "is_complete": {
+              "type": "boolean"
+            },
+            "host_job_id": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "logs": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "$ref": "#/definitions/AgentIntegratorRunLog"
+              }
+            },
+            "columns": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "$ref": "#/definitions/AgentIntegratorSourceColumn"
+              }
+            },
+            "rows": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "scan_columns": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "type": "string"
+              }
+            },
+            "is_truncated": {
+              "type": "boolean"
+            },
+            "next_cursor": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "warnings": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "AgentIntegratorRunLog": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "line": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "level": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "message": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        },
+        "AgentIntegratorSourceColumn": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "source_column": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "header": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        },
+        "AgentToolProvenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "tool": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "source": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "required_scope": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "customer_code": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "customer_name": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "generated_at_utc": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "AgentToolLimits": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "max_limit": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "default_limit": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_parent_ids": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_entity_ids": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_fields": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "max_all_limit": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "batch_hint": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        }
+      }
     }
   }
 }

@@ -22,6 +22,7 @@ Use this when a user asks for data but does not name exact Realinsight schema co
 - Do not guess field names when the question depends on a precise metric. Search fields first.
 - Treat field display labels as user-facing hints, not stable ids. Use `schema_code` or `field_name` from tool output in follow-up calls.
 - For fields with `values`, submit the returned `code`, using each value's display and description to select the right business meaning. Do not select a value marked `hide_from_selection` for new data.
+- Feature results expose `status_schema_code` when a business-status field is configured. Its allowed values may expose `classification_code` from the configured `CODE` parameter; this is classification metadata, not a replacement for the writable `code` and not the entity's soft-delete flag.
 - `postable_only` is for write planning. Write tools still require the matching write scope and explicit approval.
 - `include_sensitive` should stay false unless the user explicitly asks for a sensitive field and the tool allows it.
 - `used_fields` is not implemented yet for record hydration. Use `key_fields` or explicit fields.

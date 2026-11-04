@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "realinsight-connector",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Connect AI agents to authenticated Realinsight tools and reusable workflow skills.",
   "author": {
     "name": "Realinsight",
@@ -21,25 +21,25 @@
     "com.openai": {
       "interface": {
         "displayName": "Realinsight",
-        "shortDescription": "Work with Realinsight data",
-        "longDescription": "For Realinsight users working with commercial real estate data. Verify your connected customer, server URL, user, and granted access. Find loan and property records, inspect fields, and analyze dashboards and reports. Where enabled, validate entity creation with initial fields before approving a write, or make supported record and configuration updates after explicit approval. Requires a Realinsight account and appropriate permissions; availability depends on your deployment and granted scopes. Does not send email, search the public web, or administer user access.",
+        "shortDescription": "Work with your Realinsight customer data",
+        "longDescription": "View your connected customer and environment. Find and analyze Realinsight records, dashboards, and reports. Create entities with initial fields and make supported record and configuration updates after explicit approval.",
         "developerName": "Realinsight",
         "websiteURL": "https://www.realinsight.com",
         "supportURL": "https://www.realinsight.com/contact-us/",
         "composerIcon": "./docs/assets/brand/realinsight-agent-icon-180.png",
         "logo": "./docs/assets/brand/realinsight-agent-icon-180.png",
-        "category": "Business & Operations",
+        "category": "Business",
         "capabilities": [
           "Interactive",
           "Read",
           "Write"
         ],
         "defaultPrompt": [
-          "Show my connected Realinsight customer, server URL, and granted access.",
+          "Show my connected Realinsight customer and environment.",
           "Find a loan or property and show its key fields.",
           "Validate creating a Realinsight entity with initial fields."
         ],
-        "brandColor": "#3498DB",
+        "brandColor": "#075DC5",
         "brandColorDark": "#3498DB"
       },
       "review": {

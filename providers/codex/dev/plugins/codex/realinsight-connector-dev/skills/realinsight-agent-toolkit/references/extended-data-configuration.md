@@ -32,3 +32,4 @@ Writes require `ri:extended_data.write` plus Configuration or Admin access. Read
 - Enabling search updates configuration immediately, but historical search-index population remains asynchronous maintenance work.
 - Deactivation and enabling encryption are blocked when active indexed usages make the change unsafe. Remove or migrate affected usage first; do not bypass the block.
 - Supported settings include label/description, type at creation, reference metadata, length/precision, dictionary values, list/key-info placement, computed formula/order, searchable, sensitive, encrypted, and multi-select behavior.
+- Integer custom fields and overlays support `is_year: true` to display years without thousands separators. Other field types cannot enable this setting.

@@ -4,10 +4,130 @@
   "app_info": {
     "display_name": "Realinsight",
     "subtitle": "Work with Realinsight data",
-    "description": "For Realinsight users working with commercial real estate data. Verify your connected customer, server URL, user, and granted access. Find loan and property records, inspect fields, and analyze dashboards and reports. Where enabled, validate entity creation with initial fields before approving a write, or make supported record and configuration updates after explicit approval. Requires a Realinsight account and appropriate permissions; availability depends on your deployment and granted scopes. Does not send email, search the public web, or administer user access.",
+    "description": "Find and analyze your Realinsight records, dashboards, reports, and configuration. View your connected customer and environment, switch connections, and create entities with initial fields or make supported updates after explicit approval.",
     "category": "BUSINESS"
   },
   "tools": {
+    "search_integrators": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
+      }
+    },
+    "get_integrator_folders": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
+      }
+    },
+    "get_integrator": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
+      }
+    },
+    "get_integrator_match_schema": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
+      }
+    },
+    "get_integrator_connections": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
+      }
+    },
+    "set_integrator": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Changes Realinsight data or connection state after explicit user approval.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Can overwrite or remove existing configuration or record values after approval."
+      }
+    },
+    "stage_integrator_source_file": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Changes Realinsight data or connection state after explicit user approval.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
+      }
+    },
+    "inspect_integrator_source": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
+      }
+    },
+    "run_integrator": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Changes Realinsight data or connection state after explicit user approval.",
+        "open_world_justification": "Can execute approved SQL on a configured external data source using the customer's connection permissions.",
+        "destructive_justification": "Can overwrite or remove existing configuration or record values after approval."
+      }
+    },
+    "get_integrator_run": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Retrieves or validates information without changing customer data.",
+        "open_world_justification": "Operates within authenticated Realinsight customer data and does not publish to third-party systems.",
+        "destructive_justification": "Does not delete or overwrite existing customer records or configuration."
+      }
+    },
     "get_connection_context": {
       "annotations": {
         "readOnlyHint": true,

@@ -323,7 +323,7 @@ function to_mcp_tool_definition(tool) {
       readOnlyHint: tool.readOnlyHint ?? true,
       destructiveHint: tool.destructiveHint ?? false,
       idempotentHint: tool.idempotentHint ?? true,
-      openWorldHint: false,
+      openWorldHint: tool.openWorldHint ?? false,
     },
   };
 }

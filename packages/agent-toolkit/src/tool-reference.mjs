@@ -1,6 +1,22 @@
 import { JsonRpcError, optional_string } from "./json-rpc.mjs";
 
 const TOPICS = new Map([
+  ["integrators", {
+    topic: "integrators",
+    purpose: "Decide, configure, verify, and asynchronously run Excel, CSV, and SQL imports.",
+    skill_references: ["references/integrators.md"],
+    primary_tools: ["search_integrators", "get_integrator_folders", "get_integrator", "get_integrator_match_schema", "get_integrator_connections", "stage_integrator_source_file", "inspect_integrator_source", "set_integrator", "run_integrator", "get_integrator_run"],
+    workflow: [
+      "Search for a reusable integrator and discover the exact target feature and writable fields.",
+      "For files, stage an approved upload and inspect sheets, columns, values, and composite source keys. CSV converts to worksheet Source and uses Excel column letters.",
+      "For SQL, select a configured connection/listener, save a source draft, and queue approved test_connection, scan_headers, or query operations. Bound exploratory SQL in the query itself.",
+      "Use get_integrator_match_schema for the ordered master/parent/target hierarchy. Choose keys at each level; explicitly select MATCH, INSERT, or INSERTONLY. Add data maps, value translations, reference keys/actions, and COA maps.",
+      "Use set_integrator dry_run=true. Resolve errors before saving and run_errors before apply. Validation does not simulate posting or prove key uniqueness.",
+      "Read the latest conflict token, obtain exact approval, and save with dry_run=false and approved=true. Queue scans, review results, and get separate approval for apply.",
+      "run_integrator returns run_id and run_kind immediately. Poll get_integrator_run until is_complete, inspect completion_code, and page logs/results with section and cursor. Never automatically retry a queue request.",
+      "SQL source completion is separate from downstream posting. Query mode never posts to Realinsight but source SQL may have side effects. Verify representative target records after apply.",
+    ],
+  }],
   ["tool_discovery", {
     topic: "tool_discovery",
     purpose: "Choose the smallest Realinsight tool family before loading detailed schemas or broad data.",
@@ -434,6 +450,7 @@ const TOPICS = new Map([
       "Use search_features when business terms need feature codes.",
       "Use one coherent concept, candidate, identifier, or field label per search query. Run a small bounded set of independent searches in parallel for alternatives or distinct clues.",
       "Use search_entities to find concrete ids by name, identifier, address, or searchable value.",
+      "Search excludes soft-deleted entities but keeps business-inactive records discoverable. For extraction destinations or ambiguous matches, discover status_schema_code with search_features, inspect allowed values and classification_code with get_fields, then batch get_records for candidate statuses. Preserve historical intent and do not choose a destination by status alone.",
       "Use run_entity_query to select an exact population with runtime-field filters, deterministic sorts, paging, or top-N limits.",
       "Use get_entity_structure for parent/master/children/reference/periodic traversal.",
       "Use get_records with explicit schema_codes or field_names for final values.",
