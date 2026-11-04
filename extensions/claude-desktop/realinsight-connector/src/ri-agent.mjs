@@ -839,14 +839,15 @@ Usage:
   ri-agent auth list [--json]
   ri-agent auth logout [--profile NAME]
   ri-agent doctor [--profile NAME] [--json]
-  ri-agent integrators search|folders|connections [--limit N] [--cursor CURSOR]
-  ri-agent integrators get INTEGRATOR_ID
-  ri-agent integrators match-schema FEATURE_CODE
+  ri-agent integrators search [--limit N] [--cursor CURSOR]
+  ri-agent integrators get INTEGRATOR_ID [--sections source,match_levels,map]
+  ri-agent integrators options --feature-code FEATURE_CODE [--sections match_levels,folders,connections]
   ri-agent integrators stage-source ./source.csv --approved
   ri-agent integrators inspect-source --staged-file-id ID [--sheet-name NAME]
-  ri-agent integrators set --request-file ./definition.json [--dry-run false --approved]
+  ri-agent integrators validate --request-file ./definition.json
+  ri-agent integrators set --request-file ./definition.json --approved
   ri-agent integrators run --request-file ./run.json --approved
-  ri-agent integrators status RUN_ID --run-kind sql|host [--section status|logs|headers|values|rows]
+  ri-agent integrators status RUN_HANDLE [--section status|logs|headers|values|rows]
   ri-agent search-features QUERY [--profile NAME] [--limit N] [--type MASTER|DEPENDENT] [--include-virtuals] [--table]
   ri-agent search-fields QUERY [--profile NAME] [--feature-code CODE] [--limit N] [--postable-only] [--table]
   ri-agent get-fields FEATURE_CODE [--profile NAME] [--limit N] [--cursor CURSOR] [--postable-only] [--table]

@@ -51,43 +51,39 @@
   "tools": [
     {
       "name": "search_integrators",
-      "description": "Find existing import definitions by name, target feature, or folder before deciding whether to reuse or create an integrator."
-    },
-    {
-      "name": "get_integrator_folders",
-      "description": "Discover active integrator folders and group placement before choosing ParentFolderId. INTEGRATORPROCESS is the root."
+      "description": "Find import definitions by name, target feature, or folder before deciding whether to reuse or create one."
     },
     {
       "name": "get_integrator",
-      "description": "Read the complete source, ordered match keys, insert/update options, value translations, references, COA mappings, and conflict token. Definition properties retain their existing PascalCase names."
+      "description": "Read a compact overview, mapping summaries, and conflict token. Request sections=source,match_levels,map,map_item,definition for focused detail. map_item requires map_id; summary and map support pagination. definition is the complete PascalCase configuration for explicit replacement or copying."
     },
     {
-      "name": "get_integrator_match_schema",
-      "description": "Discover the required master-to-target match hierarchy, periodic keys, suggested identity fields, and matching options. Suggested keys do not prove uniqueness; use get_fields for exact writable fields and allowed values."
+      "name": "get_integrator_options",
+      "description": "Discover allowed configuration choices: dictionary match hierarchy (sections=match_levels with feature_code), active folders, or configured SQL connections with listener readiness. Folder and connection lists support filters and independent cursors; connection secrets are omitted. Suggested match keys do not prove uniqueness. Use get_fields for exact writable fields and allowed codes."
     },
     {
-      "name": "get_integrator_connections",
-      "description": "List configured SQL connections and listener capability/heartbeat readiness without passwords, tokens, or connection strings. Source SQL executes through the customer's listener."
+      "name": "validate_integrator",
+      "description": "Validate without saving or queueing. Supply definition for creation/explicit replacement, or integrator_id plus expected_conflict_token and focused changes/map_patch. Returns can_save/errors, can_run/run_errors, and warnings without echoing the definition. staged_file_id derives source columns from proposed Excel settings; otherwise supply source_columns when available. Validation does not simulate posting or prove key uniqueness."
     },
     {
       "name": "set_integrator",
-      "description": "Validate or save a complete integrator definition. Default dry_run=true returns can_save, can_run, errors, run_errors, and warnings. For writes set dry_run=false and approved=true after exact approval. Updates require expected_conflict_token from get_integrator. Omitted map/settings values are replaced, so preserve unchanged configuration."
+      "description": "Save only after validation and explicit approval. Use the same configuration request as validate_integrator plus approved=true and change_reason. Creates require definition; updates require the latest conflict token. Prefer changes/map_patch to preserve omitted settings; definition explicitly replaces all settings/maps. The response includes a compact overview, new conflict token, and audit operation id."
     },
     {
       "name": "stage_integrator_source_file",
-      "description": "Stage an approved temporary source upload before inspecting or importing a CSV or Excel file. Files are customer/user-bound, expire after three days, and are limited to 25 MiB. CSV becomes worksheet Source with text-preserving values."
+      "description": "Stage an approved temporary upload before inspecting or importing CSV or Excel. Files are customer/user-bound, expire after three days, and are limited to 25 MiB. CSV becomes worksheet Source with text-preserving values."
     },
     {
       "name": "inspect_integrator_source",
-      "description": "Preview workbook/CSV sheets, headers, sample rows, distinct values, and blank/duplicate composite keys before building mappings. Source column names are Excel letters, including converted CSV. Checks cover at most 5000 data rows and do not prove full-source uniqueness."
+      "description": "Preview sheets, headers, sample rows, distinct values, and blank/duplicate composite keys. Use sheet_name or one-based sheet_index. Source columns are Excel letters, including CSV. Checks cover at most 5000 data rows and do not prove full-source uniqueness."
     },
     {
       "name": "run_integrator",
-      "description": "Queue an asynchronous scan_headers, scan_values, query, test_connection, or apply operation after explicit approval of the exact source/SQL and mode. Query suppresses Realinsight posting but SQL can still have source-side effects. Apply can insert/update data and trigger post-save actions. Requires the current conflict token. Never automatically retry; poll get_integrator_run with returned run_id and run_kind."
+      "description": "Queue asynchronous scan_headers, scan_values, query, test_connection, or apply after explicit approval of the exact source/SQL and mode. Query suppresses Realinsight posting but SQL may have source-side effects. Apply can insert/update and trigger post-save actions. Requires the current conflict token. Never automatically retry; poll get_integrator_run with the returned run_handle."
     },
     {
       "name": "get_integrator_run",
-      "description": "Poll an integrator run through SQL extraction and downstream scanning/posting. Read bounded logs, scanned headers/values, or SQL result rows using section and cursors. Source extraction completing alone is not import completion. Results are available only to the initiating user/customer."
+      "description": "Pass run_handle back unchanged to follow SQL extraction through downstream scanning/posting. Status includes available_sections and scan_columns; page logs, headers, values, or SQL rows using section/cursor. Extraction completion alone is not import completion. Results belong to the initiating user/customer."
     },
     {
       "name": "get_connection_context",

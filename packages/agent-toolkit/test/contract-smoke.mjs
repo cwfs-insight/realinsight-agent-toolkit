@@ -618,23 +618,28 @@ async function run_integrator_smoke(call_agent_tool, temp_dir, config_path) {
   const preview = await call_agent_tool("inspect_integrator_source", { staged_file_id: "integrator-source-1", key_columns: ["A"] });
   assert(preview.items[0].rows[0][0] === "00123", "integrator preview lost source identifier");
   const definition = { ProcessType: "DICTIONARY", ProcessTypeCode: "Loan", ProcessName: "Loan import", DataSourceType: "SQL", DataSourceSQL: { ConnectionId: "connection-1", SQLStmtType: "SQL", SQLSelect: "select loan_id, balance from loans" }, MatchLevels: [{ MatchLevel: 1, EntityTypeFeatureCode: "Loan", MatchType: "SCHEMA", NewEntityAction: "MATCH", MatchMap: [{ SchemaCode: "Loan.LoanID", SourceColumnName: "loan_id" }] }], Map: [{ TargetSchemaCode: "Loan.Balance", SourceColumnName: "balance", IgnoreValues: [{ IgnoreValue: "N/A" }] }] };
-  await call_agent_tool("set_integrator", { definition, dry_run: true });
-  await assert_rejects(() => call_agent_tool("set_integrator", { definition, dry_run: false }), "requires approved=true");
-  const saved = await call_agent_tool("set_integrator", { definition, dry_run: false, approved: true });
+  const options = await call_agent_tool("get_integrator_options", { feature_code: "Loan", sections: "match_levels,connections", connection_cursor: "25" });
+  assert(options.items[0].connections.items[0].connection_id === "connection-1", "integrator options lost connection selection");
+  const detail = await call_agent_tool("get_integrator", { integrator_id: "integrator-1", sections: "map_item", map_id: "map-1" });
+  assert(detail.items[0].map_item.SourceColumnName === "balance", "focused integrator read lost selected mapping");
+  const validation = await call_agent_tool("validate_integrator", { definition });
+  assert(validation.items[0].can_run === true && !validation.items[0].integrator, "integrator validation did not return concise readiness");
+  await assert_rejects(() => call_agent_tool("set_integrator", { definition }), "requires approved=true");
+  const saved = await call_agent_tool("set_integrator", { definition, approved: true });
   assert(saved.items[0].saved === true, "integrator save did not preserve response");
   const args = { integrator_id: "integrator-1", expected_conflict_token: "integrator-conflict-1", mode: "query", approved: true };
   await assert_rejects(() => call_agent_tool("run_integrator", { ...args, approved: false }), "requires approved=true");
   await assert_rejects(() => call_agent_tool("run_integrator", { ...args, expected_conflict_token: undefined }), "expected_conflict_token");
   const queued = await call_agent_tool("run_integrator", args);
-  assert(queued.items[0].run_kind === "sql" && queued.items[0].is_complete === false, "integrator queue did not return async source handle");
-  const status = await call_agent_tool("get_integrator_run", { run_id: "integrator-run-1", run_kind: "sql" });
+  assert(queued.items[0].run_handle === "sql:integrator-run-1" && queued.items[0].is_complete === false, "integrator queue did not return async source handle");
+  const status = await call_agent_tool("get_integrator_run", { run_handle: queued.items[0].run_handle });
   assert(status.items[0].phase === "posting" && status.items[0].is_complete === false, "integrator status lost downstream posting state");
-  const cli = await run_node_cli(["integrators", "status", "integrator-run-1", "--run-kind", "sql"], config_path);
+  const cli = await run_node_cli(["integrators", "status", "sql:integrator-run-1"], config_path);
   assert(cli.stdout.includes('"phase": "posting"'), "integrator CLI did not preserve async status");
   const request_file = path.join(temp_dir, "integrator-definition.json");
   await fs.writeFile(request_file, JSON.stringify({ definition }));
-  const saved_cli = await run_node_cli(["integrators", "set", "--request-file", request_file, "--dry-run", "false", "--approved"], config_path);
-  assert(saved_cli.stdout.includes('"saved": true'), "integrator CLI did not send explicit dry-run=false and approval");
+  const saved_cli = await run_node_cli(["integrators", "set", "--request-file", request_file, "--approved"], config_path);
+  assert(saved_cli.stdout.includes('"saved": true'), "integrator CLI did not send explicit approval");
   const count = requests.filter((request) => request.path === "/agent/integrators/run").length;
   await assert_rejects(() => call_agent_tool("run_integrator", { ...args, mode: "apply" }), "uncertain_queue_result");
   assert(requests.filter((request) => request.path === "/agent/integrators/run").length === count + 1, "integrator queue was retried after an uncertain failure");
@@ -933,23 +938,38 @@ async function handle_request(request, response) {
     write_json(response, 200, agent_result("inspect_integrator_source", "ri:integrators.read", [{ rows: [["00123", "123.45"]], columns: [{ source_column: "A", header: "Loan ID" }] }]));
     return;
   }
+  if (request.method === "POST" && url.pathname === "/agent/integrators/options") {
+    assert(body.sections === "match_levels,connections" && body.connection_cursor === "25", "integrator options lost selectors/cursor");
+    write_json(response, 200, agent_result("get_integrator_options", "ri:integrators.read", [{ connections: { items: [{ connection_id: "connection-1" }] } }]));
+    return;
+  }
+  if (request.method === "GET" && url.pathname === "/agent/integrators/integrator-1") {
+    assert(url.searchParams.get("sections") === "map_item" && url.searchParams.get("map_id") === "map-1", "integrator read lost focused selectors");
+    write_json(response, 200, agent_result("get_integrator", "ri:integrators.read", [{ map_item: { SourceColumnName: "balance" } }]));
+    return;
+  }
+  if (request.method === "POST" && url.pathname === "/agent/integrators/validate") {
+    assert(body.definition.MatchLevels[0].NewEntityAction === "MATCH" && !("approved" in body), "integrator validation lost input or requested approval");
+    write_json(response, 200, agent_result("validate_integrator", "ri:integrators.write", [{ can_save: true, can_run: true, errors: [], run_errors: [], warnings: [] }]));
+    return;
+  }
   if (request.method === "POST" && url.pathname === "/agent/integrators/set") {
     assert(body.definition.MatchLevels[0].NewEntityAction === "MATCH", "integrator save lost match-only behavior");
     assert(body.definition.Map[0].IgnoreValues[0].IgnoreValue === "N/A", "integrator save lost ignored values");
-    assert(body.dry_run || body.approved === true, "integrator write lost approval");
-    write_json(response, 200, agent_result("set_integrator", "ri:integrators.write", [{ saved: !body.dry_run, integrator: { integrator_id: "integrator-1", conflict_token: "integrator-conflict-1", definition: body.definition }, validation: { can_save: true, can_run: true } }]));
+    assert(body.approved === true && !("dry_run" in body), "integrator write lost approval or retained dry_run");
+    write_json(response, 200, agent_result("set_integrator", "ri:integrators.write", [{ saved: true, integrator: { integrator_id: "integrator-1", conflict_token: "integrator-conflict-1", definition: body.definition }, validation: { can_save: true, can_run: true } }]));
     return;
   }
   if (request.method === "POST" && url.pathname === "/agent/integrators/run") {
     assert(body.expected_conflict_token === "integrator-conflict-1" && body.approved === true, "integrator run lost approval/conflict token");
     if (body.mode === "apply") { write_json(response, 503, { error: "uncertain_queue_result", error_description: "uncertain_queue_result" }); return; }
     assert(body.mode === "query", "integrator query mode was changed");
-    write_json(response, 200, agent_result("run_integrator", "ri:integrators.run", [{ run_id: "integrator-run-1", run_kind: "sql", status: "INIT", phase: "source", is_complete: false }]));
+    write_json(response, 200, agent_result("run_integrator", "ri:integrators.run", [{ run_handle: "sql:integrator-run-1", status: "INIT", phase: "source", is_complete: false }]));
     return;
   }
   if (request.method === "POST" && url.pathname === "/agent/integrators/runs/get") {
-    assert(body.run_id === "integrator-run-1" && body.run_kind === "sql", "integrator poll lost its source handle");
-    write_json(response, 200, agent_result("get_integrator_run", "ri:integrators.read", [{ run_id: body.run_id, run_kind: "sql", phase: "posting", status: "RUNNING", host_job_id: "integrator-host-1", is_complete: false }]));
+    assert(body.run_handle === "sql:integrator-run-1" && !("run_kind" in body), "integrator poll lost its source handle");
+    write_json(response, 200, agent_result("get_integrator_run", "ri:integrators.read", [{ run_handle: body.run_handle, phase: "posting", status: "RUNNING", host_job_id: "integrator-host-1", is_complete: false }]));
     return;
   }
 

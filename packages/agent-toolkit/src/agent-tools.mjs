@@ -63,10 +63,9 @@ export async function call_agent_tool(name, args) {
 
   switch (name) {
     case "search_integrators":
-    case "get_integrator_folders":
     case "get_integrator":
-    case "get_integrator_match_schema":
-    case "get_integrator_connections":
+    case "get_integrator_options":
+    case "validate_integrator":
     case "set_integrator":
     case "stage_integrator_source_file":
     case "inspect_integrator_source":
